@@ -10,17 +10,22 @@ async function query(queryObject) {
     console.log(error);
     throw error;
   } finally {
-    await client.end();
+    console.log(client);
+    //await client.end();
   }
 }
 
 async function getNewClient() {
+  console.log(process.env.NODE_ENV);
+  console.log(process.env.POSTGRES_HOST);
+
   const client = new Client({
     host: process.env.POSTGRES_HOST,
     port: process.env.POSTGRES_PORT,
     user: process.env.POSTGRES_USER,
     database: process.env.POSTGRES_DB,
     password: process.env.POSTGRES_PASSWORD,
+    ssl: process.env.NODE_ENV === "production" ? true : false,
   });
 
   await client.connect();
