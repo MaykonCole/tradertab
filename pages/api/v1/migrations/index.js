@@ -45,6 +45,6 @@ export default async function migrations(request, response) {
   }
 
   return response.status(405).json({
-    error: `Method not allowed : ${request.method}`,
+    error: `${process.env.NODE_ENV} Method not allowed : ${request.method}`,
   });
 }
