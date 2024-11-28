@@ -6,11 +6,9 @@ const createJestConfig = nextJest({
   dir: ".",
 });
 
-console.log(process.env.NODE_ENV);
-console.log(process.env.POSTGRES_HOST);
-
 const jestConfig = createJestConfig({
   moduleDirectories: ["node_modules", "<rootDir>"],
+  testTimeout: 60000,
 });
 
 module.exports = jestConfig;

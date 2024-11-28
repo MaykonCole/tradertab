@@ -7,18 +7,14 @@ async function query(queryObject) {
     const result = await client.query(queryObject);
     return result;
   } catch (error) {
-    console.log(error);
+    console.log("Deu erro " + error);
     throw error;
   } finally {
-    console.log(client);
-    //await client.end();
+    if (client) await client.end();
   }
 }
 
 async function getNewClient() {
-  console.log(process.env.NODE_ENV);
-  console.log(process.env.POSTGRES_HOST);
-
   const client = new Client({
     host: process.env.POSTGRES_HOST,
     port: process.env.POSTGRES_PORT,

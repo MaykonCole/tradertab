@@ -18,14 +18,11 @@ export default async function migrations(request, response) {
       };
 
       if (request.method === "GET") {
-        console.log("Entrou no GET");
         const pendingMigrations = await migrationRunner(defaultMigrations);
-        await dbClient.end();
         return response.status(200).json(pendingMigrations);
       }
 
       if (request.method === "POST") {
-        console.log("Entrou no POST");
         const migratedMigrations = await migrationRunner({
           ...defaultMigrations,
           dryRun: false,
@@ -37,7 +34,6 @@ export default async function migrations(request, response) {
         return response.status(200).json(migratedMigrations);
       }
     } catch (error) {
-      console.log("Endpoint Migrations : " + error);
       throw error;
     } finally {
       await dbClient.end();
