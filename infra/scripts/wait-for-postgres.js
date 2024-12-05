@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 const { exec } = require("node:child_process");
 
 const cmdCheckHTTPPostGres =
@@ -6,7 +8,7 @@ const cmdCheckHTTPPostGres =
 function checkConnectionPostgres() {
   exec(cmdCheckHTTPPostGres, handleReturn);
 
-  function handleReturn(error, stdout, stderr) {
+  function handleReturn(_error, stdout, stderr) {
     if (stdout.search("accepting connections") === -1) {
       process.stdout.write(".");
       checkConnectionPostgres();

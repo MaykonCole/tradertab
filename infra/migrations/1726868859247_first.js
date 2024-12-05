@@ -1,4 +1,5 @@
-/* eslint-disable camelcase */
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 
 exports.shorthands = undefined;
 
