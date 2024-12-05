@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import retry from "async-retry";
 import database from "infra/database.js";
 
