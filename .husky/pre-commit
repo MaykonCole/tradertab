@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Lista de padrões (strings) para encontrar segredos, incluindo senhas como 'POSTGRES_PASSWORD'
+SECRETS_PATTERNS="AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY password secret key api_key token client_secret POSTGRES_PASSWORD"
+
+# Verifica se algum arquivo está sendo adicionado, alterado ou removido
+for file in $(git diff --cached --name-only --diff-filter=AM); do
+  if [[ -f "$file" ]]; then
+    # Verifica se o conteúdo do arquivo contém qualquer um dos padrões de senhas
+    for pattern in $SECRETS_PATTERNS; do
+      if grep -qi "$pattern" "$file"; then
+        echo "Erro: O arquivo '$file' contém um possível segredo (padrão: '$pattern')."
+        exit 1
+      fi
+    done
+  fi
+done
+
+# Se não encontrar nenhum segredo, permite o commit
+exit 0
