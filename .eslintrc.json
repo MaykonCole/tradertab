@@ -1,11 +1,12 @@
 {
   "extends": [
     "eslint:recommended",
-    "plugin:jest/recommended",
     "next/core-web-vitals",
+    "plugin:jest/recommended",
     "prettier"
   ],
+  "plugins": ["no-secrets"],
   "rules": {
-    "import/no-anonymous-default-export": "off"
+    "no-secrets/no-secrets": "error"
   }
 }
