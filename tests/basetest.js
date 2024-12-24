@@ -31,4 +31,6 @@ async function stabilizesEnvironment(endpoint) {
   await waitForAllServices();
 }
 
-export default { stabilizesEnvironment };
+const testUtils = { stabilizesEnvironment };
+
+export default testUtils;
