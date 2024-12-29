@@ -12,7 +12,7 @@ async function waitForAllServices() {
     });
 
     async function fechStatusPage() {
-      const response = await fetch("http://127.0.0.1:3000/api/v1/status");
+      const response = await fetch("http://localhost:3000/api/v1/status");
       if (response.status !== 200) {
         throw Error();
       }
@@ -20,15 +20,12 @@ async function waitForAllServices() {
   }
 }
 
-async function stabilizesEnvironment(endpoint) {
+async function stabilizesEnvironment() {
   async function cleanDatabase() {
     await database.query("drop schema public cascade; create schema public;");
   }
-  if (endpoint === "migrations") {
-    await cleanDatabase();
-  }
-
   await waitForAllServices();
+  await cleanDatabase();
 }
 
 const testUtils = { stabilizesEnvironment };

@@ -1,7 +1,7 @@
 import basetest from "../../../../basetest.js";
 
 beforeAll(async () => {
-  await basetest.stabilizesEnvironment("migrations");
+  await basetest.stabilizesEnvironment();
 });
 
 describe("GET /api/v1/migrations", () => {

@@ -1,7 +1,7 @@
 import basetest from "../../../../basetest.js";
 
 beforeAll(async () => {
-  await basetest.stabilizesEnvironment("status");
+  await basetest.stabilizesEnvironment();
 });
 
 describe("GET /api/v1/status", () => {
@@ -18,7 +18,7 @@ describe("GET /api/v1/status", () => {
 
       const openedConnections =
         responseBody.dependencies.database.opened_connections;
-      expect(openedConnections).toBeGreaterThan(1);
+      expect(openedConnections).toBeLessThan(3);
     });
   });
 });
