@@ -8,7 +8,7 @@ const cmdCheckHTTPPostGres =
 function checkConnectionPostgres() {
   exec(cmdCheckHTTPPostGres, handleReturn);
 
-  function handleReturn(_error, stdout, stderr) {
+  function handleReturn(_error, stdout) {
     if (stdout.search("accepting connections") === -1) {
       process.stdout.write(".");
       checkConnectionPostgres();
