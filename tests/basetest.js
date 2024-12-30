@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import retry from "async-retry";
 import database from "infra/database.js";
 
@@ -20,12 +19,13 @@ async function waitForAllServices() {
   }
 }
 
-async function stabilizesEnvironment() {
+async function stabilizesEnvironment(endpoint) {
   async function cleanDatabase() {
+    console.log("Passou aqui " + endpoint);
     await database.query("drop schema public cascade; create schema public;");
   }
   await waitForAllServices();
-  await cleanDatabase();
+  if (endpoint === "migrations") await cleanDatabase();
 }
 
 const testUtils = { stabilizesEnvironment };
