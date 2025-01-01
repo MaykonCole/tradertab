@@ -8,9 +8,11 @@ async function query(queryObject) {
     return result;
   } catch (error) {
     console.log("Deu erro " + error);
+    console.log(getSSLValues());
+    await client?.end();
     throw error;
   } finally {
-    if (client) await client.end();
+    await client?.end();
   }
 }
 
@@ -21,7 +23,7 @@ async function getNewClient() {
     user: process.env.POSTGRES_USER,
     database: process.env.POSTGRES_DB,
     password: process.env.POSTGRES_PASSWORD,
-    ssl: process.env.NODE_ENV === "production" ? true : false,
+    ssl: false,
   });
 
   await client.connect();
@@ -32,5 +34,15 @@ const database = {
   query,
   getNewClient,
 };
+
+function getSSLValues() {
+  if (process.env.POSTGRES_CA) {
+    return {
+      ca: process.env.POSTGRES_CA,
+    };
+  }
+
+  return process.env.NODE_ENV === "production" ? true : false;
+}
 
 export default database;
