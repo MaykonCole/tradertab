@@ -21,7 +21,6 @@ async function waitForAllServices() {
 
 async function stabilizesEnvironment(endpoint) {
   async function cleanDatabase() {
-    console.log("Passou aqui " + endpoint);
     await database.query("drop schema public cascade; create schema public;");
   }
   await waitForAllServices();

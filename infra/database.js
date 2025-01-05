@@ -9,7 +9,6 @@ async function query(queryObject) {
   } catch (error) {
     console.log("Deu erro " + error);
     console.log(getSSLValues());
-    await client?.end();
     throw error;
   } finally {
     await client?.end();
