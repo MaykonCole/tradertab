@@ -234,7 +234,7 @@ export default function EstatisticasFutebol() {
         </Button>
 
         <Button variant="contained" color="primary" fullWidth onClick={limpar}>
-          Limpar
+          Valores Padrão
         </Button>
       </Box>
     </Container>

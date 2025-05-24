@@ -160,7 +160,7 @@ export default function Under() {
             </Button>
 
             <Button variant="contained" color="primary" onClick={resetarCampos}>
-              Limpar
+              Valores Padrão
             </Button>
 
             {lucroPorMinuto !== null && (

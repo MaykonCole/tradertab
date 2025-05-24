@@ -17,7 +17,6 @@ export default function Drakito() {
   const [stake, setStake] = useState(100);
   const [oddAtual, setOddAtual] = useState(8);
   const [oddAntesGol, setOddAntesGol] = useState(4);
-  const [minuto, setMinuto] = useState(45);
   const [lucro, setLucro] = useState(null);
   const [prejuizo, setPrejuizo] = useState(null);
   const [relacao, setRelacao] = useState(null);
@@ -45,7 +44,7 @@ export default function Drakito() {
   const resetarCampos = () => {
     setOddAntesGol(4);
     setOddAtual(8);
-    setMinuto(45);
+    setStake(100);
     setLucro(null);
     setPrejuizo(null);
     setRelacao(null);
@@ -115,19 +114,6 @@ export default function Drakito() {
               sx={inputStyles}
             />
 
-            <TextField
-              label="Minuto de Jogo"
-              type="number"
-              inputProps={{ min: 1, max: 130, step: 3 }}
-              value={minuto}
-              onChange={(e) => {
-                const value = e.target.value;
-                setMinuto(value === "" ? 1 : Number(value));
-              }}
-              fullWidth
-              sx={inputStyles}
-            />
-
             <Button
               variant="contained"
               color="secondary"
@@ -137,7 +123,7 @@ export default function Drakito() {
             </Button>
 
             <Button variant="contained" color="primary" onClick={resetarCampos}>
-              Limpar
+              Valores Padrão
             </Button>
 
             {lucro !== null && (

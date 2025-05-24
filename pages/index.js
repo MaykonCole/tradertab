@@ -3,6 +3,7 @@ import { useState } from "react";
 import Under from "../components/trader/under";
 import Drakito from "../components/trader/drakito";
 import MatchOdds from "../components/trader/matchodds";
+import Contact from "../components/trader/contact";
 import ThemeDefault from "../shared/themedefault";
 
 export default function App() {
@@ -23,6 +24,7 @@ export default function App() {
           <Tab label="Under" />
           <Tab label="Team Winning" />
           <Tab label="MatchOdds" />
+          <Tab label="Contact" />
         </Tabs>
       </AppBar>
 
@@ -35,6 +37,9 @@ export default function App() {
         </div>
         <div hidden={tabIndex !== 2}>
           <MatchOdds />
+        </div>
+        <div hidden={tabIndex !== 3}>
+          <Contact />
         </div>
       </Container>
     </ThemeDefault>
