@@ -50,7 +50,7 @@ export default function Contact() {
           variant="outlined"
           startIcon={<EmailIcon />}
           component={Link}
-          href="mailto:maykontaio@hotmail.com"
+          href="mailto:maykonsoftwares@gmail.com"
           sx={{
             borderColor: "#6f42c1",
             color: "#6f42c1",
