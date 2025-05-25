@@ -9,7 +9,6 @@ import {
   Container,
   FormControlLabel,
   Switch,
-  useMediaQuery,
 } from "@mui/material";
 import { useThemeMode } from "../../shared/themedefault";
 
@@ -23,30 +22,15 @@ const estatisticasIniciais = [
   { nome: "Falta Frontal", xg: 0.15 },
 ];
 
-const estatisticasIniciaisMobile = [
-  { nome: "Posse Ofensiva", xg: 0.02 },
-  { nome: "Chute no Gol", xg: 0.3 },
-  { nome: "Chute para Fora", xg: 0.04 },
-  { nome: "Lanç. na Área", xg: 0.04 },
-  { nome: "Infi. na Área", xg: 0.08 },
-  { nome: "Falta Lateral", xg: 0.08 },
-  { nome: "Falta Frontal", xg: 0.15 },
-];
-
-export default function MatchOdds() {
-  const { darkMode, toggleDarkMode } = useThemeMode();
-  const isSmallScreen = useMediaQuery("(max-width:520px)");
-
-  const estatisticas = isSmallScreen
-    ? estatisticasIniciaisMobile
-    : estatisticasIniciais;
-
-  const inicialContagem = estatisticas.reduce((acc, stat) => {
+export default function EstatisticasFutebol() {
+  const inicialContagem = estatisticasIniciais.reduce((acc, stat) => {
     acc[stat.nome] = { favorito: 0, zebra: 0 };
     return acc;
   }, {});
 
   const [contagem, setContagem] = useState(inicialContagem);
+  const { darkMode, toggleDarkMode } = useThemeMode();
+
   const [tempo, setTempo] = useState(0);
   const [cronometroAtivo, setCronometroAtivo] = useState(false);
 
@@ -60,19 +44,9 @@ export default function MatchOdds() {
     return () => clearInterval(timer);
   }, [cronometroAtivo]);
 
-  // Sempre que mudar de mobile para desktop, reseta as contagens para evitar inconsistência de nomes
-  useEffect(() => {
-    setContagem(() => {
-      return estatisticas.reduce((acc, stat) => {
-        acc[stat.nome] = { favorito: 0, zebra: 0 };
-        return acc;
-      }, {});
-    });
-  }, [estatisticas]);
-
   const calculaXGTotal = (time) => {
-    return estatisticas.reduce((total, stat) => {
-      const count = contagem[stat.nome]?.[time] || 0;
+    return estatisticasIniciais.reduce((total, stat) => {
+      const count = contagem[stat.nome][time];
       return total + count * stat.xg;
     }, 0);
   };
@@ -173,7 +147,7 @@ export default function MatchOdds() {
           </Box>
         </Stack>
 
-        {estatisticas.map(({ nome }) => (
+        {estatisticasIniciais.map(({ nome }) => (
           <Paper
             key={nome}
             variant="outlined"
@@ -185,26 +159,15 @@ export default function MatchOdds() {
               mb: 1,
             }}
           >
+            {/* Bloco Favorito */}
             <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
                 gap: 0.5,
                 minWidth: 110,
-                flexDirection: isSmallScreen ? "column" : "row",
               }}
             >
-              <Typography width={24} textAlign="center">
-                {contagem[nome]?.favorito ?? 0}
-              </Typography>
-              <Button
-                variant="contained"
-                size="small"
-                color="success"
-                onClick={() => handleChange(nome, "favorito", 1)}
-              >
-                +
-              </Button>
               <Button
                 variant="contained"
                 size="small"
@@ -213,29 +176,48 @@ export default function MatchOdds() {
               >
                 -
               </Button>
+              <Button
+                variant="contained"
+                size="small"
+                color="success"
+                onClick={() => handleChange(nome, "favorito", 1)}
+              >
+                +
+              </Button>
+              <Typography width={24} textAlign="center">
+                {contagem[nome].favorito}
+              </Typography>
             </Box>
-
-            <Typography sx={{ flexGrow: 1, textAlign: "center" }}>
-              {nome}
-            </Typography>
 
             <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
-                gap: 0.5,
                 minWidth: 110,
-                flexDirection: isSmallScreen ? "column" : "row",
               }}
             >
-              <Typography width={24} textAlign="center">
-                {contagem[nome]?.zebra ?? 0}
+              <Typography sx={{ flexGrow: 1, textAlign: "center" }}>
+                {nome}
+              </Typography>
+            </Box>
+
+            {/* Bloco Zebra */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                minWidth: 110,
+              }}
+            >
+              <Typography width={24} textAlign="center" mr={0.5}>
+                {contagem[nome].zebra}
               </Typography>
               <Button
                 variant="contained"
                 size="small"
                 color="error"
                 onClick={() => handleChange(nome, "zebra", 1)}
+                sx={{ mr: 0.5 }}
               >
                 +
               </Button>
@@ -251,32 +233,19 @@ export default function MatchOdds() {
           </Paper>
         ))}
 
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: isSmallScreen ? "column" : "row",
-            gap: 1,
-            mt: 2,
-          }}
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={entrarNoMercado}
+          fullWidth
+          sx={{ marginBottom: "12px", marginTop: "12px" }}
         >
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={entrarNoMercado}
-            fullWidth
-          >
-            Entrar no Mercado
-          </Button>
+          Entrar no Mercado
+        </Button>
 
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={limpar}
-            fullWidth
-          >
-            Valores Padrão
-          </Button>
-        </Box>
+        <Button variant="contained" color="primary" fullWidth onClick={limpar}>
+          Limpar
+        </Button>
       </Box>
     </Container>
   );
