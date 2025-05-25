@@ -188,7 +188,6 @@ export default function EstatisticasFutebol() {
                 {contagem[nome].favorito}
               </Typography>
             </Box>
-
             <Box
               sx={{
                 display: "flex",
