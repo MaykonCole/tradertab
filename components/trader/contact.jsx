@@ -64,6 +64,12 @@ export default function Contact() {
           Enviar Email
         </Button>
       </Stack>
+      <Typography
+        variant="caption"
+        sx={{ display: "block", mt: 4, color: "text.secondary" }}
+      >
+        Trader Tab 2025 © Maykon Emanuel
+      </Typography>
     </Container>
   );
 }
