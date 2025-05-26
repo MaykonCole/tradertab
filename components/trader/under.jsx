@@ -9,6 +9,11 @@ import {
   Box,
   FormControlLabel,
   Switch,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormHelperText,
 } from "@mui/material";
 import { useThemeMode } from "../../shared/themedefault";
 
@@ -17,6 +22,11 @@ export default function Under() {
   const [minuto, setMinuto] = useState(45); // valor padrão fixo
   const [lucroPorMinuto, setLucroPorMinuto] = useState(null);
   const [historico, setHistorico] = useState([]);
+  const [tipoJogo, setTipoJogo] = useState(0);
+  const [tentouCalcular, setTentouCalcular] = useState(false);
+
+  const [favorito, onChangeFavorito] = useState(0);
+  const [zebra, onChangeZebra] = useState(0);
 
   const { darkMode, toggleDarkMode } = useThemeMode();
 
@@ -54,12 +64,29 @@ export default function Under() {
   }, [minuto]);
 
   const calcularLucro = () => {
+    setTentouCalcular(true);
+
+    if (tipoJogo === 0) {
+      return;
+    }
+
     if (odd > 1 && minuto >= 0 && minuto < 90) {
-      const oddFinal = 1.01;
+      const golsTotal = favorito + zebra;
       const minutosRestantes = 90 - minuto;
+      const oddFinal = 1.01;
       const lucroTotal = odd - oddFinal;
-      const resultado = (lucroTotal / minutosRestantes) * 100;
+      const fatorGol = Math.max(1 - golsTotal * 0.1, 0.5);
+
+      const percentualPorJogo = tipoJogo / 2;
+
+      const valorBruto = (lucroTotal / minutosRestantes) * 100;
+      console.log(valorBruto);
+
+      const resultado =
+        ((lucroTotal * fatorGol) / minutosRestantes) * 100 + percentualPorJogo;
+
       const lucro = Number(resultado.toFixed(2));
+
       setLucroPorMinuto(lucro);
       setHistorico([{ odd, minuto, lucroPorMinuto: lucro }, ...historico]);
     } else {
@@ -72,10 +99,14 @@ export default function Under() {
     setMinuto(45);
     setLucroPorMinuto(null);
     setHistorico([]);
+    setTipoJogo(0);
+    setTentouCalcular(false);
     if (typeof window !== "undefined") {
       sessionStorage.clear();
     }
   };
+
+  const isError = tentouCalcular && tipoJogo === 0;
 
   return (
     <Container maxWidth="sm" sx={{ mt: 4 }}>
@@ -150,6 +181,81 @@ export default function Under() {
                 },
               }}
             />
+
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              gap={2}
+            >
+              <Typography
+                variant="body1"
+                sx={{ color: "green", fontWeight: "bold", fontSize: "20px" }}
+              >
+                Casa
+              </Typography>
+              <TextField
+                type="number"
+                size="small"
+                value={favorito}
+                onChange={(e) => onChangeFavorito(Number(e.target.value))}
+                inputProps={{ min: 0 }}
+                sx={{ width: 60 }}
+              />
+
+              <Typography variant="h6">x</Typography>
+
+              <TextField
+                type="number"
+                size="small"
+                value={zebra}
+                onChange={(e) => onChangeZebra(Number(e.target.value))}
+                inputProps={{ min: 0 }}
+                sx={{ width: 60 }}
+              />
+              <Typography
+                variant="body1"
+                sx={{ color: "red", fontWeight: "bold", fontSize: "20px" }}
+              >
+                Fora
+              </Typography>
+            </Box>
+
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">
+                Tipo de Jogo
+              </InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={tipoJogo}
+                label="Tipo de Jogo"
+                onChange={(e) => setTipoJogo(e.target.value)}
+              >
+                <MenuItem value={0}>
+                  <em>Selecione...</em>
+                </MenuItem>
+                <MenuItem value={4}>
+                  Jogo truncado (muitas faltas, cera)
+                </MenuItem>
+                <MenuItem value={3}>
+                  Somente um time atacando (só chuveirinho)
+                </MenuItem>
+                <MenuItem value={2}>
+                  Somente um time atacando (com chances)
+                </MenuItem>
+                <MenuItem value={1}>
+                  Ambos times atacando (jogo aberto)
+                </MenuItem>
+              </Select>
+              {isError && (
+                <FormHelperText
+                  sx={{ color: "red", fontWeight: "bold", fontSize: "15px" }}
+                >
+                  Por favor, selecione o tipo de jogo.
+                </FormHelperText>
+              )}
+            </FormControl>
 
             <Button
               variant="contained"
