@@ -9,28 +9,46 @@ import {
   Container,
   FormControlLabel,
   Switch,
+  useMediaQuery,
 } from "@mui/material";
 import { useThemeMode } from "../../shared/themedefault";
 
 const estatisticasIniciais = [
-  { nome: "Posse Ofensiva", xg: 0.02 },
-  { nome: "Chute no Gol", xg: 0.3 },
+  { nome: "Ataque Perigoso", xg: 0.02 },
+  { nome: "Chute Certeiro Perigo", xg: 0.25 },
+  { nome: "Chute Certeiro", xg: 0.05 },
   { nome: "Chute para Fora", xg: 0.04 },
-  { nome: "Lançamento na Área", xg: 0.04 },
-  { nome: "Infiltração na Área", xg: 0.08 },
-  { nome: "Falta Lateral", xg: 0.08 },
-  { nome: "Falta Frontal", xg: 0.15 },
+  { nome: "Lançamento na Área", xg: 0.03 },
+  { nome: "Infiltração na Área", xg: 0.05 },
+  { nome: "Falta Lateral", xg: 0.05 },
+  { nome: "Falta Frontal", xg: 0.12 },
 ];
 
-export default function EstatisticasFutebol() {
-  const inicialContagem = estatisticasIniciais.reduce((acc, stat) => {
+const estatisticasIniciaisMobile = [
+  { nome: "Posse Ofensiva", xg: 0.02 },
+  { nome: "Chute no Gol Perigo", xg: 0.25 },
+  { nome: "Chute Certeiro", xg: 0.05 },
+  { nome: "Chute para Fora", xg: 0.04 },
+  { nome: "Lanç. na Área", xg: 0.03 },
+  { nome: "Infi. na Área", xg: 0.05 },
+  { nome: "Falta Lateral", xg: 0.05 },
+  { nome: "Falta Frontal", xg: 0.12 },
+];
+
+export default function MatchOdds() {
+  const { darkMode, toggleDarkMode } = useThemeMode();
+  const isSmallScreen = useMediaQuery("(max-width:520px)");
+
+  const estatisticas = isSmallScreen
+    ? estatisticasIniciaisMobile
+    : estatisticasIniciais;
+
+  const inicialContagem = estatisticas.reduce((acc, stat) => {
     acc[stat.nome] = { favorito: 0, zebra: 0 };
     return acc;
   }, {});
 
   const [contagem, setContagem] = useState(inicialContagem);
-  const { darkMode, toggleDarkMode } = useThemeMode();
-
   const [tempo, setTempo] = useState(0);
   const [cronometroAtivo, setCronometroAtivo] = useState(false);
 
@@ -44,9 +62,19 @@ export default function EstatisticasFutebol() {
     return () => clearInterval(timer);
   }, [cronometroAtivo]);
 
+  // Sempre que mudar de mobile para desktop, reseta as contagens para evitar inconsistência de nomes
+  useEffect(() => {
+    setContagem(() => {
+      return estatisticas.reduce((acc, stat) => {
+        acc[stat.nome] = { favorito: 0, zebra: 0 };
+        return acc;
+      }, {});
+    });
+  }, [estatisticas]);
+
   const calculaXGTotal = (time) => {
-    return estatisticasIniciais.reduce((total, stat) => {
-      const count = contagem[stat.nome][time];
+    return estatisticas.reduce((total, stat) => {
+      const count = contagem[stat.nome]?.[time] || 0;
       return total + count * stat.xg;
     }, 0);
   };
@@ -147,7 +175,7 @@ export default function EstatisticasFutebol() {
           </Box>
         </Stack>
 
-        {estatisticasIniciais.map(({ nome }) => (
+        {estatisticas.map(({ nome }) => (
           <Paper
             key={nome}
             variant="outlined"
@@ -159,13 +187,13 @@ export default function EstatisticasFutebol() {
               mb: 1,
             }}
           >
-            {/* Bloco Favorito */}
             <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
                 gap: 0.5,
                 minWidth: 110,
+                flexDirection: isSmallScreen ? "column" : "row",
               }}
             >
               <Button
@@ -173,6 +201,9 @@ export default function EstatisticasFutebol() {
                 size="small"
                 color="info"
                 onClick={() => handleChange(nome, "favorito", -1)}
+                sx={{
+                  order: isSmallScreen ? 2 : 0,
+                }}
               >
                 -
               </Button>
@@ -181,42 +212,44 @@ export default function EstatisticasFutebol() {
                 size="small"
                 color="success"
                 onClick={() => handleChange(nome, "favorito", 1)}
+                sx={{
+                  order: isSmallScreen ? 1 : 0,
+                }}
               >
                 +
               </Button>
-              <Typography width={24} textAlign="center">
-                {contagem[nome].favorito}
-              </Typography>
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                minWidth: 110,
-              }}
-            >
-              <Typography sx={{ flexGrow: 1, textAlign: "center" }}>
-                {nome}
+              <Typography
+                width={24}
+                textAlign="center"
+                sx={{
+                  order: isSmallScreen ? -1 : 0,
+                }}
+              >
+                {contagem[nome]?.favorito ?? 0}
               </Typography>
             </Box>
 
-            {/* Bloco Zebra */}
+            <Typography sx={{ flexGrow: 1, textAlign: "center" }}>
+              {nome}
+            </Typography>
+
             <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
+                gap: 0.5,
                 minWidth: 110,
+                flexDirection: isSmallScreen ? "column" : "row",
               }}
             >
-              <Typography width={24} textAlign="center" mr={0.5}>
-                {contagem[nome].zebra}
+              <Typography width={24} textAlign="center">
+                {contagem[nome]?.zebra ?? 0}
               </Typography>
               <Button
                 variant="contained"
                 size="small"
                 color="error"
                 onClick={() => handleChange(nome, "zebra", 1)}
-                sx={{ mr: 0.5 }}
               >
                 +
               </Button>
@@ -232,19 +265,32 @@ export default function EstatisticasFutebol() {
           </Paper>
         ))}
 
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={entrarNoMercado}
-          fullWidth
-          sx={{ marginBottom: "12px", marginTop: "12px" }}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: isSmallScreen ? "column" : "row",
+            gap: 1,
+            mt: 2,
+          }}
         >
-          Entrar no Mercado
-        </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={entrarNoMercado}
+            fullWidth
+          >
+            Entrar no Mercado
+          </Button>
 
-        <Button variant="contained" color="primary" fullWidth onClick={limpar}>
-          Limpar
-        </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={limpar}
+            fullWidth
+          >
+            Valores Padrão
+          </Button>
+        </Box>
       </Box>
     </Container>
   );
