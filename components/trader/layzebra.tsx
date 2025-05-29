@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Container,
   Card,
@@ -57,6 +57,36 @@ export default function LucroPorMinuto() {
     setZebraChecks(Array(zebraLabels.length).fill(false));
   };
 
+  const [tempo, setTempo] = useState(0);
+  const [cronometroAtivo, setCronometroAtivo] = useState(false);
+
+  useEffect(() => {
+    let timer;
+    if (cronometroAtivo) {
+      timer = setInterval(() => {
+        setTempo((prev) => prev + 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [cronometroAtivo]);
+
+  const formatarTempo = (segundos: number) => {
+    const minutos = Math.floor(segundos / 60)
+      .toString()
+      .padStart(2, "0");
+    const seg = (segundos % 60).toString().padStart(2, "0");
+    return `${minutos}:${seg}`;
+  };
+
+  const toggleMercado = () => {
+    if (cronometroAtivo) {
+      setCronometroAtivo(false);
+      setTempo(0);
+    } else {
+      setCronometroAtivo(true);
+    }
+  };
+
   const progresso = useMemo(() => {
     const favoritoPeso = favoritoChecks
       .map((checked, index) => (checked ? favoritoLabels[index].peso : 0))
@@ -93,6 +123,16 @@ export default function LucroPorMinuto() {
         label={darkMode ? "Modo Escuro" : "Modo Claro"}
         sx={{ mb: 2 }}
       />
+
+      {cronometroAtivo && (
+        <Typography
+          variant="h6"
+          textAlign="center"
+          sx={{ mb: 2, fontWeight: "bold" }}
+        >
+          {formatarTempo(tempo)}
+        </Typography>
+      )}
 
       <Card sx={{ mt: 2 }} elevation={6}>
         <CardContent>
@@ -212,16 +252,22 @@ export default function LucroPorMinuto() {
 
           {/* Botões */}
           <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
-            <Button variant="contained" color="secondary" fullWidth>
-              Calcular
+            <Button
+              variant="contained"
+              color={cronometroAtivo ? "error" : "secondary"}
+              onClick={toggleMercado}
+              fullWidth
+            >
+              {cronometroAtivo ? "Sair do Mercado" : "Entrar no Mercado"}
             </Button>
+
             <Button
               variant="contained"
               color="primary"
               fullWidth
               onClick={handleReset}
             >
-              Resetar
+              Desmarcar todos checks
             </Button>
           </Box>
         </CardContent>
