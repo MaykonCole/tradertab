@@ -18,6 +18,7 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 
 import Under from "../components/trader/under";
 import Drakito from "../components/trader/drakito";
+import LayZebra from "../components/trader/layzebra";
 import MatchOdds from "../components/trader/matchodds";
 import Contact from "../components/trader/contact";
 import ThemeDefault from "../shared/themedefault";
@@ -28,7 +29,7 @@ export default function App() {
 
   const isMobile = useMediaQuery("(max-width:520px)");
 
-  const tabs = ["Under", "Team Winning", "Match Odds", "Contact"];
+  const tabs = ["Under", "Team Winning", "Lay Zebra", "My Stats", "Contact"];
 
   const handleChange = (_, newValue) => {
     setTabIndex(newValue);
@@ -93,8 +94,9 @@ export default function App() {
       <Container maxWidth="md" sx={{ mt: 4 }}>
         {tabIndex === 0 && <Under />}
         {tabIndex === 1 && <Drakito />}
-        {tabIndex === 2 && <MatchOdds />}
-        {tabIndex === 3 && <Contact />}
+        {tabIndex === 2 && <LayZebra />}
+        {tabIndex === 3 && <MatchOdds />}
+        {tabIndex === 4 && <Contact />}
       </Container>
     </ThemeDefault>
   );
