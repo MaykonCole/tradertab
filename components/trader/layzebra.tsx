@@ -10,12 +10,14 @@ import {
   Checkbox,
   Button,
   LinearProgress,
+  useMediaQuery,
 } from "@mui/material";
 
 import { useThemeMode } from "../../shared/themedefault";
 
 export default function LucroPorMinuto() {
   const { darkMode, toggleDarkMode } = useThemeMode();
+  const isMobile = useMediaQuery("(max-width:520px)");
 
   const favoritoLabels = [
     { label: "Marcação Pressão", peso: 20 },
@@ -97,15 +99,15 @@ export default function LucroPorMinuto() {
       .reduce((acc, val) => acc + val, 0);
 
     const total = favoritoPeso + zebraPeso;
-    const totalLimitado = Math.max(0, Math.min(total, 100)); // Limita entre 0 e 100
+    const totalLimitado = Math.max(0, Math.min(total, 100));
 
     return totalLimitado;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [favoritoChecks, zebraChecks]);
 
   const progressColor = useMemo(() => {
-    const startColor = [200, 255, 200]; // Verde claro
-    const endColor = [0, 128, 0]; // Verde escuro
+    const startColor = [200, 255, 200];
+    const endColor = [0, 128, 0];
 
     const ratio = progresso / 100;
 
@@ -139,13 +141,15 @@ export default function LucroPorMinuto() {
           <Box
             sx={{
               display: "flex",
+              flexDirection: isMobile ? "column" : "row",
               justifyContent: "space-between",
-              gap: 8,
+              alignItems: isMobile ? "center" : "flex-start",
+              gap: isMobile ? 3 : 8,
               mb: 2,
             }}
           >
             {/* Grupo Favorito */}
-            <Box sx={{ textAlign: "center", flex: 1 }}>
+            <Box sx={{ textAlign: "center", width: isMobile ? "100%" : "50%" }}>
               <Typography
                 variant="body1"
                 sx={{
@@ -186,7 +190,7 @@ export default function LucroPorMinuto() {
             </Box>
 
             {/* Grupo Zebra */}
-            <Box sx={{ textAlign: "center", flex: 1 }}>
+            <Box sx={{ textAlign: "center", width: isMobile ? "100%" : "50%" }}>
               <Typography
                 variant="body1"
                 sx={{
@@ -251,7 +255,14 @@ export default function LucroPorMinuto() {
           </Box>
 
           {/* Botões */}
-          <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: isMobile ? "column" : "row",
+              gap: 2,
+              mt: 2,
+            }}
+          >
             <Button
               variant="contained"
               color={cronometroAtivo ? "error" : "secondary"}
@@ -267,7 +278,7 @@ export default function LucroPorMinuto() {
               fullWidth
               onClick={handleReset}
             >
-              Desmarcar todos checks
+              Desmarcar todos
             </Button>
           </Box>
         </CardContent>
