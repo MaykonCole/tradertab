@@ -130,7 +130,7 @@ export default function Under() {
               label="Odd Atual do Under Limite"
               type="number"
               inputProps={{
-                min: 1.01,
+                min: 1,
                 step:
                   odd > 20
                     ? 1

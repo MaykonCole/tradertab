@@ -121,7 +121,7 @@ export default function Drakito() {
               label="Odd antes do gol"
               type="number"
               inputProps={{
-                min: 1.01,
+                min: 1,
                 step:
                   oddAntesGol > 20
                     ? 1
