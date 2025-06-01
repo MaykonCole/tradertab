@@ -91,7 +91,23 @@ export default function Drakito() {
             <TextField
               label="Odd Atual"
               type="number"
-              inputProps={{ min: 1, step: 0.01 }}
+              inputProps={{
+                min: 1,
+                step:
+                  oddAtual > 20
+                    ? 1
+                    : oddAtual >= 10 && oddAtual < 20
+                      ? 0.5
+                      : oddAtual >= 6 && oddAtual < 10
+                        ? 0.2
+                        : oddAtual >= 4 && oddAtual < 6
+                          ? 0.1
+                          : oddAtual >= 3 && oddAtual < 4
+                            ? 0.05
+                            : oddAtual >= 2 && oddAtual < 2
+                              ? 0.02
+                              : 0.01,
+              }}
               value={oddAtual}
               onChange={(e) => {
                 const value = e.target.value;
@@ -104,7 +120,23 @@ export default function Drakito() {
             <TextField
               label="Odd antes do gol"
               type="number"
-              inputProps={{ min: 1, step: 0.01 }}
+              inputProps={{
+                min: 1.01,
+                step:
+                  oddAntesGol > 20
+                    ? 1
+                    : oddAntesGol >= 10 && oddAntesGol < 20
+                      ? 0.5
+                      : oddAntesGol >= 6 && oddAntesGol < 10
+                        ? 0.2
+                        : oddAntesGol >= 4 && oddAntesGol < 6
+                          ? 0.1
+                          : oddAntesGol >= 3 && oddAntesGol < 4
+                            ? 0.05
+                            : oddAntesGol >= 2 && oddAntesGol < 2
+                              ? 0.02
+                              : 0.01,
+              }}
               value={oddAntesGol}
               onChange={(e) => {
                 const value = e.target.value;

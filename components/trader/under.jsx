@@ -129,7 +129,23 @@ export default function Under() {
             <TextField
               label="Odd Atual do Under Limite"
               type="number"
-              inputProps={{ min: 1, step: 0.01 }}
+              inputProps={{
+                min: 1.01,
+                step:
+                  odd > 20
+                    ? 1
+                    : odd >= 10 && odd < 20
+                      ? 0.5
+                      : odd >= 6 && odd < 10
+                        ? 0.2
+                        : odd >= 4 && odd < 6
+                          ? 0.1
+                          : odd >= 3 && odd < 4
+                            ? 0.05
+                            : odd >= 2 && odd < 2
+                              ? 0.02
+                              : 0.01,
+              }}
               value={odd}
               onChange={(e) => {
                 const value = e.target.value;
@@ -157,7 +173,7 @@ export default function Under() {
             <TextField
               label="Minuto de Jogo"
               type="number"
-              inputProps={{ min: 1, max: 130, step: 3 }}
+              inputProps={{ min: 1, max: 130, step: 1 }}
               value={minuto}
               onChange={(e) => {
                 const value = e.target.value;
