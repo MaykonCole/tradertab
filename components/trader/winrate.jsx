@@ -94,7 +94,7 @@ export default function WinRateCalculator() {
               label="Odd Média"
               type="number"
               inputProps={{
-                min: 1.01,
+                min: 1,
                 step:
                   odd > 20
                     ? 1
