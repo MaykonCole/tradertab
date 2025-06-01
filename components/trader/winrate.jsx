@@ -93,12 +93,30 @@ export default function WinRateCalculator() {
             <TextField
               label="Odd Média"
               type="number"
+              inputProps={{
+                min: 1.01,
+                step:
+                  odd > 20
+                    ? 1
+                    : odd >= 10 && odd < 20
+                      ? 0.5
+                      : odd >= 6 && odd < 10
+                        ? 0.2
+                        : odd >= 4 && odd < 6
+                          ? 0.1
+                          : odd >= 3 && odd < 4
+                            ? 0.05
+                            : odd >= 2 && odd < 2
+                              ? 0.02
+                              : 0.01,
+              }}
               value={odd}
-              onChange={(e) => setOdd(Number(e.target.value))}
-              inputProps={{ min: 1.01, step: 0.01 }}
+              onChange={(e) => {
+                const value = e.target.value;
+                setOdd(value === "" ? 2 : Number(value));
+              }}
               fullWidth
             />
-
             <TextField
               label="Comissão (%)"
               type="number"
@@ -114,7 +132,7 @@ export default function WinRateCalculator() {
             </Button>
 
             <Button variant="contained" color="primary" onClick={resetar}>
-              Resetar
+              VALORES PADRÃO
             </Button>
 
             {winrate !== null && (
