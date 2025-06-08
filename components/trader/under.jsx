@@ -18,9 +18,10 @@ import {
 import { useThemeMode } from "../../shared/themedefault";
 
 export default function Under() {
-  const [odd, setOdd] = useState(4); // valor padrão fixo
-  const [minuto, setMinuto] = useState(45); // valor padrão fixo
-  const [lucroPorMinuto, setLucroPorMinuto] = useState(null);
+  const [odd, setOdd] = useState(4);
+  const [minuto, setMinuto] = useState(45);
+  const [possivelAcrescimo, setPossivelAcrescimo] = useState(0);
+  const [lucroPorMinuto, setLucroPorMinuto] = useState(0);
   const [historico, setHistorico] = useState([]);
   const [tipoJogo, setTipoJogo] = useState(0);
   const [tentouCalcular, setTentouCalcular] = useState(false);
@@ -29,8 +30,9 @@ export default function Under() {
   const [zebra, onChangeZebra] = useState(0);
 
   const { darkMode, toggleDarkMode } = useThemeMode();
+  const [modoUnder, setModoUnder] = useState(true);
+  const [minutosFaltando, setMinutosFaltando] = useState(10);
 
-  // Carregar do sessionStorage apenas no cliente
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedHistorico = sessionStorage.getItem("lucroHistorico");
@@ -41,62 +43,68 @@ export default function Under() {
 
       const storedMinuto = sessionStorage.getItem("minuto");
       if (storedMinuto) setMinuto(Number(storedMinuto));
+
+      const storedAcrescimo = sessionStorage.getItem("acrescimo");
+      if (storedAcrescimo) setPossivelAcrescimo(Number(storedAcrescimo));
     }
   }, []);
-
-  // Salvar no sessionStorage quando mudar
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("lucroHistorico", JSON.stringify(historico));
-    }
-  }, [historico]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("odd", odd.toString());
-    }
-  }, [odd]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("minuto", minuto.toString());
-    }
-  }, [minuto]);
 
   const calcularLucro = () => {
     setTentouCalcular(true);
 
-    if (tipoJogo === 0) {
-      return;
-    }
+    if (!modoUnder && tipoJogo === 0) return;
 
-    if (odd > 1 && minuto >= 0 && minuto < 90) {
-      const golsTotal = favorito + zebra;
-      const minutosRestantes = 90 - minuto;
-      const oddFinal = 1.01;
-      const lucroTotal = odd - oddFinal;
-      const fatorGol = Math.max(1 - golsTotal * 0.1, 0.5);
+    if (
+      odd > 1 &&
+      (!modoUnder ? minuto >= 0 && minuto < 90 : minutosFaltando > 0)
+    ) {
+      console.log("Entrou no cálculo");
 
-      const percentualPorJogo = tipoJogo / 2;
+      let lucro;
 
-      const valorBruto = (lucroTotal / minutosRestantes) * 100;
-      console.log(valorBruto);
+      if (modoUnder) {
+        const lucroTotal = odd - 1;
+        lucro = Number(((lucroTotal / minutosFaltando) * 100).toFixed(2));
+      } else {
+        const golsTotal = favorito + zebra;
 
-      const resultado =
-        ((lucroTotal * fatorGol) / minutosRestantes) * 100 + percentualPorJogo;
+        const minutosRestantes =
+          (minuto >= 70 ? 90 + possivelAcrescimo : 90) - minuto;
 
-      const lucro = Number(resultado.toFixed(2));
+        const oddFinal = 1.01;
+        const lucroTotal = odd - oddFinal;
+
+        const fatorGol = Math.max(1 - golsTotal * 0.1, 0.5);
+
+        const pesoTipoJogo = 1;
+
+        const resultado =
+          ((lucroTotal * fatorGol) / minutosRestantes) * 100 + pesoTipoJogo;
+
+        lucro = Number(resultado.toFixed(2));
+      }
 
       setLucroPorMinuto(lucro);
-      setHistorico([{ odd, minuto, lucroPorMinuto: lucro }, ...historico]);
+
+      setHistorico([
+        {
+          odd,
+          minuto: modoUnder ? minutosFaltando : minuto,
+          acrescimo: !modoUnder && minuto >= 70 ? possivelAcrescimo : 0,
+          lucroPorMinuto: lucro,
+        },
+        ...historico,
+      ]);
     } else {
       setLucroPorMinuto(null);
     }
   };
 
   const resetarCampos = () => {
-    setOdd(2);
+    setOdd(4);
     setMinuto(45);
+    setMinutosFaltando(10);
+    setPossivelAcrescimo(0);
     setLucroPorMinuto(null);
     setHistorico([]);
     setTipoJogo(0);
@@ -106,6 +114,10 @@ export default function Under() {
     }
   };
 
+  const handleModeToggle = (event) => {
+    setModoUnder(event.target.checked);
+  };
+
   const isError = tentouCalcular && tipoJogo === 0;
 
   return (
@@ -113,6 +125,12 @@ export default function Under() {
       <FormControlLabel
         control={<Switch checked={darkMode} onChange={toggleDarkMode} />}
         label={darkMode ? "Modo Escuro" : "Modo Claro"}
+        sx={{ mb: 2 }}
+      />
+
+      <FormControlLabel
+        control={<Switch checked={modoUnder} onChange={handleModeToggle} />}
+        label={modoUnder ? "Modo Minutos Faltando" : "Modo Minuto Atual"}
         sx={{ mb: 2 }}
       />
 
@@ -132,146 +150,135 @@ export default function Under() {
               inputProps={{
                 min: 1,
                 step:
-                  odd > 20
+                  odd >= 20
                     ? 1
-                    : odd >= 10 && odd < 20
+                    : odd >= 10
                       ? 0.5
-                      : odd >= 6 && odd < 10
+                      : odd >= 6
                         ? 0.2
-                        : odd >= 4 && odd < 6
+                        : odd >= 4
                           ? 0.1
-                          : odd >= 3 && odd < 4
+                          : odd >= 3
                             ? 0.05
-                            : odd >= 2 && odd < 2
-                              ? 0.02
-                              : 0.01,
+                            : 0.01,
               }}
               value={odd}
-              onChange={(e) => {
-                const value = e.target.value;
-                setOdd(value === "" ? 2 : Number(value));
-              }}
+              onChange={(e) =>
+                setOdd(e.target.value === "" ? 2 : Number(e.target.value))
+              }
               fullWidth
-              sx={{
-                "& label.Mui-focused": {
-                  color: "green",
-                },
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "gray",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "green",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "green",
-                  },
-                },
-              }}
             />
 
-            <TextField
-              label="Minuto de Jogo"
-              type="number"
-              inputProps={{ min: 1, max: 130, step: 1 }}
-              value={minuto}
-              onChange={(e) => {
-                const value = e.target.value;
-                setMinuto(value === "" ? 1 : Number(value));
-              }}
-              fullWidth
-              sx={{
-                "& label.Mui-focused": {
-                  color: "green",
-                },
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "gray",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "green",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "green",
-                  },
-                },
-              }}
-            />
-
-            <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              gap={2}
-            >
-              <Typography
-                variant="body1"
-                sx={{ color: "green", fontWeight: "bold", fontSize: "20px" }}
-              >
-                Casa
-              </Typography>
+            {modoUnder ? (
               <TextField
+                label="Minutos Faltando"
                 type="number"
-                size="small"
-                value={favorito}
-                onChange={(e) => onChangeFavorito(Number(e.target.value))}
-                inputProps={{ min: 0 }}
-                sx={{ width: 60 }}
+                inputProps={{ min: 1, max: 30, step: 1 }}
+                value={minutosFaltando}
+                onChange={(e) =>
+                  setMinutosFaltando(
+                    e.target.value === "" ? 1 : Number(e.target.value),
+                  )
+                }
+                fullWidth
               />
+            ) : (
+              <>
+                <TextField
+                  label="Minuto de Jogo"
+                  type="number"
+                  inputProps={{ min: 1, max: 89, step: 1 }}
+                  value={minuto}
+                  onChange={(e) =>
+                    setMinuto(
+                      e.target.value === "" ? 1 : Number(e.target.value),
+                    )
+                  }
+                  fullWidth
+                />
+                {minuto >= 70 && (
+                  <TextField
+                    label="Possível Acréscimo"
+                    type="number"
+                    inputProps={{ min: 0, max: 10, step: 1 }}
+                    value={possivelAcrescimo}
+                    onChange={(e) =>
+                      setPossivelAcrescimo(
+                        e.target.value === "" ? 0 : Number(e.target.value),
+                      )
+                    }
+                    fullWidth
+                  />
+                )}
 
-              <Typography variant="h6">x</Typography>
-
-              <TextField
-                type="number"
-                size="small"
-                value={zebra}
-                onChange={(e) => onChangeZebra(Number(e.target.value))}
-                inputProps={{ min: 0 }}
-                sx={{ width: 60 }}
-              />
-              <Typography
-                variant="body1"
-                sx={{ color: "red", fontWeight: "bold", fontSize: "20px" }}
-              >
-                Fora
-              </Typography>
-            </Box>
-
-            <FormControl fullWidth>
-              <InputLabel id="demo-simple-select-label">
-                Tipo de Jogo
-              </InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={tipoJogo}
-                label="Tipo de Jogo"
-                onChange={(e) => setTipoJogo(e.target.value)}
-              >
-                <MenuItem value={0}>
-                  <em>Selecione...</em>
-                </MenuItem>
-                <MenuItem value={4}>
-                  Jogo truncado (muitas faltas, cera)
-                </MenuItem>
-                <MenuItem value={3}>
-                  Somente um time atacando (só chuveirinho)
-                </MenuItem>
-                <MenuItem value={2}>
-                  Somente um time atacando (com chances)
-                </MenuItem>
-                <MenuItem value={1}>
-                  Ambos times atacando (jogo aberto)
-                </MenuItem>
-              </Select>
-              {isError && (
-                <FormHelperText
-                  sx={{ color: "red", fontWeight: "bold", fontSize: "15px" }}
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  gap={2}
+                  justifyContent="center"
                 >
-                  Por favor, selecione o tipo de jogo.
-                </FormHelperText>
-              )}
-            </FormControl>
+                  <Typography
+                    sx={{
+                      color: "green",
+                      fontWeight: "bold",
+                      fontSize: "20px",
+                    }}
+                  >
+                    Casa
+                  </Typography>
+                  <TextField
+                    type="number"
+                    size="small"
+                    value={favorito}
+                    onChange={(e) => onChangeFavorito(Number(e.target.value))}
+                    inputProps={{ min: 0 }}
+                    sx={{ width: 60 }}
+                  />
+                  <Typography variant="h6">x</Typography>
+                  <TextField
+                    type="number"
+                    size="small"
+                    value={zebra}
+                    onChange={(e) => onChangeZebra(Number(e.target.value))}
+                    inputProps={{ min: 0 }}
+                    sx={{ width: 60 }}
+                  />
+                  <Typography
+                    sx={{ color: "red", fontWeight: "bold", fontSize: "20px" }}
+                  >
+                    Fora
+                  </Typography>
+                </Box>
+
+                <FormControl fullWidth error={isError}>
+                  <InputLabel>Tipo de Jogo</InputLabel>
+                  <Select
+                    value={tipoJogo}
+                    label="Tipo de Jogo"
+                    onChange={(e) => setTipoJogo(e.target.value)}
+                  >
+                    <MenuItem value={0}>
+                      <em>Selecione...</em>
+                    </MenuItem>
+                    <MenuItem value={4}>
+                      Jogo truncado (muitas faltas, cera)
+                    </MenuItem>
+                    <MenuItem value={3}>
+                      Só um time atacando (chuveirinho)
+                    </MenuItem>
+                    <MenuItem value={2}>
+                      Só um time atacando (com chances)
+                    </MenuItem>
+                    <MenuItem value={1}>Ambos atacando (jogo aberto)</MenuItem>
+                  </Select>
+                  {!modoUnder && isError && (
+                    <FormHelperText>
+                      Por favor, selecione o tipo de jogo.
+                    </FormHelperText>
+                  )}
+                </FormControl>
+              </>
+            )}
 
             <Button
               variant="contained"
