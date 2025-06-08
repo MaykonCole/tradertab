@@ -173,6 +173,7 @@ export default function Under() {
               <TextField
                 label="Minutos Faltando"
                 type="number"
+                v
                 inputProps={{ min: 1, max: 30, step: 1 }}
                 value={minutosFaltando}
                 onChange={(e) =>
@@ -186,6 +187,7 @@ export default function Under() {
               <>
                 <TextField
                   label="Minuto de Jogo"
+                  helperText="Após o minuto 70 terá a possibilidade de informar o possível acréscimo"
                   type="number"
                   inputProps={{ min: 1, max: 89, step: 1 }}
                   value={minuto}
@@ -309,8 +311,8 @@ export default function Under() {
             </Typography>
             {historico.map((item, index) => (
               <Typography key={index} variant="body2">
-                Odd: {item.odd}, Minuto: {item.minuto}, Lucro/min:{" "}
-                {item.lucroPorMinuto}%
+                Odd: {item.odd}, {modoUnder ? "Minutos faltando" : "Minuto"}:{" "}
+                {item.minuto}, Lucro/min: {item.lucroPorMinuto}%
               </Typography>
             ))}
           </CardContent>
