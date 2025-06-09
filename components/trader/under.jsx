@@ -173,7 +173,7 @@ export default function Under() {
               <TextField
                 label="Minutos Faltando"
                 type="number"
-                v
+                helperText="Considere o valor do possível acréscimo para o preenchimento deste campo"
                 inputProps={{ min: 1, max: 30, step: 1 }}
                 value={minutosFaltando}
                 onChange={(e) =>
