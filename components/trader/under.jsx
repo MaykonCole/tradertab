@@ -174,7 +174,7 @@ export default function Under() {
                 label="Minutos Faltando"
                 type="number"
                 helperText="Considere o valor do possível acréscimo para o preenchimento deste campo"
-                inputProps={{ min: 1, max: 30, step: 1 }}
+                inputProps={{ min: 1, max: 89, step: 1 }}
                 value={minutosFaltando}
                 onChange={(e) =>
                   setMinutosFaltando(
