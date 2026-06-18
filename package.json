@@ -14,7 +14,8 @@
     "lint:secretlint:check": "node scripts/check-project.mjs",
     "lint:commit:check": "node scripts/check-project.mjs",
     "prepare": "echo \"husky skipped in CI\"",
-    "commit": "echo \"Use: git commit -m 'feat: replace tradertab with moment of goal dashboard'\""
+    "commit": "echo \"Use: git commit -m 'feat: replace tradertab with moment of goal dashboard'\"",
+    "validate:data": "node scripts/validate-worldcup-data.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "4.3.4",
