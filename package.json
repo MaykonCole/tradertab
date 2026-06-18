@@ -4,24 +4,28 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
-    "build": "vite build",
+    "dev": "next dev",
+    "build": "next build",
     "preview": "vite preview --host 0.0.0.0",
-    "test": "npm run build",
+    "test": "next build",
     "lint:prettier:check": "node scripts/check-project.mjs",
     "lint:prettier:fix": "node scripts/check-project.mjs",
     "lint:eslint:check": "node scripts/check-project.mjs",
     "lint:secretlint:check": "node scripts/check-project.mjs",
     "lint:commit:check": "node scripts/check-project.mjs",
     "prepare": "echo \"husky skipped in CI\"",
-    "commit": "echo \"Use: git commit -m 'feat: replace tradertab with moment of goal dashboard'\""
+    "commit": "echo \"Use: git commit -m 'feat: replace tradertab with moment of goal dashboard'\"",
+    "start": "next start",
+    "vite:dev": "vite --host 0.0.0.0",
+    "vite:build": "vite build",
+    "vite:preview": "vite preview --host 0.0.0.0"
   },
   "dependencies": {
     "@vitejs/plugin-react": "4.3.4",
-    "vite": "5.4.11",
+    "lucide-react": "0.468.0",
+    "next": "^14.2.35",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "lucide-react": "0.468.0"
-  },
-  "devDependencies": {}
+    "vite": "5.4.11"
+  }
 }
