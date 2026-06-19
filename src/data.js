@@ -1,40 +1,68 @@
-export const bucketRows = [
-  { id: '0-15', goals: 5, minutes: '0–15', half: '1T' },
-  { id: '16-22', goals: 7, minutes: '16–22', half: '1T' },
-  { id: '23-29', goals: 3, minutes: '23–29', half: '1T' },
-  { id: '30-40', goals: 6, minutes: '30–40', half: '1T' },
-  { id: '41-45', goals: 3, minutes: '41–45', half: '1T' },
-  { id: '45+', goals: 2, minutes: '45+', half: '1T+' },
-  { id: '45-60FT', goals: 8, minutes: '46–60', half: '2T' },
-  { id: '61-67FT', goals: 6, minutes: '61–67', half: '2T' },
-  { id: '68-74FT', goals: 2, minutes: '68–74', half: '2T' },
-  { id: '75-85FT', goals: 10, minutes: '75–85', half: '2T' },
-  { id: '86-90FT', goals: 3, minutes: '86–90', half: '2T' },
-  { id: '90+', goals: 7, minutes: '90+', half: '2T+' }
-];
+import worldCup2026Data from './worldCup2026Data.json';
 
-export const matchRows = [
-  { date: '11/06', group: 'A', goals: 2, teams: { pt: 'México 2 x 0 África do Sul', en: 'Mexico 2 x 0 South Africa', es: 'México 2 x 0 Sudáfrica' } },
-  { date: '11/06', group: 'A', goals: 3, teams: { pt: 'Coreia do Sul 2 x 1 Tchéquia', en: 'South Korea 2 x 1 Czechia', es: 'Corea del Sur 2 x 1 Chequia' } },
-  { date: '12/06', group: 'B', goals: 2, teams: { pt: 'Canadá 1 x 1 Bósnia e Herzegovina', en: 'Canada 1 x 1 Bosnia and Herzegovina', es: 'Canadá 1 x 1 Bosnia y Herzegovina' } },
-  { date: '12/06', group: 'D', goals: 5, teams: { pt: 'Estados Unidos 4 x 1 Paraguai', en: 'United States 4 x 1 Paraguay', es: 'Estados Unidos 4 x 1 Paraguay' } },
-  { date: '13/06', group: 'B', goals: 2, teams: { pt: 'Catar 1 x 1 Suíça', en: 'Qatar 1 x 1 Switzerland', es: 'Catar 1 x 1 Suiza' } },
-  { date: '13/06', group: 'C', goals: 2, teams: { pt: 'Brasil 1 x 1 Marrocos', en: 'Brazil 1 x 1 Morocco', es: 'Brasil 1 x 1 Marruecos' } },
-  { date: '13/06', group: 'C', goals: 1, teams: { pt: 'Haiti 0 x 1 Escócia', en: 'Haiti 0 x 1 Scotland', es: 'Haití 0 x 1 Escocia' } },
-  { date: '14/06', group: 'D', goals: 2, teams: { pt: 'Austrália 2 x 0 Turquia', en: 'Australia 2 x 0 Turkey', es: 'Australia 2 x 0 Turquía' } },
-  { date: '14/06', group: 'E', goals: 8, teams: { pt: 'Alemanha 7 x 1 Curaçao', en: 'Germany 7 x 1 Curaçao', es: 'Alemania 7 x 1 Curazao' } },
-  { date: '14/06', group: 'F', goals: 4, teams: { pt: 'Holanda 2 x 2 Japão', en: 'Netherlands 2 x 2 Japan', es: 'Países Bajos 2 x 2 Japón' } },
-  { date: '14/06', group: 'E', goals: 1, teams: { pt: 'Costa do Marfim 1 x 0 Equador', en: 'Ivory Coast 1 x 0 Ecuador', es: 'Costa de Marfil 1 x 0 Ecuador' } },
-  { date: '14/06', group: 'F', goals: 6, teams: { pt: 'Suécia 5 x 1 Tunísia', en: 'Sweden 5 x 1 Tunisia', es: 'Suecia 5 x 1 Túnez' } },
-  { date: '15/06', group: 'H', goals: 0, teams: { pt: 'Espanha 0 x 0 Cabo Verde', en: 'Spain 0 x 0 Cape Verde', es: 'España 0 x 0 Cabo Verde' } },
-  { date: '15/06', group: 'G', goals: 2, teams: { pt: 'Bélgica 1 x 1 Egito', en: 'Belgium 1 x 1 Egypt', es: 'Bélgica 1 x 1 Egipto' } },
-  { date: '15/06', group: 'H', goals: 2, teams: { pt: 'Arábia Saudita 1 x 1 Uruguai', en: 'Saudi Arabia 1 x 1 Uruguay', es: 'Arabia Saudita 1 x 1 Uruguay' } },
-  { date: '15/06', group: 'G', goals: 4, teams: { pt: 'Irã 2 x 2 Nova Zelândia', en: 'Iran 2 x 2 New Zealand', es: 'Irán 2 x 2 Nueva Zelanda' } },
-  { date: '16/06', group: 'I', goals: 4, teams: { pt: 'França 3 x 1 Senegal', en: 'France 3 x 1 Senegal', es: 'Francia 3 x 1 Senegal' } },
-  { date: '16/06', group: 'I', goals: 5, teams: { pt: 'Iraque 1 x 4 Noruega', en: 'Iraq 1 x 4 Norway', es: 'Irak 1 x 4 Noruega' } },
-  { date: '16/06', group: 'J', goals: 3, teams: { pt: 'Argentina 3 x 0 Argélia', en: 'Argentina 3 x 0 Algeria', es: 'Argentina 3 x 0 Argelia' } },
-  { date: '16/06', group: 'J', goals: 4, teams: { pt: 'Áustria 3 x 1 Jordânia', en: 'Austria 3 x 1 Jordan', es: 'Austria 3 x 1 Jordania' } }
-];
+const formatDisplayDate = (isoDate) => {
+  if (!isoDate) return '';
+  const [year, month, day] = isoDate.split('-');
+  if (!year || !month || !day) return isoDate;
+  return `${day}/${month}`;
+};
+
+const toNumber = (value, fallback = 0) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const bucketDefinitions = worldCup2026Data.bucketDefinitions || worldCup2026Data.bucketRows || [];
+
+const getMatchGoals = (match) => {
+  if (Array.isArray(match.goals)) return match.goals;
+
+  const scoreTotal = toNumber(match.score?.home) + toNumber(match.score?.away);
+  return Array.from({ length: toNumber(match.totalGoals, scoreTotal) }, (_, index) => ({
+    id: `legacy-${index + 1}`,
+    bucketId: 'unknown'
+  }));
+};
+
+const goalEvents = worldCup2026Data.matches.flatMap((match) =>
+  getMatchGoals(match).map((goal) => ({ ...goal, match }))
+);
+
+export const bucketRows = bucketDefinitions.map((bucket) => ({
+  id: bucket.id,
+  goals: goalEvents.filter((goal) => goal.bucketId === bucket.id).length,
+  minutes: bucket.minutes,
+  half: bucket.half
+}));
+
+const buildMatchTitle = (match, lang) => {
+  if (match.teams?.[lang]) return match.teams[lang];
+
+  const home = match.home?.[lang] || match.home?.pt || '';
+  const away = match.away?.[lang] || match.away?.pt || '';
+  const homeScore = toNumber(match.score?.home);
+  const awayScore = toNumber(match.score?.away);
+
+  return `${home} ${homeScore} x ${awayScore} ${away}`.trim();
+};
+
+export const matchRows = worldCup2026Data.matches.map((match) => {
+  const goals = getMatchGoals(match);
+
+  return {
+    date: match.displayDate || formatDisplayDate(match.date),
+    group: match.group,
+    goals: goals.length,
+    goalMinutes: goals.map((goal) => goal.minuteLabel || String(goal.minute)).filter(Boolean),
+    teams: {
+      pt: buildMatchTitle(match, 'pt'),
+      en: buildMatchTitle(match, 'en'),
+      es: buildMatchTitle(match, 'es')
+    }
+  };
+});
+
+export const sourceMeta = worldCup2026Data.meta;
 
 export const translations = {
   pt: {
@@ -61,14 +89,36 @@ export const translations = {
       ofTotal: 'do total',
       bestBlock: 'Melhor bloco',
       bestBlockValue: '75-85 FT',
-      bestBlockDetail: '10 gols',
+      bestBlockDetail: '15 gols',
       stoppage: 'Acréscimos',
-      stoppageValue: '9 gols',
+      stoppageValue: '17 gols',
       stoppageDetail: '45+ e 90+ somados'
     },
     chart: { eyebrow: 'Distribuição por momento', title: 'Onde os gols estão acontecendo' },
     side: { eyebrow: 'Resumo executivo', title: 'Padrões principais' },
     split: { first: '1T + 45+', second: '2T + 90+' },
+    quarters: {
+      eyebrow: 'División en 4 períodos',
+      title: 'Porcentaje de goles por fase del partido',
+      goals: 'goles',
+      periods: {
+        first: { label: '0 a 22', description: 'Inicio del 1T hasta prehidratación' },
+        second: { label: '22 hasta el final HT', description: 'Después de 22 minutos + cierre y añadido del 1T' },
+        third: { label: '45 a 67', description: 'Inicio del 2T hasta prehidratación FT' },
+        fourth: { label: '67 hasta el final FT', description: 'Después de 67 minutos + cierre y añadido del 2T' }
+      }
+    },
+    quarters: {
+      eyebrow: 'Divisão em 4 períodos',
+      title: 'Percentual dos gols por fase do jogo',
+      goals: 'gols',
+      periods: {
+        first: { label: '0 a 22', description: 'Início do 1T até pré-hidratação' },
+        second: { label: '22 até o final HT', description: 'Pós 22 minutos + final e acréscimos do 1T' },
+        third: { label: '45 a 67', description: 'Início do 2T até pré-hidratação FT' },
+        fourth: { label: '67 até o final FT', description: 'Pós 67 minutos + final e acréscimos do 2T' }
+      }
+    },
     timelinePanel: { eyebrow: 'Mapa temporal', title: 'Linha do jogo' },
     table: {
       eyebrow: 'Tabela completa',
@@ -96,14 +146,14 @@ export const translations = {
       '90+': { label: '90+', phase: 'Acréscimos FT', intent: 'Jogo aberto, desespero ou administração frágil' }
     },
     notes: [
-      'O bloco 75-85 FT lidera com 10 gols.',
-      'O 2T concentra 58,1% dos gols quando somamos 45-90+.',
-      'Acréscimos 45+ e 90+ somam 9 gols, mantendo alta relevância operacional.',
-      'Pós-hidratação FT segue baixo, enquanto 16-22 e 45-60 FT ganharam força com os novos jogos.'
+      'O bloco 75-85 FT lidera com 15 gols.',
+      'O 2T concentra 58,4% dos gols quando somamos 46-90+.',
+      'Acréscimos 45+ e 90+ somam 17 gols, mantendo alta relevância operacional.',
+      '45-60 FT chegou a 11 gols e segue forte logo após o intervalo; pós-hidratação FT ainda é o bloco mais baixo.'
     ],
     insights: [
-      { title: 'Melhores janelas de pressão', tone: 'hot', text: 'O bloco 75-85 FT é o mais forte da amostra. Ele mistura substituições, queda física e necessidade de resultado, aumentando a chance de jogo aberto.' },
-      { title: 'Acréscimos não podem ser ignorados', tone: 'default', text: '45+ e 90+ juntos representam 14,5% dos gols. Para leitura de tempo final, considerar o acréscimo real é essencial.' },
+      { title: 'Melhores janelas de pressão', tone: 'hot', text: 'O bloco 75-85 FT é o mais forte da amostra atualizada. Ele mistura substituições, queda física e necessidade de resultado, aumentando a chance de jogo aberto.' },
+      { title: 'Acréscimos não podem ser ignorados', tone: 'default', text: '45+ e 90+ juntos representam 17,3% dos gols. Para leitura de tempo final, considerar o acréscimo real é essencial.' },
       { title: 'Pós-hidratação ainda fraco', tone: 'cold', text: 'Os blocos 23-29 e 68-74 somam apenas 5 gols. Até agora, a retomada depois da pausa não aparece como pico principal.' }
     ]
   },
@@ -131,14 +181,25 @@ export const translations = {
       ofTotal: 'of total',
       bestBlock: 'Best block',
       bestBlockValue: '75-85 FT',
-      bestBlockDetail: '10 goals',
+      bestBlockDetail: '15 goals',
       stoppage: 'Stoppage time',
-      stoppageValue: '9 goals',
+      stoppageValue: '17 goals',
       stoppageDetail: '45+ and 90+ combined'
     },
     chart: { eyebrow: 'Distribution by moment', title: 'Where goals are happening' },
     side: { eyebrow: 'Executive summary', title: 'Main patterns' },
     split: { first: '1H + 45+', second: '2H + 90+' },
+    quarters: {
+      eyebrow: '4-period split',
+      title: 'Goal percentage by match phase',
+      goals: 'goals',
+      periods: {
+        first: { label: '0 to 22', description: 'Start of 1H through pre-hydration' },
+        second: { label: '22 to HT end', description: 'After 22 minutes + 1H closing and stoppage time' },
+        third: { label: '45 to 67', description: 'Start of 2H through FT pre-hydration' },
+        fourth: { label: '67 to FT end', description: 'After 67 minutes + 2H closing and stoppage time' }
+      }
+    },
     timelinePanel: { eyebrow: 'Temporal map', title: 'Match timeline' },
     table: {
       eyebrow: 'Full table',
@@ -166,14 +227,14 @@ export const translations = {
       '90+': { label: '90+', phase: 'FT stoppage time', intent: 'Open game, desperation or fragile game management' }
     },
     notes: [
-      'The 75-85 FT block leads with 10 goals.',
-      'The second half accounts for 58.1% of goals when 45-90+ is combined.',
-      'Stoppage time at 45+ and 90+ adds up to 9 goals, keeping strong operational relevance.',
-      'FT post-hydration remains low, while 16-22 and 45-60 FT gained strength with the new matches.'
+      'The 75-85 FT block leads with 15 goals.',
+      'The second half accounts for 58.4% of goals when 46-90+ is combined.',
+      'Stoppage time at 45+ and 90+ adds up to 17 goals, keeping strong operational relevance.',
+      '45-60 FT reached 11 goals and remains strong after half-time; FT post-hydration is still the lowest block.'
     ],
     insights: [
-      { title: 'Best pressure windows', tone: 'hot', text: 'The 75-85 FT block is the strongest in the sample. It combines substitutions, physical decline and score-pressure, increasing the chance of a more open match.' },
-      { title: 'Stoppage time matters', tone: 'default', text: '45+ and 90+ together represent 14.5% of all goals. For end-game reading, the real added-time expectation is essential.' },
+      { title: 'Best pressure windows', tone: 'hot', text: 'The 75-85 FT block is the strongest in the updated sample. It combines substitutions, physical decline and score-pressure, increasing the chance of a more open match.' },
+      { title: 'Stoppage time matters', tone: 'default', text: '45+ and 90+ together represent 17.3% of all goals. For end-game reading, the real added-time expectation is essential.' },
       { title: 'Post-hydration is still weak', tone: 'cold', text: 'The 23-29 and 68-74 blocks combine for only 5 goals. So far, the restart after the pause is not the main scoring peak.' }
     ]
   },
@@ -201,9 +262,9 @@ export const translations = {
       ofTotal: 'del total',
       bestBlock: 'Mejor bloque',
       bestBlockValue: '75-85 FT',
-      bestBlockDetail: '10 goles',
+      bestBlockDetail: '15 goles',
       stoppage: 'Descuentos',
-      stoppageValue: '9 goles',
+      stoppageValue: '17 goles',
       stoppageDetail: '45+ y 90+ sumados'
     },
     chart: { eyebrow: 'Distribución por momento', title: 'Dónde están ocurriendo los goles' },
@@ -236,14 +297,14 @@ export const translations = {
       '90+': { label: '90+', phase: 'Descuentos FT', intent: 'Partido abierto, desesperación o gestión frágil' }
     },
     notes: [
-      'El bloque 75-85 FT lidera con 10 goles.',
-      'El 2T concentra el 58,1% de los goles al sumar 45-90+.',
-      'Los descuentos 45+ y 90+ suman 9 goles, manteniendo alta relevancia operativa.',
-      'La poshidratación FT sigue baja, mientras 16-22 y 45-60 FT ganaron fuerza con los nuevos partidos.'
+      'El bloque 75-85 FT lidera con 15 goles.',
+      'El 2T concentra el 58,4% de los goles al sumar 46-90+.',
+      'Los descuentos 45+ y 90+ suman 17 goles, manteniendo alta relevancia operativa.',
+      '45-60 FT llegó a 11 goles y sigue fuerte tras el descanso; la poshidratación FT aún es el bloque más bajo.'
     ],
     insights: [
-      { title: 'Mejores ventanas de presión', tone: 'hot', text: 'El bloque 75-85 FT es el más fuerte de la muestra. Mezcla cambios, caída física y presión por el resultado, aumentando la posibilidad de un partido más abierto.' },
-      { title: 'Los descuentos no se pueden ignorar', tone: 'default', text: '45+ y 90+ juntos representan el 14,5% de los goles. Para lectura del tramo final, considerar el descuento real es esencial.' },
+      { title: 'Mejores ventanas de presión', tone: 'hot', text: 'El bloque 75-85 FT es el más fuerte de la muestra actualizada. Mezcla cambios, caída física y presión por el resultado, aumentando la posibilidad de un partido más abierto.' },
+      { title: 'Los descuentos no se pueden ignorar', tone: 'default', text: '45+ y 90+ juntos representan el 17,3% de los goles. Para lectura del tramo final, considerar el descuento real es esencial.' },
       { title: 'La poshidratación sigue débil', tone: 'cold', text: 'Los bloques 23-29 y 68-74 suman solo 5 goles. Hasta ahora, el regreso después de la pausa no aparece como el principal pico de goles.' }
     ]
   }
