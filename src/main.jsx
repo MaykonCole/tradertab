@@ -98,6 +98,43 @@ function Timeline({ data, total, t }) {
   );
 }
 
+const sumBuckets = (rows, ids) => rows
+  .filter((row) => ids.includes(row.id))
+  .reduce((sum, row) => sum + row.goals, 0);
+
+function FourPeriodGoals({ data, total, t }) {
+  const periods = [
+    { key: 'first', goals: sumBuckets(data, ['0-15', '16-22']) },
+    { key: 'second', goals: sumBuckets(data, ['23-29', '30-40', '41-45', '45+']) },
+    { key: 'third', goals: sumBuckets(data, ['45-60FT', '61-67FT']) },
+    { key: 'fourth', goals: sumBuckets(data, ['68-74FT', '75-85FT', '86-90FT', '90+']) }
+  ];
+
+  return (
+    <section className="panel four-period-panel">
+      <div className="section-title compact">
+        <div>
+          <p>{t.quarters.eyebrow}</p>
+          <h2>{t.quarters.title}</h2>
+        </div>
+      </div>
+      <div className="four-period-grid">
+        {periods.map((period) => {
+          const meta = t.quarters.periods[period.key];
+          return (
+            <div className="period-card" key={period.key}>
+              <span>{meta.label}</span>
+              <strong>{period.goals}</strong>
+              <small>{t.quarters.goals} • {pct(period.goals, total, t.locale)}</small>
+              <p>{meta.description}</p>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 function BucketTable({ data, total, t }) {
   return (
     <div className="panel table-panel">
@@ -220,6 +257,8 @@ function App() {
         <StatCard icon={Flame} label={t.stats.bestBlock} value={t.stats.bestBlockValue} detail={t.stats.bestBlockDetail} />
         <StatCard icon={Activity} label={t.stats.stoppage} value={t.stats.stoppageValue} detail={t.stats.stoppageDetail} />
       </section>
+
+      <FourPeriodGoals data={bucketRows} total={totalGoals} t={t} />
 
       <section className="content-grid">
         <BarChart data={sortedBuckets} total={totalGoals} t={t} />

@@ -89,14 +89,36 @@ export const translations = {
       ofTotal: 'do total',
       bestBlock: 'Melhor bloco',
       bestBlockValue: '75-85 FT',
-      bestBlockDetail: '11 gols',
+      bestBlockDetail: '15 gols',
       stoppage: 'Acréscimos',
-      stoppageValue: '13 gols',
+      stoppageValue: '17 gols',
       stoppageDetail: '45+ e 90+ somados'
     },
     chart: { eyebrow: 'Distribuição por momento', title: 'Onde os gols estão acontecendo' },
     side: { eyebrow: 'Resumo executivo', title: 'Padrões principais' },
     split: { first: '1T + 45+', second: '2T + 90+' },
+    quarters: {
+      eyebrow: 'División en 4 períodos',
+      title: 'Porcentaje de goles por fase del partido',
+      goals: 'goles',
+      periods: {
+        first: { label: '0 a 22', description: 'Inicio del 1T hasta prehidratación' },
+        second: { label: '22 hasta el final HT', description: 'Después de 22 minutos + cierre y añadido del 1T' },
+        third: { label: '45 a 67', description: 'Inicio del 2T hasta prehidratación FT' },
+        fourth: { label: '67 hasta el final FT', description: 'Después de 67 minutos + cierre y añadido del 2T' }
+      }
+    },
+    quarters: {
+      eyebrow: 'Divisão em 4 períodos',
+      title: 'Percentual dos gols por fase do jogo',
+      goals: 'gols',
+      periods: {
+        first: { label: '0 a 22', description: 'Início do 1T até pré-hidratação' },
+        second: { label: '22 até o final HT', description: 'Pós 22 minutos + final e acréscimos do 1T' },
+        third: { label: '45 a 67', description: 'Início do 2T até pré-hidratação FT' },
+        fourth: { label: '67 até o final FT', description: 'Pós 67 minutos + final e acréscimos do 2T' }
+      }
+    },
     timelinePanel: { eyebrow: 'Mapa temporal', title: 'Linha do jogo' },
     table: {
       eyebrow: 'Tabela completa',
@@ -124,10 +146,10 @@ export const translations = {
       '90+': { label: '90+', phase: 'Acréscimos FT', intent: 'Jogo aberto, desespero ou administração frágil' }
     },
     notes: [
-      'O bloco 75-85 FT lidera com 11 gols.',
-      'O 2T concentra 56,0% dos gols quando somamos 46-90+.',
-      'Acréscimos 45+ e 90+ somam 13 gols, mantendo alta relevância operacional.',
-      '45-60 FT chegou a 10 gols e segue forte logo após o intervalo; pós-hidratação FT ainda é o bloco mais baixo.'
+      'O bloco 75-85 FT lidera com 15 gols.',
+      'O 2T concentra 58,4% dos gols quando somamos 46-90+.',
+      'Acréscimos 45+ e 90+ somam 17 gols, mantendo alta relevância operacional.',
+      '45-60 FT chegou a 11 gols e segue forte logo após o intervalo; pós-hidratação FT ainda é o bloco mais baixo.'
     ],
     insights: [
       { title: 'Melhores janelas de pressão', tone: 'hot', text: 'O bloco 75-85 FT é o mais forte da amostra atualizada. Ele mistura substituições, queda física e necessidade de resultado, aumentando a chance de jogo aberto.' },
@@ -159,14 +181,25 @@ export const translations = {
       ofTotal: 'of total',
       bestBlock: 'Best block',
       bestBlockValue: '75-85 FT',
-      bestBlockDetail: '11 goals',
+      bestBlockDetail: '15 goals',
       stoppage: 'Stoppage time',
-      stoppageValue: '13 goals',
+      stoppageValue: '17 goals',
       stoppageDetail: '45+ and 90+ combined'
     },
     chart: { eyebrow: 'Distribution by moment', title: 'Where goals are happening' },
     side: { eyebrow: 'Executive summary', title: 'Main patterns' },
     split: { first: '1H + 45+', second: '2H + 90+' },
+    quarters: {
+      eyebrow: '4-period split',
+      title: 'Goal percentage by match phase',
+      goals: 'goals',
+      periods: {
+        first: { label: '0 to 22', description: 'Start of 1H through pre-hydration' },
+        second: { label: '22 to HT end', description: 'After 22 minutes + 1H closing and stoppage time' },
+        third: { label: '45 to 67', description: 'Start of 2H through FT pre-hydration' },
+        fourth: { label: '67 to FT end', description: 'After 67 minutes + 2H closing and stoppage time' }
+      }
+    },
     timelinePanel: { eyebrow: 'Temporal map', title: 'Match timeline' },
     table: {
       eyebrow: 'Full table',
@@ -194,10 +227,10 @@ export const translations = {
       '90+': { label: '90+', phase: 'FT stoppage time', intent: 'Open game, desperation or fragile game management' }
     },
     notes: [
-      'The 75-85 FT block leads with 11 goals.',
-      'The second half accounts for 56.0% of goals when 46-90+ is combined.',
-      'Stoppage time at 45+ and 90+ adds up to 13 goals, keeping strong operational relevance.',
-      '45-60 FT reached 10 goals and remains strong after half-time; FT post-hydration is still the lowest block.'
+      'The 75-85 FT block leads with 15 goals.',
+      'The second half accounts for 58.4% of goals when 46-90+ is combined.',
+      'Stoppage time at 45+ and 90+ adds up to 17 goals, keeping strong operational relevance.',
+      '45-60 FT reached 11 goals and remains strong after half-time; FT post-hydration is still the lowest block.'
     ],
     insights: [
       { title: 'Best pressure windows', tone: 'hot', text: 'The 75-85 FT block is the strongest in the updated sample. It combines substitutions, physical decline and score-pressure, increasing the chance of a more open match.' },
@@ -229,9 +262,9 @@ export const translations = {
       ofTotal: 'del total',
       bestBlock: 'Mejor bloque',
       bestBlockValue: '75-85 FT',
-      bestBlockDetail: '11 goles',
+      bestBlockDetail: '15 goles',
       stoppage: 'Descuentos',
-      stoppageValue: '13 goles',
+      stoppageValue: '17 goles',
       stoppageDetail: '45+ y 90+ sumados'
     },
     chart: { eyebrow: 'Distribución por momento', title: 'Dónde están ocurriendo los goles' },
@@ -264,10 +297,10 @@ export const translations = {
       '90+': { label: '90+', phase: 'Descuentos FT', intent: 'Partido abierto, desesperación o gestión frágil' }
     },
     notes: [
-      'El bloque 75-85 FT lidera con 11 goles.',
-      'El 2T concentra el 56,0% de los goles al sumar 46-90+.',
-      'Los descuentos 45+ y 90+ suman 13 goles, manteniendo alta relevancia operativa.',
-      '45-60 FT llegó a 10 goles y sigue fuerte tras el descanso; la poshidratación FT aún es el bloque más bajo.'
+      'El bloque 75-85 FT lidera con 15 goles.',
+      'El 2T concentra el 58,4% de los goles al sumar 46-90+.',
+      'Los descuentos 45+ y 90+ suman 17 goles, manteniendo alta relevancia operativa.',
+      '45-60 FT llegó a 11 goles y sigue fuerte tras el descanso; la poshidratación FT aún es el bloque más bajo.'
     ],
     insights: [
       { title: 'Mejores ventanas de presión', tone: 'hot', text: 'El bloque 75-85 FT es el más fuerte de la muestra actualizada. Mezcla cambios, caída física y presión por el resultado, aumentando la posibilidad de un partido más abierto.' },
