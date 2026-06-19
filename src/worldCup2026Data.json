@@ -1,7 +1,7 @@
 {
   "meta": {
     "tournament": "FIFA World Cup 2026",
-    "lastUpdated": "2026-06-18",
+    "lastUpdated": "2026-06-19",
     "description": "Base editável usada pela aplicação. Cada partida possui goals[] com minuto, período, time, placar após o gol e bucketId. A aplicação calcula os blocos automaticamente a partir dos gols.",
     "editingGuide": {
       "matches": "Cada jogo alimenta a tabela de partidas. Ajuste score e a lista goals[] quando corrigir um jogo.",
@@ -79,54 +79,6 @@
       "displayDate": "11/06",
       "group": "A",
       "home": {
-        "pt": "México",
-        "en": "Mexico",
-        "es": "México"
-      },
-      "away": {
-        "pt": "África do Sul",
-        "en": "South Africa",
-        "es": "Sudáfrica"
-      },
-      "score": {
-        "home": 2,
-        "away": 0
-      },
-      "totalGoals": 2,
-      "goals": [
-        {
-          "id": "g1",
-          "team": "home",
-          "minute": 3,
-          "minuteLabel": "3",
-          "period": "1T",
-          "bucketId": "0-15",
-          "scoreAfter": {
-            "home": 1,
-            "away": 0
-          },
-          "source": "derived-from-current-bucket-base"
-        },
-        {
-          "id": "g2",
-          "team": "home",
-          "minute": 8,
-          "minuteLabel": "8",
-          "period": "1T",
-          "bucketId": "0-15",
-          "scoreAfter": {
-            "home": 2,
-            "away": 0
-          },
-          "source": "derived-from-current-bucket-base"
-        }
-      ]
-    },
-    {
-      "date": "2026-06-11",
-      "displayDate": "11/06",
-      "group": "A",
-      "home": {
         "pt": "Coreia do Sul",
         "en": "South Korea",
         "es": "Corea del Sur"
@@ -178,6 +130,54 @@
           "scoreAfter": {
             "home": 2,
             "away": 1
+          },
+          "source": "derived-from-current-bucket-base"
+        }
+      ]
+    },
+    {
+      "date": "2026-06-11",
+      "displayDate": "11/06",
+      "group": "A",
+      "home": {
+        "pt": "México",
+        "en": "Mexico",
+        "es": "México"
+      },
+      "away": {
+        "pt": "África do Sul",
+        "en": "South Africa",
+        "es": "Sudáfrica"
+      },
+      "score": {
+        "home": 2,
+        "away": 0
+      },
+      "totalGoals": 2,
+      "goals": [
+        {
+          "id": "g1",
+          "team": "home",
+          "minute": 3,
+          "minuteLabel": "3",
+          "period": "1T",
+          "bucketId": "0-15",
+          "scoreAfter": {
+            "home": 1,
+            "away": 0
+          },
+          "source": "derived-from-current-bucket-base"
+        },
+        {
+          "id": "g2",
+          "team": "home",
+          "minute": 8,
+          "minuteLabel": "8",
+          "period": "1T",
+          "bucketId": "0-15",
+          "scoreAfter": {
+            "home": 2,
+            "away": 0
           },
           "source": "derived-from-current-bucket-base"
         }
@@ -626,6 +626,41 @@
     {
       "date": "2026-06-14",
       "displayDate": "14/06",
+      "group": "E",
+      "home": {
+        "pt": "Costa do Marfim",
+        "en": "Ivory Coast",
+        "es": "Costa de Marfil"
+      },
+      "away": {
+        "pt": "Equador",
+        "en": "Ecuador",
+        "es": "Ecuador"
+      },
+      "score": {
+        "home": 1,
+        "away": 0
+      },
+      "totalGoals": 1,
+      "goals": [
+        {
+          "id": "g1",
+          "team": "home",
+          "minute": 58,
+          "minuteLabel": "58",
+          "period": "2T",
+          "bucketId": "45-60FT",
+          "scoreAfter": {
+            "home": 1,
+            "away": 0
+          },
+          "source": "derived-from-current-bucket-base"
+        }
+      ]
+    },
+    {
+      "date": "2026-06-14",
+      "displayDate": "14/06",
       "group": "F",
       "home": {
         "pt": "Holanda",
@@ -692,41 +727,6 @@
           "scoreAfter": {
             "home": 2,
             "away": 2
-          },
-          "source": "derived-from-current-bucket-base"
-        }
-      ]
-    },
-    {
-      "date": "2026-06-14",
-      "displayDate": "14/06",
-      "group": "E",
-      "home": {
-        "pt": "Costa do Marfim",
-        "en": "Ivory Coast",
-        "es": "Costa de Marfil"
-      },
-      "away": {
-        "pt": "Equador",
-        "en": "Ecuador",
-        "es": "Ecuador"
-      },
-      "score": {
-        "home": 1,
-        "away": 0
-      },
-      "totalGoals": 1,
-      "goals": [
-        {
-          "id": "g1",
-          "team": "home",
-          "minute": 58,
-          "minuteLabel": "58",
-          "period": "2T",
-          "bucketId": "45-60FT",
-          "scoreAfter": {
-            "home": 1,
-            "away": 0
           },
           "source": "derived-from-current-bucket-base"
         }
@@ -835,27 +835,6 @@
     {
       "date": "2026-06-15",
       "displayDate": "15/06",
-      "group": "H",
-      "home": {
-        "pt": "Espanha",
-        "en": "Spain",
-        "es": "España"
-      },
-      "away": {
-        "pt": "Cabo Verde",
-        "en": "Cape Verde",
-        "es": "Cabo Verde"
-      },
-      "score": {
-        "home": 0,
-        "away": 0
-      },
-      "totalGoals": 0,
-      "goals": []
-    },
-    {
-      "date": "2026-06-15",
-      "displayDate": "15/06",
       "group": "G",
       "home": {
         "pt": "Bélgica",
@@ -893,54 +872,6 @@
           "minuteLabel": "67",
           "period": "2T",
           "bucketId": "61-67FT",
-          "scoreAfter": {
-            "home": 1,
-            "away": 1
-          },
-          "source": "derived-from-current-bucket-base"
-        }
-      ]
-    },
-    {
-      "date": "2026-06-15",
-      "displayDate": "15/06",
-      "group": "H",
-      "home": {
-        "pt": "Arábia Saudita",
-        "en": "Saudi Arabia",
-        "es": "Arabia Saudita"
-      },
-      "away": {
-        "pt": "Uruguai",
-        "en": "Uruguay",
-        "es": "Uruguay"
-      },
-      "score": {
-        "home": 1,
-        "away": 1
-      },
-      "totalGoals": 2,
-      "goals": [
-        {
-          "id": "g1",
-          "team": "home",
-          "minute": 70,
-          "minuteLabel": "70",
-          "period": "2T",
-          "bucketId": "68-74FT",
-          "scoreAfter": {
-            "home": 1,
-            "away": 0
-          },
-          "source": "derived-from-current-bucket-base"
-        },
-        {
-          "id": "g2",
-          "team": "away",
-          "minute": 73,
-          "minuteLabel": "73",
-          "period": "2T",
-          "bucketId": "68-74FT",
           "scoreAfter": {
             "home": 1,
             "away": 1
@@ -1022,6 +953,75 @@
           "source": "derived-from-current-bucket-base"
         }
       ]
+    },
+    {
+      "date": "2026-06-15",
+      "displayDate": "15/06",
+      "group": "H",
+      "home": {
+        "pt": "Arábia Saudita",
+        "en": "Saudi Arabia",
+        "es": "Arabia Saudita"
+      },
+      "away": {
+        "pt": "Uruguai",
+        "en": "Uruguay",
+        "es": "Uruguay"
+      },
+      "score": {
+        "home": 1,
+        "away": 1
+      },
+      "totalGoals": 2,
+      "goals": [
+        {
+          "id": "g1",
+          "team": "home",
+          "minute": 70,
+          "minuteLabel": "70",
+          "period": "2T",
+          "bucketId": "68-74FT",
+          "scoreAfter": {
+            "home": 1,
+            "away": 0
+          },
+          "source": "derived-from-current-bucket-base"
+        },
+        {
+          "id": "g2",
+          "team": "away",
+          "minute": 73,
+          "minuteLabel": "73",
+          "period": "2T",
+          "bucketId": "68-74FT",
+          "scoreAfter": {
+            "home": 1,
+            "away": 1
+          },
+          "source": "derived-from-current-bucket-base"
+        }
+      ]
+    },
+    {
+      "date": "2026-06-15",
+      "displayDate": "15/06",
+      "group": "H",
+      "home": {
+        "pt": "Espanha",
+        "en": "Spain",
+        "es": "España"
+      },
+      "away": {
+        "pt": "Cabo Verde",
+        "en": "Cape Verde",
+        "es": "Cabo Verde"
+      },
+      "score": {
+        "home": 0,
+        "away": 0
+      },
+      "totalGoals": 0,
+      "goals": []
     },
     {
       "date": "2026-06-16",
@@ -1370,6 +1370,115 @@
     {
       "date": "2026-06-17",
       "displayDate": "17/06",
+      "group": "K",
+      "home": {
+        "pt": "Uzbequistão",
+        "en": "Uzbekistan",
+        "es": "Uzbekistán"
+      },
+      "away": {
+        "pt": "Colômbia",
+        "en": "Colombia",
+        "es": "Colombia"
+      },
+      "score": {
+        "home": 1,
+        "away": 3
+      },
+      "totalGoals": 4,
+      "goals": [
+        {
+          "id": "g1",
+          "team": "away",
+          "minute": 40,
+          "minuteLabel": "40",
+          "period": "1T",
+          "bucketId": "30-40",
+          "scoreAfter": {
+            "home": 0,
+            "away": 1
+          },
+          "source": "manual/external"
+        },
+        {
+          "id": "g2",
+          "team": "home",
+          "minute": 60,
+          "minuteLabel": "60",
+          "period": "2T",
+          "bucketId": "45-60FT",
+          "scoreAfter": {
+            "home": 1,
+            "away": 1
+          },
+          "source": "manual/external"
+        },
+        {
+          "id": "g3",
+          "team": "away",
+          "minute": 65,
+          "minuteLabel": "65",
+          "period": "2T",
+          "bucketId": "61-67FT",
+          "scoreAfter": {
+            "home": 1,
+            "away": 2
+          },
+          "source": "manual/external"
+        },
+        {
+          "id": "g4",
+          "team": "away",
+          "minute": 90,
+          "minuteLabel": "90+9",
+          "period": "2T",
+          "bucketId": "90+",
+          "scoreAfter": {
+            "home": 1,
+            "away": 3
+          },
+          "source": "manual/external"
+        }
+      ]
+    },
+    {
+      "date": "2026-06-17",
+      "displayDate": "17/06",
+      "group": "L",
+      "home": {
+        "pt": "Gana",
+        "en": "Ghana",
+        "es": "Ghana"
+      },
+      "away": {
+        "pt": "Panamá",
+        "en": "Panama",
+        "es": "Panamá"
+      },
+      "score": {
+        "home": 1,
+        "away": 0
+      },
+      "totalGoals": 1,
+      "goals": [
+        {
+          "id": "g1",
+          "team": "home",
+          "minute": 90,
+          "minuteLabel": "90+5",
+          "period": "2T",
+          "bucketId": "90+",
+          "scoreAfter": {
+            "home": 1,
+            "away": 0
+          },
+          "source": "manual/external"
+        }
+      ]
+    },
+    {
+      "date": "2026-06-17",
+      "displayDate": "17/06",
       "group": "L",
       "home": {
         "pt": "Inglaterra",
@@ -1468,18 +1577,18 @@
       ]
     },
     {
-      "date": "2026-06-17",
-      "displayDate": "17/06",
-      "group": "L",
+      "date": "2026-06-18",
+      "displayDate": "18/06",
+      "group": "A",
       "home": {
-        "pt": "Gana",
-        "en": "Ghana",
-        "es": "Ghana"
+        "pt": "México",
+        "en": "Mexico",
+        "es": "México"
       },
       "away": {
-        "pt": "Panamá",
-        "en": "Panama",
-        "es": "Panamá"
+        "pt": "Coreia do Sul",
+        "en": "South Korea",
+        "es": "Corea del Sur"
       },
       "score": {
         "home": 1,
@@ -1490,89 +1599,250 @@
         {
           "id": "g1",
           "team": "home",
-          "minute": 90,
-          "minuteLabel": "90+5",
-          "period": "2T",
-          "bucketId": "90+",
-          "scoreAfter": {
-            "home": 1,
-            "away": 0
-          },
-          "source": "manual/external"
-        }
-      ]
-    },
-    {
-      "date": "2026-06-17",
-      "displayDate": "17/06",
-      "group": "K",
-      "home": {
-        "pt": "Uzbequistão",
-        "en": "Uzbekistan",
-        "es": "Uzbekistán"
-      },
-      "away": {
-        "pt": "Colômbia",
-        "en": "Colombia",
-        "es": "Colombia"
-      },
-      "score": {
-        "home": 1,
-        "away": 3
-      },
-      "totalGoals": 4,
-      "goals": [
-        {
-          "id": "g1",
-          "team": "away",
-          "minute": 40,
-          "minuteLabel": "40",
-          "period": "1T",
-          "bucketId": "30-40",
-          "scoreAfter": {
-            "home": 0,
-            "away": 1
-          },
-          "source": "manual/external"
-        },
-        {
-          "id": "g2",
-          "team": "home",
-          "minute": 60,
-          "minuteLabel": "60",
+          "minute": 50,
+          "minuteLabel": "50",
           "period": "2T",
           "bucketId": "45-60FT",
           "scoreAfter": {
             "home": 1,
+            "away": 0
+          },
+          "source": "guardian-2026-06-18"
+        }
+      ]
+    },
+    {
+      "date": "2026-06-18",
+      "displayDate": "18/06",
+      "group": "A",
+      "home": {
+        "pt": "Tchéquia",
+        "en": "Czechia",
+        "es": "Chequia"
+      },
+      "away": {
+        "pt": "África do Sul",
+        "en": "South Africa",
+        "es": "Sudáfrica"
+      },
+      "score": {
+        "home": 1,
+        "away": 1
+      },
+      "totalGoals": 2,
+      "goals": [
+        {
+          "id": "g1",
+          "team": "home",
+          "minute": 5,
+          "minuteLabel": "5",
+          "period": "1T",
+          "bucketId": "0-15",
+          "scoreAfter": {
+            "home": 1,
+            "away": 0
+          },
+          "source": "guardian-2026-06-18"
+        },
+        {
+          "id": "g2",
+          "team": "away",
+          "minute": 83,
+          "minuteLabel": "83",
+          "period": "2T",
+          "bucketId": "75-85FT",
+          "scoreAfter": {
+            "home": 1,
             "away": 1
           },
-          "source": "manual/external"
+          "source": "guardian-2026-06-18"
+        }
+      ]
+    },
+    {
+      "date": "2026-06-18",
+      "displayDate": "18/06",
+      "group": "B",
+      "home": {
+        "pt": "Canadá",
+        "en": "Canada",
+        "es": "Canadá"
+      },
+      "away": {
+        "pt": "Catar",
+        "en": "Qatar",
+        "es": "Catar"
+      },
+      "score": {
+        "home": 6,
+        "away": 0
+      },
+      "totalGoals": 6,
+      "goals": [
+        {
+          "id": "g1",
+          "team": "home",
+          "minute": 16,
+          "minuteLabel": "16",
+          "period": "1T",
+          "bucketId": "16-22",
+          "scoreAfter": {
+            "home": 1,
+            "away": 0
+          },
+          "source": "guardian-2026-06-18"
+        },
+        {
+          "id": "g2",
+          "team": "home",
+          "minute": 29,
+          "minuteLabel": "29",
+          "period": "1T",
+          "bucketId": "23-29",
+          "scoreAfter": {
+            "home": 2,
+            "away": 0
+          },
+          "source": "guardian-2026-06-18"
         },
         {
           "id": "g3",
-          "team": "away",
-          "minute": 65,
-          "minuteLabel": "65",
+          "team": "home",
+          "minute": 48,
+          "minuteLabel": "45+3",
+          "period": "1T+",
+          "bucketId": "45+",
+          "scoreAfter": {
+            "home": 3,
+            "away": 0
+          },
+          "source": "guardian-2026-06-18"
+        },
+        {
+          "id": "g4",
+          "team": "home",
+          "minute": 64,
+          "minuteLabel": "64",
           "period": "2T",
           "bucketId": "61-67FT",
           "scoreAfter": {
-            "home": 1,
-            "away": 2
+            "home": 4,
+            "away": 0
           },
-          "source": "manual/external"
+          "source": "guardian-2026-06-18"
+        },
+        {
+          "id": "g5",
+          "team": "home",
+          "minute": 75,
+          "minuteLabel": "75",
+          "period": "2T",
+          "bucketId": "75-85FT",
+          "scoreAfter": {
+            "home": 5,
+            "away": 0
+          },
+          "source": "guardian-2026-06-18"
+        },
+        {
+          "id": "g6",
+          "team": "home",
+          "minute": 92,
+          "minuteLabel": "90+2",
+          "period": "2T+",
+          "bucketId": "90+",
+          "scoreAfter": {
+            "home": 6,
+            "away": 0
+          },
+          "source": "guardian-2026-06-18"
+        }
+      ]
+    },
+    {
+      "date": "2026-06-18",
+      "displayDate": "18/06",
+      "group": "B",
+      "home": {
+        "pt": "Suíça",
+        "en": "Switzerland",
+        "es": "Suiza"
+      },
+      "away": {
+        "pt": "Bósnia e Herzegovina",
+        "en": "Bosnia and Herzegovina",
+        "es": "Bosnia y Herzegovina"
+      },
+      "score": {
+        "home": 4,
+        "away": 1
+      },
+      "totalGoals": 5,
+      "goals": [
+        {
+          "id": "g1",
+          "team": "home",
+          "minute": 75,
+          "minuteLabel": "75",
+          "period": "2T",
+          "bucketId": "75-85FT",
+          "scoreAfter": {
+            "home": 1,
+            "away": 0
+          },
+          "source": "guardian-2026-06-18"
+        },
+        {
+          "id": "g2",
+          "team": "home",
+          "minute": 85,
+          "minuteLabel": "85",
+          "period": "2T",
+          "bucketId": "75-85FT",
+          "scoreAfter": {
+            "home": 2,
+            "away": 0
+          },
+          "source": "guardian-2026-06-18"
+        },
+        {
+          "id": "g3",
+          "team": "home",
+          "minute": 90,
+          "minuteLabel": "90",
+          "period": "2T",
+          "bucketId": "86-90FT",
+          "scoreAfter": {
+            "home": 3,
+            "away": 0
+          },
+          "source": "guardian-2026-06-18"
         },
         {
           "id": "g4",
           "team": "away",
-          "minute": 90,
-          "minuteLabel": "90+9",
-          "period": "2T",
+          "minute": 93,
+          "minuteLabel": "90+3",
+          "period": "2T+",
           "bucketId": "90+",
           "scoreAfter": {
-            "home": 1,
-            "away": 3
+            "home": 3,
+            "away": 1
           },
-          "source": "manual/external"
+          "source": "guardian-2026-06-18"
+        },
+        {
+          "id": "g5",
+          "team": "home",
+          "minute": 96,
+          "minuteLabel": "90+6",
+          "period": "2T+",
+          "bucketId": "90+",
+          "scoreAfter": {
+            "home": 4,
+            "away": 1
+          },
+          "source": "guardian-2026-06-18"
         }
       ]
     }
