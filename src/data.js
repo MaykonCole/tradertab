@@ -88,10 +88,10 @@ export const translations = {
       secondHalfGoals: 'Gols no 2T',
       ofTotal: 'do total',
       bestBlock: 'Melhor bloco',
-      bestBlockValue: '75-85 FT',
-      bestBlockDetail: '15 gols',
+      bestBlockValue: '',
+      bestBlockDetail: '{bestGoals} gols',
       stoppage: 'Acréscimos',
-      stoppageValue: '17 gols',
+      stoppageValue: '',
       stoppageDetail: '45+ e 90+ somados'
     },
     chart: { eyebrow: 'Distribuição por momento', title: 'Onde os gols estão acontecendo' },
@@ -146,15 +146,15 @@ export const translations = {
       '90+': { label: '90+', phase: 'Acréscimos FT', intent: 'Jogo aberto, desespero ou administração frágil' }
     },
     notes: [
-      'O bloco 75-85 FT lidera com 15 gols.',
-      'O 2T concentra 58,4% dos gols quando somamos 46-90+.',
-      'Acréscimos 45+ e 90+ somam 17 gols, mantendo alta relevância operacional.',
-      '45-60 FT chegou a 11 gols e segue forte logo após o intervalo; pós-hidratação FT ainda é o bloco mais baixo.'
+      'O bloco {bestLabel} lidera com {bestGoals} gols.',
+      'O 2T concentra {secondHalfPct}% dos gols na amostra atual.',
+      'Acréscimos 45+ e 90+ somam {stoppageGoals} gols, mantendo alta relevância operacional.',
+      '45-60 FT registrou {ftOpeningGoals} gols; a pós-hidratação reúne {postHydrationGoals} gols na amostra atual.'
     ],
     insights: [
-      { title: 'Melhores janelas de pressão', tone: 'hot', text: 'O bloco 75-85 FT é o mais forte da amostra atualizada. Ele mistura substituições, queda física e necessidade de resultado, aumentando a chance de jogo aberto.' },
-      { title: 'Acréscimos não podem ser ignorados', tone: 'default', text: '45+ e 90+ juntos representam 17,3% dos gols. Para leitura de tempo final, considerar o acréscimo real é essencial.' },
-      { title: 'Pós-hidratação ainda fraco', tone: 'cold', text: 'Os blocos 23-29 e 68-74 somam apenas 5 gols. Até agora, a retomada depois da pausa não aparece como pico principal.' }
+      { title: 'Melhores janelas de pressão', tone: 'hot', text: 'O bloco {bestLabel} é o mais forte da amostra atualizada, com {bestGoals} gols. Ele mistura substituições, queda física e necessidade de resultado, aumentando a chance de jogo aberto.' },
+      { title: 'Acréscimos não podem ser ignorados', tone: 'default', text: '45+ e 90+ juntos representam {stoppagePct}% dos gols. Para leitura de tempo final, considerar o acréscimo real é essencial.' },
+      { title: 'Pós-hidratação ainda fraco', tone: 'cold', text: 'Os blocos 23-29 e 68-74 somam {postHydrationGoals} gols. Até agora, a retomada depois da pausa não aparece como pico principal.' }
     ]
   },
   en: {
@@ -180,10 +180,10 @@ export const translations = {
       secondHalfGoals: 'Second-half goals',
       ofTotal: 'of total',
       bestBlock: 'Best block',
-      bestBlockValue: '75-85 FT',
-      bestBlockDetail: '15 goals',
+      bestBlockValue: '',
+      bestBlockDetail: '{bestGoals} goals',
       stoppage: 'Stoppage time',
-      stoppageValue: '17 goals',
+      stoppageValue: '',
       stoppageDetail: '45+ and 90+ combined'
     },
     chart: { eyebrow: 'Distribution by moment', title: 'Where goals are happening' },
@@ -227,15 +227,15 @@ export const translations = {
       '90+': { label: '90+', phase: 'FT stoppage time', intent: 'Open game, desperation or fragile game management' }
     },
     notes: [
-      'The 75-85 FT block leads with 15 goals.',
-      'The second half accounts for 58.4% of goals when 46-90+ is combined.',
-      'Stoppage time at 45+ and 90+ adds up to 17 goals, keeping strong operational relevance.',
-      '45-60 FT reached 11 goals and remains strong after half-time; FT post-hydration is still the lowest block.'
+      'The {bestLabel} block leads with {bestGoals} goals.',
+      'The second half accounts for {secondHalfPct}% of goals in the current sample.',
+      'Stoppage time at 45+ and 90+ adds up to {stoppageGoals} goals, keeping strong operational relevance.',
+      '45-60 FT recorded {ftOpeningGoals} goals; post-hydration combines {postHydrationGoals} goals in the current sample.'
     ],
     insights: [
-      { title: 'Best pressure windows', tone: 'hot', text: 'The 75-85 FT block is the strongest in the updated sample. It combines substitutions, physical decline and score-pressure, increasing the chance of a more open match.' },
-      { title: 'Stoppage time matters', tone: 'default', text: '45+ and 90+ together represent 17.3% of all goals. For end-game reading, the real added-time expectation is essential.' },
-      { title: 'Post-hydration is still weak', tone: 'cold', text: 'The 23-29 and 68-74 blocks combine for only 5 goals. So far, the restart after the pause is not the main scoring peak.' }
+      { title: 'Best pressure windows', tone: 'hot', text: 'The {bestLabel} block is the strongest in the updated sample, with {bestGoals} goals. It combines substitutions, physical decline and score-pressure, increasing the chance of a more open match.' },
+      { title: 'Stoppage time matters', tone: 'default', text: '45+ and 90+ together represent {stoppagePct}% of all goals. For end-game reading, the real added-time expectation is essential.' },
+      { title: 'Post-hydration is still weak', tone: 'cold', text: 'The 23-29 and 68-74 blocks combine for {postHydrationGoals} goals. So far, the restart after the pause is not the main scoring peak.' }
     ]
   },
   es: {
@@ -261,10 +261,10 @@ export const translations = {
       secondHalfGoals: 'Goles en el 2T',
       ofTotal: 'del total',
       bestBlock: 'Mejor bloque',
-      bestBlockValue: '75-85 FT',
-      bestBlockDetail: '15 goles',
+      bestBlockValue: '',
+      bestBlockDetail: '{bestGoals} goles',
       stoppage: 'Descuentos',
-      stoppageValue: '17 goles',
+      stoppageValue: '',
       stoppageDetail: '45+ y 90+ sumados'
     },
     chart: { eyebrow: 'Distribución por momento', title: 'Dónde están ocurriendo los goles' },
@@ -297,15 +297,15 @@ export const translations = {
       '90+': { label: '90+', phase: 'Descuentos FT', intent: 'Partido abierto, desesperación o gestión frágil' }
     },
     notes: [
-      'El bloque 75-85 FT lidera con 15 goles.',
-      'El 2T concentra el 58,4% de los goles al sumar 46-90+.',
-      'Los descuentos 45+ y 90+ suman 17 goles, manteniendo alta relevancia operativa.',
-      '45-60 FT llegó a 11 goles y sigue fuerte tras el descanso; la poshidratación FT aún es el bloque más bajo.'
+      'El bloque {bestLabel} lidera con {bestGoals} goles.',
+      'El 2T concentra el {secondHalfPct}% de los goles en la muestra actual.',
+      'Los descuentos 45+ y 90+ suman {stoppageGoals} goles, manteniendo alta relevancia operativa.',
+      '45-60 FT registró {ftOpeningGoals} goles; la poshidratación reúne {postHydrationGoals} goles en la muestra actual.'
     ],
     insights: [
-      { title: 'Mejores ventanas de presión', tone: 'hot', text: 'El bloque 75-85 FT es el más fuerte de la muestra actualizada. Mezcla cambios, caída física y presión por el resultado, aumentando la posibilidad de un partido más abierto.' },
-      { title: 'Los descuentos no se pueden ignorar', tone: 'default', text: '45+ y 90+ juntos representan el 17,3% de los goles. Para lectura del tramo final, considerar el descuento real es esencial.' },
-      { title: 'La poshidratación sigue débil', tone: 'cold', text: 'Los bloques 23-29 y 68-74 suman solo 5 goles. Hasta ahora, el regreso después de la pausa no aparece como el principal pico de goles.' }
+      { title: 'Mejores ventanas de presión', tone: 'hot', text: 'El bloque {bestLabel} es el más fuerte de la muestra actualizada, con {bestGoals} goles. Mezcla cambios, caída física y presión por el resultado, aumentando la posibilidad de un partido más abierto.' },
+      { title: 'Los descuentos no se pueden ignorar', tone: 'default', text: '45+ y 90+ juntos representan el {stoppagePct}% de los goles. Para lectura del tramo final, considerar el descuento real es esencial.' },
+      { title: 'La poshidratación sigue débil', tone: 'cold', text: 'Los bloques 23-29 y 68-74 suman {postHydrationGoals} goles. Hasta ahora, el regreso después de la pausa no aparece como el principal pico de goles.' }
     ]
   }
 };

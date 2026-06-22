@@ -214,6 +214,8 @@ function Insight({ title, children, tone = 'default' }) {
   );
 }
 
+const replaceTokens = (text, values) => String(text).replace(/\{(\w+)\}/g, (_, key) => values[key] ?? `{${key}}`);
+
 function App() {
   const [view, setView] = useState('rank');
   const [lang, setLang] = useState('pt');
@@ -223,6 +225,19 @@ function App() {
   const totalGoals = bucketRows.reduce((sum, item) => sum + item.goals, 0);
   const firstHalf = bucketRows.filter((b) => b.half.includes('1T')).reduce((s, b) => s + b.goals, 0);
   const secondHalf = totalGoals - firstHalf;
+  const bestBucket = bucketRows.reduce((best, current) => current.goals > best.goals ? current : best, bucketRows[0]);
+  const stoppageGoals = bucketRows.filter((b) => b.id === '45+' || b.id === '90+').reduce((sum, b) => sum + b.goals, 0);
+  const postHydrationGoals = bucketRows.filter((b) => b.id === '23-29' || b.id === '68-74FT').reduce((sum, b) => sum + b.goals, 0);
+  const ftOpeningGoals = bucketRows.find((b) => b.id === '45-60FT')?.goals ?? 0;
+  const textValues = {
+    bestLabel: t.buckets[bestBucket.id]?.label || bestBucket.id,
+    bestGoals: bestBucket.goals,
+    secondHalfPct: pct(secondHalf, totalGoals, t.locale),
+    stoppageGoals,
+    stoppagePct: pct(stoppageGoals, totalGoals, t.locale),
+    postHydrationGoals,
+    ftOpeningGoals
+  };
   const sortedBuckets = useMemo(() => {
     if (view === 'rank') return [...buckets].sort((a, b) => b.goals - a.goals);
     return buckets;
@@ -254,8 +269,8 @@ function App() {
       <section className="stats-grid">
         <StatCard icon={Goal} label={t.stats.totalGoals} value={totalGoals} detail={t.stats.completedBase} />
         <StatCard icon={Clock} label={t.stats.secondHalfGoals} value={secondHalf} detail={`${pct(secondHalf, totalGoals, t.locale)} ${t.stats.ofTotal}`} />
-        <StatCard icon={Flame} label={t.stats.bestBlock} value={t.stats.bestBlockValue} detail={t.stats.bestBlockDetail} />
-        <StatCard icon={Activity} label={t.stats.stoppage} value={t.stats.stoppageValue} detail={t.stats.stoppageDetail} />
+        <StatCard icon={Flame} label={t.stats.bestBlock} value={textValues.bestLabel} detail={replaceTokens(t.stats.bestBlockDetail, textValues)} />
+        <StatCard icon={Activity} label={t.stats.stoppage} value={`${stoppageGoals} ${t.hero.goals}`} detail={t.stats.stoppageDetail} />
       </section>
 
       <FourPeriodGoals data={bucketRows} total={totalGoals} t={t} />
@@ -271,7 +286,7 @@ function App() {
               </div>
             </div>
             <ul className="notes">
-              {t.notes.map((n) => <li key={n}>{n}</li>)}
+              {t.notes.map((n) => <li key={n}>{replaceTokens(n, textValues)}</li>)}
             </ul>
           </div>
           <div className="panel split">
@@ -293,7 +308,7 @@ function App() {
 
       <section className="insights-grid">
         {t.insights.map((item) => (
-          <Insight key={item.title} title={item.title} tone={item.tone}>{item.text}</Insight>
+          <Insight key={item.title} title={item.title} tone={item.tone}>{replaceTokens(item.text, textValues)}</Insight>
         ))}
       </section>
 
