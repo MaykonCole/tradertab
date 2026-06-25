@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Activity, Clock, Flame, Goal, Trophy } from 'lucide-react';
-import { bucketRows, matchRows, translations } from './data';
+import { getDashboardData, translations } from './data';
 import './styles.css';
 
 const languages = [
@@ -10,7 +10,7 @@ const languages = [
   { key: 'es', label: 'ES', flag: '🇪🇸' }
 ];
 
-const pct = (value, total, locale) => `${((value / total) * 100).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
+const pct = (value, total, locale) => `${(total ? (value / total) * 100 : 0).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
 
 function StatCard({ icon: Icon, label, value, detail }) {
   return (
@@ -45,7 +45,7 @@ function LanguageSelector({ lang, onChange }) {
 }
 
 function BarChart({ data, total, t }) {
-  const max = Math.max(...data.map((d) => d.goals));
+  const max = Math.max(1, ...data.map((d) => d.goals));
   return (
     <div className="chart-card">
       <div className="section-title">
@@ -172,7 +172,7 @@ function BucketTable({ data, total, t }) {
   );
 }
 
-function MatchTable({ t, lang }) {
+function MatchTable({ t, lang, rows }) {
   return (
     <div className="panel table-panel">
       <div className="section-title compact">
@@ -191,7 +191,7 @@ function MatchTable({ t, lang }) {
           </tr>
         </thead>
         <tbody>
-          {matchRows.map((m) => (
+          {rows.map((m) => (
             <tr key={`${m.date}-${m.teams.pt}`}>
               <td>{m.date}</td>
               <td><span className="mini-pill">{t.group} {m.group}</span></td>
@@ -219,9 +219,12 @@ const replaceTokens = (text, values) => String(text).replace(/\{(\w+)\}/g, (_, k
 function App() {
   const [view, setView] = useState('rank');
   const [lang, setLang] = useState('pt');
+  const [round, setRound] = useState('all');
   const t = translations[lang];
+  const dashboardData = useMemo(() => getDashboardData(round), [round]);
+  const { bucketRows, matchRows } = dashboardData;
 
-  const buckets = useMemo(() => bucketRows.map((row) => ({ ...row, ...t.buckets[row.id] })), [t]);
+  const buckets = useMemo(() => bucketRows.map((row) => ({ ...row, ...t.buckets[row.id] })), [bucketRows, t]);
   const totalGoals = bucketRows.reduce((sum, item) => sum + item.goals, 0);
   const firstHalf = bucketRows.filter((b) => b.half.includes('1T')).reduce((s, b) => s + b.goals, 0);
   const secondHalf = totalGoals - firstHalf;
@@ -242,7 +245,12 @@ function App() {
     if (view === 'rank') return [...buckets].sort((a, b) => b.goals - a.goals);
     return buckets;
   }, [view, buckets]);
-  const avgGoals = (totalGoals / matchRows.length).toLocaleString(t.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const avgGoals = (totalGoals / Math.max(matchRows.length, 1)).toLocaleString(t.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const roundLabels = {
+    pt: { label: 'Filtrar por rodada', all: 'Todos os jogos', round1: 'Rodada 1', round2: 'Rodada 2', round3: 'Rodada 3' },
+    en: { label: 'Filter by round', all: 'All matches', round1: 'Matchday 1', round2: 'Matchday 2', round3: 'Matchday 3' },
+    es: { label: 'Filtrar por jornada', all: 'Todos los partidos', round1: 'Jornada 1', round2: 'Jornada 2', round3: 'Jornada 3' }
+  }[lang];
 
   return (
     <main>
@@ -257,6 +265,15 @@ function App() {
           <div className="hero-actions">
             <button className={view === 'rank' ? 'active' : ''} onClick={() => setView('rank')}>{t.hero.rank}</button>
             <button className={view === 'timeline' ? 'active' : ''} onClick={() => setView('timeline')}>{t.hero.timeline}</button>
+            <label className="round-filter">
+              <span>{roundLabels.label}</span>
+              <select value={round} onChange={(event) => setRound(event.target.value)} aria-label={roundLabels.label}>
+                <option value="all">{roundLabels.all}</option>
+                <option value="round1">{roundLabels.round1}</option>
+                <option value="round2">{roundLabels.round2}</option>
+                <option value="round3">{roundLabels.round3}</option>
+              </select>
+            </label>
           </div>
         </div>
         <div className="hero-panel">
@@ -313,7 +330,7 @@ function App() {
       </section>
 
       <BucketTable data={buckets} total={totalGoals} t={t} />
-      <MatchTable t={t} lang={lang} />
+      <MatchTable t={t} lang={lang} rows={matchRows} />
     </main>
   );
 }
