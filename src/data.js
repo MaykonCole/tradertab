@@ -52,6 +52,7 @@ export const matchRows = worldCup2026Data.matches.map((match) => {
   return {
     date: match.displayDate || formatDisplayDate(match.date),
     group: match.group,
+    round: match.round || 'round1',
     goals: goals.length,
     goalMinutes: goals.map((goal) => goal.minuteLabel || String(goal.minute)).filter(Boolean),
     teams: {
@@ -63,6 +64,41 @@ export const matchRows = worldCup2026Data.matches.map((match) => {
 });
 
 export const sourceMeta = worldCup2026Data.meta;
+
+export const getDashboardData = (round = 'all') => {
+  const matches = round === 'all'
+    ? worldCup2026Data.matches
+    : worldCup2026Data.matches.filter((match) => (match.round || 'round1') === round);
+
+  const events = matches.flatMap((match) =>
+    getMatchGoals(match).map((goal) => ({ ...goal, match }))
+  );
+
+  const filteredBucketRows = bucketDefinitions.map((bucket) => ({
+    id: bucket.id,
+    goals: events.filter((goal) => goal.bucketId === bucket.id).length,
+    minutes: bucket.minutes,
+    half: bucket.half
+  }));
+
+  const filteredMatchRows = [...matches].sort((a, b) => a.date.localeCompare(b.date) || a.group.localeCompare(b.group)).map((match) => {
+    const goals = getMatchGoals(match);
+    return {
+      date: match.displayDate || formatDisplayDate(match.date),
+      group: match.group,
+      round: match.round || 'round1',
+      goals: goals.length,
+      goalMinutes: goals.map((goal) => goal.minuteLabel || String(goal.minute)).filter(Boolean),
+      teams: {
+        pt: buildMatchTitle(match, 'pt'),
+        en: buildMatchTitle(match, 'en'),
+        es: buildMatchTitle(match, 'es')
+      }
+    };
+  });
+
+  return { bucketRows: filteredBucketRows, matchRows: filteredMatchRows };
+};
 
 export const translations = {
   pt: {
