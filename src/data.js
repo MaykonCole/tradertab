@@ -306,6 +306,17 @@ export const translations = {
     chart: { eyebrow: 'Distribución por momento', title: 'Dónde están ocurriendo los goles' },
     side: { eyebrow: 'Resumen ejecutivo', title: 'Patrones principales' },
     split: { first: '1T + 45+', second: '2T + 90+' },
+    quarters: {
+      eyebrow: 'División en 4 períodos',
+      title: 'Porcentaje de goles por fase del partido',
+      goals: 'goles',
+      periods: {
+        first: { label: '0 a 22', description: 'Inicio del 1T hasta la prehidratación' },
+        second: { label: '22 hasta el final HT', description: 'Después de 22 minutos + cierre y añadido del 1T' },
+        third: { label: '45 a 67', description: 'Inicio del 2T hasta la prehidratación FT' },
+        fourth: { label: '67 hasta el final FT', description: 'Después de 67 minutos + cierre y añadido del 2T' }
+      }
+    },
     timelinePanel: { eyebrow: 'Mapa temporal', title: 'Línea del partido' },
     table: {
       eyebrow: 'Tabla completa',
