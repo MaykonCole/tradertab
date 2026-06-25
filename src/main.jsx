@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Activity, Clock, Flame, Goal, Trophy } from 'lucide-react';
-import { bucketRows, matchRows, translations } from './data';
+import { getDashboardData, translations } from './data';
 import './styles.css';
 
 const languages = [
@@ -10,7 +10,7 @@ const languages = [
   { key: 'es', label: 'ES', flag: '🇪🇸' }
 ];
 
-const pct = (value, total, locale) => `${((value / total) * 100).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
+const pct = (value, total, locale) => `${(total ? (value / total) * 100 : 0).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
 
 function StatCard({ icon: Icon, label, value, detail }) {
   return (
@@ -45,7 +45,7 @@ function LanguageSelector({ lang, onChange }) {
 }
 
 function BarChart({ data, total, t }) {
-  const max = Math.max(...data.map((d) => d.goals));
+  const max = Math.max(1, ...data.map((d) => d.goals));
   return (
     <div className="chart-card">
       <div className="section-title">
@@ -98,6 +98,43 @@ function Timeline({ data, total, t }) {
   );
 }
 
+const sumBuckets = (rows, ids) => rows
+  .filter((row) => ids.includes(row.id))
+  .reduce((sum, row) => sum + row.goals, 0);
+
+function FourPeriodGoals({ data, total, t }) {
+  const periods = [
+    { key: 'first', goals: sumBuckets(data, ['0-15', '16-22']) },
+    { key: 'second', goals: sumBuckets(data, ['23-29', '30-40', '41-45', '45+']) },
+    { key: 'third', goals: sumBuckets(data, ['45-60FT', '61-67FT']) },
+    { key: 'fourth', goals: sumBuckets(data, ['68-74FT', '75-85FT', '86-90FT', '90+']) }
+  ];
+
+  return (
+    <section className="panel four-period-panel">
+      <div className="section-title compact">
+        <div>
+          <p>{t.quarters.eyebrow}</p>
+          <h2>{t.quarters.title}</h2>
+        </div>
+      </div>
+      <div className="four-period-grid">
+        {periods.map((period) => {
+          const meta = t.quarters.periods[period.key];
+          return (
+            <div className="period-card" key={period.key}>
+              <span>{meta.label}</span>
+              <strong>{period.goals}</strong>
+              <small>{t.quarters.goals} • {pct(period.goals, total, t.locale)}</small>
+              <p>{meta.description}</p>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 function BucketTable({ data, total, t }) {
   return (
     <div className="panel table-panel">
@@ -135,7 +172,7 @@ function BucketTable({ data, total, t }) {
   );
 }
 
-function MatchTable({ t, lang }) {
+function MatchTable({ t, lang, rows }) {
   return (
     <div className="panel table-panel">
       <div className="section-title compact">
@@ -154,7 +191,7 @@ function MatchTable({ t, lang }) {
           </tr>
         </thead>
         <tbody>
-          {matchRows.map((m) => (
+          {rows.map((m) => (
             <tr key={`${m.date}-${m.teams.pt}`}>
               <td>{m.date}</td>
               <td><span className="mini-pill">{t.group} {m.group}</span></td>
@@ -177,20 +214,43 @@ function Insight({ title, children, tone = 'default' }) {
   );
 }
 
+const replaceTokens = (text, values) => String(text).replace(/\{(\w+)\}/g, (_, key) => values[key] ?? `{${key}}`);
+
 function App() {
   const [view, setView] = useState('rank');
   const [lang, setLang] = useState('pt');
+  const [round, setRound] = useState('all');
   const t = translations[lang];
+  const dashboardData = useMemo(() => getDashboardData(round), [round]);
+  const { bucketRows, matchRows } = dashboardData;
 
-  const buckets = useMemo(() => bucketRows.map((row) => ({ ...row, ...t.buckets[row.id] })), [t]);
+  const buckets = useMemo(() => bucketRows.map((row) => ({ ...row, ...t.buckets[row.id] })), [bucketRows, t]);
   const totalGoals = bucketRows.reduce((sum, item) => sum + item.goals, 0);
   const firstHalf = bucketRows.filter((b) => b.half.includes('1T')).reduce((s, b) => s + b.goals, 0);
   const secondHalf = totalGoals - firstHalf;
+  const bestBucket = bucketRows.reduce((best, current) => current.goals > best.goals ? current : best, bucketRows[0]);
+  const stoppageGoals = bucketRows.filter((b) => b.id === '45+' || b.id === '90+').reduce((sum, b) => sum + b.goals, 0);
+  const postHydrationGoals = bucketRows.filter((b) => b.id === '23-29' || b.id === '68-74FT').reduce((sum, b) => sum + b.goals, 0);
+  const ftOpeningGoals = bucketRows.find((b) => b.id === '45-60FT')?.goals ?? 0;
+  const textValues = {
+    bestLabel: t.buckets[bestBucket.id]?.label || bestBucket.id,
+    bestGoals: bestBucket.goals,
+    secondHalfPct: pct(secondHalf, totalGoals, t.locale),
+    stoppageGoals,
+    stoppagePct: pct(stoppageGoals, totalGoals, t.locale),
+    postHydrationGoals,
+    ftOpeningGoals
+  };
   const sortedBuckets = useMemo(() => {
     if (view === 'rank') return [...buckets].sort((a, b) => b.goals - a.goals);
     return buckets;
   }, [view, buckets]);
-  const avgGoals = (totalGoals / matchRows.length).toLocaleString(t.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const avgGoals = (totalGoals / Math.max(matchRows.length, 1)).toLocaleString(t.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const roundLabels = {
+    pt: { label: 'Filtrar por rodada', all: 'Todos os jogos', round1: 'Rodada 1', round2: 'Rodada 2', round3: 'Rodada 3' },
+    en: { label: 'Filter by round', all: 'All matches', round1: 'Matchday 1', round2: 'Matchday 2', round3: 'Matchday 3' },
+    es: { label: 'Filtrar por jornada', all: 'Todos los partidos', round1: 'Jornada 1', round2: 'Jornada 2', round3: 'Jornada 3' }
+  }[lang];
 
   return (
     <main>
@@ -205,6 +265,15 @@ function App() {
           <div className="hero-actions">
             <button className={view === 'rank' ? 'active' : ''} onClick={() => setView('rank')}>{t.hero.rank}</button>
             <button className={view === 'timeline' ? 'active' : ''} onClick={() => setView('timeline')}>{t.hero.timeline}</button>
+            <label className="round-filter">
+              <span>{roundLabels.label}</span>
+              <select value={round} onChange={(event) => setRound(event.target.value)} aria-label={roundLabels.label}>
+                <option value="all">{roundLabels.all}</option>
+                <option value="round1">{roundLabels.round1}</option>
+                <option value="round2">{roundLabels.round2}</option>
+                <option value="round3">{roundLabels.round3}</option>
+              </select>
+            </label>
           </div>
         </div>
         <div className="hero-panel">
@@ -217,9 +286,11 @@ function App() {
       <section className="stats-grid">
         <StatCard icon={Goal} label={t.stats.totalGoals} value={totalGoals} detail={t.stats.completedBase} />
         <StatCard icon={Clock} label={t.stats.secondHalfGoals} value={secondHalf} detail={`${pct(secondHalf, totalGoals, t.locale)} ${t.stats.ofTotal}`} />
-        <StatCard icon={Flame} label={t.stats.bestBlock} value={t.stats.bestBlockValue} detail={t.stats.bestBlockDetail} />
-        <StatCard icon={Activity} label={t.stats.stoppage} value={t.stats.stoppageValue} detail={t.stats.stoppageDetail} />
+        <StatCard icon={Flame} label={t.stats.bestBlock} value={textValues.bestLabel} detail={replaceTokens(t.stats.bestBlockDetail, textValues)} />
+        <StatCard icon={Activity} label={t.stats.stoppage} value={`${stoppageGoals} ${t.hero.goals}`} detail={t.stats.stoppageDetail} />
       </section>
+
+      <FourPeriodGoals data={bucketRows} total={totalGoals} t={t} />
 
       <section className="content-grid">
         <BarChart data={sortedBuckets} total={totalGoals} t={t} />
@@ -232,7 +303,7 @@ function App() {
               </div>
             </div>
             <ul className="notes">
-              {t.notes.map((n) => <li key={n}>{n}</li>)}
+              {t.notes.map((n) => <li key={n}>{replaceTokens(n, textValues)}</li>)}
             </ul>
           </div>
           <div className="panel split">
@@ -254,12 +325,12 @@ function App() {
 
       <section className="insights-grid">
         {t.insights.map((item) => (
-          <Insight key={item.title} title={item.title} tone={item.tone}>{item.text}</Insight>
+          <Insight key={item.title} title={item.title} tone={item.tone}>{replaceTokens(item.text, textValues)}</Insight>
         ))}
       </section>
 
       <BucketTable data={buckets} total={totalGoals} t={t} />
-      <MatchTable t={t} lang={lang} />
+      <MatchTable t={t} lang={lang} rows={matchRows} />
     </main>
   );
 }
