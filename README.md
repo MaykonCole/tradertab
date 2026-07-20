@@ -27,3 +27,8 @@ Este pacote foi preparado para substituir a aplicação antiga do `tradertab`, m
 - `commitlint.config.js`
 
 Não inclui `node_modules` nem `.git`.
+
+## Google Sheets
+
+O dashboard lê os jogos em tempo real pelo aplicativo Web do Google Apps Script configurado em `src/main.jsx`.
+A leitura usa apenas GET. O token de gravação não é incluído no site.
