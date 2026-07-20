@@ -51,7 +51,7 @@ const translations = {
     balanced: 'Parelho',
     homeFavorite: 'Favorito casa',
     awayFavorite: 'Favorito fora',
-    strongFavorite: 'Favorito forte',
+    strongFavorite: 'Super Favorito',
     league: 'Liga',
     cup: 'Copa',
     international: 'Internacional',
@@ -116,7 +116,7 @@ const translations = {
     balanced: 'Balanced',
     homeFavorite: 'Home favorite',
     awayFavorite: 'Away favorite',
-    strongFavorite: 'Strong favorite',
+    strongFavorite: 'Super Favorite',
     league: 'League',
     cup: 'Cup',
     international: 'International',
@@ -181,7 +181,7 @@ const translations = {
     balanced: 'Equilibrado',
     homeFavorite: 'Favorito local',
     awayFavorite: 'Favorito visitante',
-    strongFavorite: 'Favorito fuerte',
+    strongFavorite: 'Súper Favorito',
     league: 'Liga',
     cup: 'Copa',
     international: 'Internacional',
@@ -275,10 +275,10 @@ const normalizeClassification = (value, homeOdd, awayOdd) => {
   const text = String(value ?? '').trim().toLowerCase();
   if (text.includes('equilibr') || text.includes('balanced') || text.includes('parelho')) return 'balanced';
   if (text.includes('fora') || text.includes('visit') || text.includes('away')) return 'awayFavorite';
-  if (text.includes('forte') || text.includes('strong')) return 'strongFavorite';
+  if (text.includes('forte') || text.includes('strong') || text.includes('super')) return 'strongFavorite';
   if (text.includes('casa') || text.includes('local') || text.includes('home')) return 'homeFavorite';
   const favorite = Math.min(homeOdd || 99, awayOdd || 99);
-  if (favorite <= 1.8) return 'strongFavorite';
+  if (favorite <= 1.30) return 'strongFavorite';
   return homeOdd < awayOdd ? 'homeFavorite' : 'awayFavorite';
 };
 
@@ -421,7 +421,7 @@ function MatchTable({ games, t, lang, sortConfig, onSort }) {
           {games.map((game) => (
             <tr key={game.id}>
               <td><span className="table-time"><Clock3 size={14} />{game.time}</span></td>
-              <td><span className="table-country">{game.flag} {game.country}</span></td>
+              <td><span className="table-country">{game.country}</span></td>
               <td>
                 <div className="table-competition">
                   <strong>{game.competition}</strong>
@@ -505,7 +505,29 @@ function App() {
   };
 
   useEffect(() => {
+    let hourlyTimeoutId;
+    let cancelled = false;
+
+    const scheduleNextFullHour = () => {
+      const now = new Date();
+      const nextFullHour = new Date(now);
+      nextFullHour.setHours(now.getHours() + 1, 0, 0, 0);
+      const delay = Math.max(1000, nextFullHour.getTime() - now.getTime());
+
+      hourlyTimeoutId = window.setTimeout(async () => {
+        if (cancelled) return;
+        await loadGames();
+        if (!cancelled) scheduleNextFullHour();
+      }, delay);
+    };
+
     loadGames();
+    scheduleNextFullHour();
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(hourlyTimeoutId);
+    };
   }, []);
 
   useEffect(() => {
@@ -661,7 +683,6 @@ function App() {
             <div><Trophy size={18} /><strong>{t.listTitle}</strong></div>
             <div className="list-actions">
               <span>{lastUpdated ? `${t.lastUpdate}: ${lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : t.updated}</span>
-              <button type="button" className="refresh-button" onClick={loadGames} disabled={loading}><RefreshCw size={15} className={loading ? 'spinning' : ''} />{t.refresh}</button>
             </div>
           </div>
 
