@@ -448,16 +448,40 @@ function MobileList({ games, t, lang }) {
       {games.map((game) => (
         <article key={game.id} className="mobile-game-card">
           <div className="mobile-game-top">
-            <span className="table-time"><Clock3 size={14} />{game.time}</span>
+            <span className="table-time"><Clock3 size={15} />{game.time}</span>
             <span className={`classification ${classTone[game.classification]}`}>{t[game.classification]}</span>
           </div>
-          <small>{game.flag} {game.country} · {game.competition} · {formatGameDate(game.date, lang)}</small>
-          <div className="mobile-match-layout">
-            <strong>{game.home}</strong>
-            <span className={`odd-cell ${getOddTone(game.homeOdd)}`}>{game.homeOdd ? game.homeOdd.toFixed(2) : '—'}</span>
-            <span className={`odd-cell ${getOddTone(game.drawOdd)}`}>{game.drawOdd ? game.drawOdd.toFixed(2) : '—'}</span>
-            <span className={`odd-cell ${getOddTone(game.awayOdd)}`}>{game.awayOdd ? game.awayOdd.toFixed(2) : '—'}</span>
-            <strong>{game.away}</strong>
+
+          <div className="mobile-meta">
+            <span>{game.country}</span>
+            <span>{game.competition}</span>
+            <span>{formatGameDate(game.date, lang)}</span>
+          </div>
+
+          <div className="mobile-teams">
+            <div className="mobile-team-row">
+              <span className="mobile-team-label">{t.home}</span>
+              <strong>{game.home}</strong>
+            </div>
+            <div className="mobile-team-row away-row">
+              <span className="mobile-team-label">{t.away}</span>
+              <strong>{game.away}</strong>
+            </div>
+          </div>
+
+          <div className="mobile-odds-grid">
+            <div>
+              <span>{t.home}</span>
+              <strong className={`odd-cell ${getOddTone(game.homeOdd)}`}>{game.homeOdd ? game.homeOdd.toFixed(2) : '—'}</strong>
+            </div>
+            <div>
+              <span>{t.draw}</span>
+              <strong className={`odd-cell ${getOddTone(game.drawOdd)}`}>{game.drawOdd ? game.drawOdd.toFixed(2) : '—'}</strong>
+            </div>
+            <div>
+              <span>{t.away}</span>
+              <strong className={`odd-cell ${getOddTone(game.awayOdd)}`}>{game.awayOdd ? game.awayOdd.toFixed(2) : '—'}</strong>
+            </div>
           </div>
         </article>
       ))}

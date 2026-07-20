@@ -647,3 +647,133 @@ footer {
 @media (max-width: 560px) {
   .odds-filter-row { grid-template-columns: 1fr; }
 }
+
+/* Mobile layout rebuilt to avoid horizontal overflow. */
+@media (max-width: 860px) {
+  html, body, #root, .app-shell { max-width: 100%; overflow-x: hidden; }
+  .topbar { position: relative; }
+  .topbar-inner {
+    width: 100%;
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 14px;
+  }
+  .brand { min-width: 0; }
+  .brand-mark { width: 46px; height: 46px; flex: 0 0 auto; }
+  .brand strong { font-size: 22px; line-height: 1.05; }
+  .brand span { font-size: 12px; }
+  .topbar-center-pills { display: none !important; }
+  .topbar-actions {
+    grid-column: 1 / -1;
+    width: 100%;
+    justify-content: space-between;
+  }
+  .language-menu { min-width: 126px; }
+  .page { width: 100%; padding: 14px 12px 30px; }
+  .date-filter-only { padding: 0 0 14px; }
+  .date-filter-only .segmented {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .date-filter-only .segmented button { width: 100%; min-width: 0; }
+  .filters-section, .list-section { border-radius: 16px; padding: 14px; }
+  .section-heading { align-items: flex-start; }
+  .list-heading { flex-direction: column; align-items: stretch; }
+  .list-actions { align-items: flex-start; width: 100%; }
+  .filters-grid-wrap.open .filter-grid { grid-template-columns: 1fr; }
+  .odds-filter-row { grid-template-columns: 1fr 1fr; max-width: 100%; }
+  .mobile-table { width: 100%; min-width: 0; }
+  .mobile-cards { width: 100%; min-width: 0; gap: 12px; }
+  .mobile-game-card {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    padding: 15px;
+    border-radius: 16px;
+  }
+  .mobile-game-top { align-items: center; }
+  .mobile-game-top .classification {
+    max-width: 58%;
+    white-space: normal;
+    text-align: center;
+    justify-content: center;
+    line-height: 1.15;
+  }
+  .mobile-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px 8px;
+    margin-top: 12px;
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+  .mobile-meta span:not(:last-child)::after {
+    content: '·';
+    margin-left: 8px;
+  }
+  .mobile-teams {
+    display: grid;
+    gap: 10px;
+    margin: 16px 0;
+    padding: 14px;
+    border-radius: 14px;
+    background: rgba(255,255,255,.025);
+    border: 1px solid var(--border);
+  }
+  .mobile-team-row {
+    display: grid;
+    grid-template-columns: 54px minmax(0, 1fr);
+    gap: 10px;
+    align-items: center;
+  }
+  .mobile-team-label {
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .mobile-team-row strong {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-size: 15px;
+    line-height: 1.25;
+  }
+  .mobile-team-row.away-row strong { color: var(--blue-accent); }
+  .mobile-odds-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .mobile-odds-grid > div { min-width: 0; text-align: center; }
+  .mobile-odds-grid > div > span {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+  .mobile-odds-grid .odd-cell {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0 6px;
+    font-size: 18px;
+  }
+  .mobile-match-layout { display: none !important; }
+}
+
+@media (max-width: 430px) {
+  .page { padding-left: 8px; padding-right: 8px; }
+  .topbar-inner { padding-left: 12px; padding-right: 12px; }
+  .brand strong { font-size: 20px; }
+  .brand span { font-size: 11px; }
+  .odds-filter-row { grid-template-columns: 1fr; }
+  .mobile-game-card { padding: 13px; }
+  .mobile-odds-grid { gap: 6px; }
+  .mobile-odds-grid .odd-cell { font-size: 16px; }
+}
