@@ -549,7 +549,7 @@ function SortableHeader({
             : "descending"
           : "none"
       }
-      className={isDragging ? "column-dragging" : ""}
+      className={`column-${sortKey} ${isDragging ? "column-dragging" : ""}`}
       onDragOver={onDragOver}
       onDrop={onDrop}
     >
@@ -717,7 +717,9 @@ function MatchTable({ games, t, lang, sortConfig, onSort }) {
           {games.map((game) => (
             <tr key={game.id}>
               {columnOrder.map((columnKey) => (
-                <td key={columnKey}>{columns[columnKey].render(game)}</td>
+                <td key={columnKey} className={`column-${columnKey}`}>
+                  {columns[columnKey].render(game)}
+                </td>
               ))}
             </tr>
           ))}
