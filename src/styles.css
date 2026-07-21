@@ -981,3 +981,53 @@ footer {
 .column-drag-handle:active { cursor: grabbing; }
 .games-table th.column-dragging { opacity: .48; }
 .games-table th:has(.column-drag-handle):hover { background: rgba(255,255,255,.065); }
+
+/* Larguras semânticas: acompanham a coluna mesmo após o usuário arrastar.
+   Prioriza os nomes dos times e elimina espaços vazios criados por nth-child. */
+@media (min-width: 861px) {
+  .games-table th.column-time,
+  .games-table td.column-time { width: 6%; }
+
+  .games-table th.column-country,
+  .games-table td.column-country { width: 7%; }
+
+  .games-table th.column-competition,
+  .games-table td.column-competition { width: 11%; }
+
+  .games-table th.column-home,
+  .games-table td.column-home,
+  .games-table th.column-away,
+  .games-table td.column-away { width: 16%; }
+
+  .games-table th.column-homeOdd,
+  .games-table td.column-homeOdd,
+  .games-table th.column-drawOdd,
+  .games-table td.column-drawOdd,
+  .games-table th.column-awayOdd,
+  .games-table td.column-awayOdd { width: 6%; }
+
+  .games-table th.column-classification,
+  .games-table td.column-classification { width: 10%; }
+
+  .games-table th.column-over25Odd,
+  .games-table td.column-over25Odd,
+  .games-table th.column-under25Odd,
+  .games-table td.column-under25Odd { width: 8%; }
+
+  .games-table td.column-home,
+  .games-table td.column-away {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .games-table td.column-home .team-cell,
+  .games-table td.column-away .team-cell {
+    display: block;
+    width: 100%;
+  }
+
+  .games-table th.column-home .column-header-content,
+  .games-table th.column-away .column-header-content {
+    width: 100%;
+  }
+}
