@@ -331,13 +331,15 @@ button:focus-visible, input:focus-visible, select:focus-visible {
 }
 .refresh-button:disabled { opacity: .6; cursor: wait; }
 .table-shell {
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   border-radius: 16px;
   background: linear-gradient(180deg, #101d2b, #132132);
 }
 :root[data-theme='light'] .table-shell { background: linear-gradient(180deg, #f8fafc, #ffffff); }
 .games-table {
   width: 100%;
+  min-width: 1460px;
   border-collapse: collapse;
 }
 .games-table th {
@@ -406,6 +408,33 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   border-color: #8f1f28;
   color: #ffffff;
 }
+
+.odd-cell.odd-over-light {
+  background: #9ee7ba;
+  border-color: #70cc94;
+  color: #07120b;
+}
+.odd-cell.odd-over-dark {
+  background: #17643c;
+  border-color: #17643c;
+  color: #ffffff;
+}
+.odd-cell.odd-under-light {
+  background: #d8b4fe;
+  border-color: #bc8cf3;
+  color: #12091d;
+}
+.odd-cell.odd-under-dark {
+  background: #5b2182;
+  border-color: #5b2182;
+  color: #ffffff;
+}
+.odd-cell.odd-goals-neutral {
+  background: #d7dce2;
+  border-color: #b7bec7;
+  color: #111820;
+}
+
 .odd-cell.odd-empty {
   background: rgba(255,255,255,.05);
   color: var(--text-muted);
@@ -636,13 +665,13 @@ footer {
 }
 .odds-filter-row {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
-  max-width: calc(50% - 6px);
+  max-width: 100%;
   margin-top: 14px;
 }
 @media (max-width: 1180px) {
-  .odds-filter-row { max-width: 100%; }
+  .odds-filter-row { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 100%; }
 }
 @media (max-width: 560px) {
   .odds-filter-row { grid-template-columns: 1fr; }
@@ -749,6 +778,8 @@ footer {
     gap: 8px;
   }
   .mobile-odds-grid > div { min-width: 0; text-align: center; }
+  .mobile-odds-grid > div:nth-child(4),
+  .mobile-odds-grid > div:nth-child(5) { grid-column: span 1; }
   .mobile-odds-grid > div > span {
     display: block;
     margin-bottom: 6px;
@@ -777,3 +808,176 @@ footer {
   .mobile-odds-grid { gap: 6px; }
   .mobile-odds-grid .odd-cell { font-size: 16px; }
 }
+
+/* Compact desktop table: keeps all 11 columns visible without excessive gaps. */
+@media (min-width: 861px) {
+  .games-table {
+    min-width: 1240px;
+    table-layout: auto;
+  }
+
+  .games-table th {
+    padding: 11px 9px;
+    font-size: 11px;
+    letter-spacing: .055em;
+  }
+
+  .games-table td {
+    padding: 11px 9px;
+  }
+
+  .sortable-header {
+    gap: 4px;
+  }
+
+  .sortable-header svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .odd-cell {
+    min-width: 52px;
+    min-height: 34px;
+    padding: 0 8px;
+    border-radius: 9px;
+  }
+
+  .classification {
+    padding-left: 9px;
+    padding-right: 9px;
+    white-space: nowrap;
+  }
+
+  .team-cell,
+  .table-country,
+  .table-competition strong {
+    white-space: nowrap;
+  }
+
+  .games-table th:nth-child(1),
+  .games-table td:nth-child(1) { width: 76px; }
+  .games-table th:nth-child(2),
+  .games-table td:nth-child(2) { width: 92px; }
+  .games-table th:nth-child(3),
+  .games-table td:nth-child(3) { width: 130px; }
+  .games-table th:nth-child(4),
+  .games-table td:nth-child(4),
+  .games-table th:nth-child(8),
+  .games-table td:nth-child(8) { width: 130px; }
+  .games-table th:nth-child(5),
+  .games-table td:nth-child(5),
+  .games-table th:nth-child(6),
+  .games-table td:nth-child(6),
+  .games-table th:nth-child(7),
+  .games-table td:nth-child(7) { width: 76px; }
+  .games-table th:nth-child(9),
+  .games-table td:nth-child(9) { width: 122px; }
+  .games-table th:nth-child(10),
+  .games-table td:nth-child(10),
+  .games-table th:nth-child(11),
+  .games-table td:nth-child(11) { width: 94px; }
+}
+
+/* Desktop fit correction: show Over/Under columns without horizontal clipping. */
+@media (min-width: 861px) {
+  .games-table {
+    width: 100%;
+    min-width: 1080px;
+    table-layout: fixed;
+  }
+
+  .games-table th,
+  .games-table td {
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+
+  .games-table th {
+    font-size: 10px;
+    letter-spacing: .035em;
+  }
+
+  .sortable-header {
+    white-space: normal;
+    line-height: 1.15;
+  }
+
+  .team-cell,
+  .table-country,
+  .table-competition strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .odd-cell {
+    min-width: 48px;
+    min-height: 32px;
+    padding: 0 6px;
+    font-size: 13px;
+  }
+
+  .classification {
+    max-width: 100%;
+    padding-left: 7px;
+    padding-right: 7px;
+    font-size: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .games-table th:nth-child(1),
+  .games-table td:nth-child(1) { width: 6%; }
+  .games-table th:nth-child(2),
+  .games-table td:nth-child(2) { width: 8%; }
+  .games-table th:nth-child(3),
+  .games-table td:nth-child(3) { width: 11%; }
+  .games-table th:nth-child(4),
+  .games-table td:nth-child(4) { width: 14%; }
+  .games-table th:nth-child(5),
+  .games-table td:nth-child(5),
+  .games-table th:nth-child(6),
+  .games-table td:nth-child(6),
+  .games-table th:nth-child(7),
+  .games-table td:nth-child(7) { width: 6.5%; }
+  .games-table th:nth-child(8),
+  .games-table td:nth-child(8) { width: 14%; }
+  .games-table th:nth-child(9),
+  .games-table td:nth-child(9) { width: 11%; }
+  .games-table th:nth-child(10),
+  .games-table td:nth-child(10),
+  .games-table th:nth-child(11),
+  .games-table td:nth-child(11) { width: 7%; }
+}
+
+/* Reorganização das colunas por arrastar e soltar */
+.column-header-content {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+}
+
+.column-drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 17px;
+  height: 28px;
+  margin-left: -5px;
+  color: var(--text-muted);
+  cursor: grab;
+  border-radius: 5px;
+  user-select: none;
+}
+
+.column-drag-handle:hover {
+  color: var(--green-accent);
+  background: rgba(57, 210, 155, .10);
+}
+
+.column-drag-handle:active { cursor: grabbing; }
+.games-table th.column-dragging { opacity: .48; }
+.games-table th:has(.column-drag-handle):hover { background: rgba(255,255,255,.065); }
