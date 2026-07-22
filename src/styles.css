@@ -709,6 +709,7 @@ footer {
   }
   .date-filter-only .segmented button { width: 100%; min-width: 0; }
   .filters-section, .list-section { border-radius: 16px; padding: 14px; }
+  .list-section { scroll-margin-top: 12px; }
   .section-heading { align-items: flex-start; }
   .list-heading { flex-direction: column; align-items: stretch; }
   .list-actions { align-items: flex-start; width: 100%; }
@@ -1073,12 +1074,24 @@ footer {
 .mobile-team-details {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 8px;
   grid-column: 2;
+  min-width: 0;
   min-height: 28px;
 }
-.away-row .mobile-team-details { justify-content: flex-start; }
+
+/* Mantém nome, posição e race iniciando sempre na mesma coluna no mobile. */
+.mobile-team-row > strong,
+.mobile-team-row > .mobile-team-details {
+  grid-column: 2;
+  justify-self: stretch;
+}
+.mobile-team-row .form-race {
+  justify-content: flex-start;
+  min-width: 0;
+  flex-wrap: wrap;
+}
 .games-table th.column-homePosition,
 .games-table td.column-homePosition,
 .games-table th.column-awayPosition,

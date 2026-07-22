@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
   ArrowDown,
@@ -988,6 +988,8 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [lastUpdated, setLastUpdated] = useState(null);
+  const listSectionRef = useRef(null);
+  const filterScrollInitialized = useRef(false);
   const t = translations[lang];
 
   const loadGames = async () => {
@@ -1220,6 +1222,55 @@ function App() {
     : 0;
   const filteredCountries = new Set(filteredGames.map((game) => game.country))
     .size;
+
+  useEffect(() => {
+    if (!filterScrollInitialized.current) {
+      filterScrollInitialized.current = true;
+      return undefined;
+    }
+
+    const hasActiveFilter =
+      day !== "all" ||
+      timePeriod !== "all" ||
+      raceFilter !== "all" ||
+      type !== "all" ||
+      gender !== "all" ||
+      classification !== "all" ||
+      country !== "all" ||
+      maxHomeOdd.trim() !== "" ||
+      maxAwayOdd.trim() !== "" ||
+      minOver25Odd.trim() !== "" ||
+      minUnder25Odd.trim() !== "" ||
+      maxHomePosition.trim() !== "" ||
+      maxAwayPosition.trim() !== "";
+
+    if (!hasActiveFilter || !window.matchMedia("(max-width: 860px)").matches) {
+      return undefined;
+    }
+
+    const timer = window.setTimeout(() => {
+      listSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 250);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    day,
+    timePeriod,
+    raceFilter,
+    type,
+    gender,
+    classification,
+    country,
+    maxHomeOdd,
+    maxAwayOdd,
+    minOver25Odd,
+    minUnder25Odd,
+    maxHomePosition,
+    maxAwayPosition,
+  ]);
 
   const resetFilters = () => {
     setQuery("");
@@ -1532,7 +1583,7 @@ function App() {
           </div>
         </section>
 
-        <section className="list-section">
+        <section ref={listSectionRef} className="list-section">
           <div className="section-heading list-heading">
             <div>
               <Trophy size={18} />
