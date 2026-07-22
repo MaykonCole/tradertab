@@ -40,12 +40,25 @@ const translations = {
     filters: "Filtros",
     clear: "Limpar filtros",
     date: "Data",
+    timeRange: "Horário",
+    raceFilter: "Race",
+    yes: "Sim",
+    no: "Não",
+    dawn: "Madrugada",
+    morning: "Manhã",
+    afternoon: "Tarde",
+    night: "Noite",
     competitionType: "Tipo de jogo",
     gender: "Gênero",
     male: "Masculino",
     female: "Feminino",
     classification: "Classificação",
     country: "País",
+    homePosition: "Posição Casa",
+    awayPosition: "Posição Fora",
+    homeForm: "Forma Casa",
+    awayForm: "Forma Fora",
+    positionPlaceholder: "Ex.: 2",
     maxHomeOdd: "Odd Casa máxima",
     maxAwayOdd: "Odd Fora máxima",
     minOver25Odd: "Odd 2.5 Over mínima",
@@ -79,7 +92,7 @@ const translations = {
     lowestOdd: "Menor odd favorita",
     dateLabel: "Datas",
     footer:
-      "TraderTab organiza dados pré-jogo em uma experiência clara, profissional e intuitiva.",
+      "TraderTab organiza dados pré-jogo em uma experiência clara, profissional e intuitiva. 18+ Ministério da Fazenda adverte: Aposta não é investimento.",
     validOnly: "Somente jogos futuros com horário válido",
     confidence: "Confiança",
     high: "Alta",
@@ -111,12 +124,25 @@ const translations = {
     filters: "Filters",
     clear: "Clear filters",
     date: "Date",
+    timeRange: "Time range",
+    raceFilter: "Race",
+    yes: "Yes",
+    no: "No",
+    dawn: "Dawn",
+    morning: "Morning",
+    afternoon: "Afternoon",
+    night: "Night",
     competitionType: "Game type",
     gender: "Gender",
     male: "Male",
     female: "Female",
     classification: "Classification",
     country: "Country",
+    homePosition: "Home position",
+    awayPosition: "Away position",
+    homeForm: "Home form",
+    awayForm: "Away form",
+    positionPlaceholder: "E.g. 2",
     maxHomeOdd: "Max home odd",
     maxAwayOdd: "Max away odd",
     minOver25Odd: "Min 2.5 Over odd",
@@ -182,12 +208,25 @@ const translations = {
     filters: "Filtros",
     clear: "Limpiar filtros",
     date: "Fecha",
+    timeRange: "Horario",
+    raceFilter: "Race",
+    yes: "Sí",
+    no: "No",
+    dawn: "Madrugada",
+    morning: "Mañana",
+    afternoon: "Tarde",
+    night: "Noche",
     competitionType: "Tipo de partido",
     gender: "Género",
     male: "Masculino",
     female: "Femenino",
     classification: "Clasificación",
     country: "País",
+    homePosition: "Posición local",
+    awayPosition: "Posición visitante",
+    homeForm: "Forma local",
+    awayForm: "Forma visitante",
+    positionPlaceholder: "Ej.: 2",
     maxHomeOdd: "Cuota local máxima",
     maxAwayOdd: "Cuota visitante máxima",
     minOver25Odd: "Cuota mínima Over 2.5",
@@ -318,6 +357,35 @@ const getDayKey = (dateValue) => {
           : "other";
 };
 
+const parseTimeMinutes = (value) => {
+  const match = String(value ?? "").trim().match(/^(\d{2}):(\d{2})$/);
+  if (!match) return null;
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return null;
+  return hours * 60 + minutes;
+};
+
+const getTimePeriod = (value) => {
+  const minutes = parseTimeMinutes(value);
+  if (minutes === null) return "other";
+  if (minutes < 360) return "dawn";
+  if (minutes < 720) return "morning";
+  if (minutes < 1080) return "afternoon";
+  return "night";
+};
+
+const getTimeToneClass = (value) => {
+  const period = getTimePeriod(value);
+  return period === "dawn"
+    ? "time-dawn"
+    : period === "morning"
+      ? "time-morning"
+      : period === "afternoon"
+        ? "time-afternoon"
+        : "time-night";
+};
+
 const normalizeClassification = (value, homeOdd, awayOdd) => {
   // Se nenhum dos dois times tem odd abaixo de 2.00, o confronto é considerado parelho.
   if (homeOdd >= 2 && awayOdd >= 2) return "balanced";
@@ -385,6 +453,53 @@ const getGoalsOddTone = (odd, market) => {
   return `odd-${prefix}-dark`;
 };
 
+const parsePosition = (value) => {
+  const text = String(value ?? "").trim();
+  if (!text) return null;
+  const match = text.match(/\d+/);
+  if (!match) return null;
+  const parsed = Number(match[0]);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+};
+
+const normalizeForm = (value) => {
+  const source = Array.isArray(value)
+    ? value
+    : String(value ?? "")
+        .trim()
+        .replace(/[\[\]"']/g, "")
+        .split(/[\s,;|/\-]+/);
+
+  return source
+    .map((item) => String(item).trim().toUpperCase())
+    .map((item) => {
+      if (["V", "W", "WIN", "VITÓRIA", "VITORIA"].includes(item)) return "V";
+      if (["E", "X", "DRA", "DRAW", "EMPATE"].includes(item)) return "E";
+      if (["D", "L", "LOSS", "DERROTA"].includes(item)) return "D";
+      return "";
+    })
+    .filter(Boolean)
+    .slice(0, 8);
+};
+
+function FormRace({ results }) {
+  if (!results?.length) return null;
+  return (
+    <span className="form-race" aria-label={results.join(" ")}>
+      {results.map((result, index) => (
+        <span key={`${result}-${index}`} className={`form-result form-${result.toLowerCase()}`}>
+          {result}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+function PositionBadge({ position }) {
+  if (!position) return null;
+  return <span className="position-badge">{position}º</span>;
+}
+
 const normalizeGame = (row, index) => {
   const homeOdd = parseOdd(getField(row, "Odd Casa", "homeOdd", "HomeOdd"));
   const drawOdd = parseOdd(getField(row, "Odd Empate", "drawOdd", "DrawOdd"));
@@ -409,6 +524,7 @@ const normalizeGame = (row, index) => {
     date,
     day: getDayKey(date),
     time: String(getField(row, "Horário", "Horario", "time", "Time")).trim(),
+    timePeriod: getTimePeriod(getField(row, "Horário", "Horario", "time", "Time")),
     country,
     flag: countryFlags[country] || "🌐",
     competition,
@@ -416,6 +532,18 @@ const normalizeGame = (row, index) => {
     gender: normalizeGender(competition, home, away),
     home,
     away,
+    homePosition: parsePosition(
+      getField(row, "Posição Casa", "Posicao Casa", "homePosition", "HomePosition"),
+    ),
+    awayPosition: parsePosition(
+      getField(row, "Posição Fora", "Posicao Fora", "awayPosition", "AwayPosition"),
+    ),
+    homeForm: normalizeForm(
+      getField(row, "Forma Casa", "Race Casa", "homeForm", "HomeForm"),
+    ),
+    awayForm: normalizeForm(
+      getField(row, "Forma Fora", "Race Fora", "awayForm", "AwayForm"),
+    ),
     homeOdd,
     drawOdd,
     awayOdd,
@@ -492,19 +620,20 @@ const formatGameDate = (value, language) => {
 
 const DEFAULT_COLUMN_ORDER = [
   "time",
-  "country",
   "competition",
   "home",
+  "homePosition",
   "homeOdd",
   "drawOdd",
   "awayOdd",
   "away",
+  "awayPosition",
   "classification",
   "over25Odd",
   "under25Odd",
 ];
 
-const COLUMN_ORDER_STORAGE_KEY = "tradertab-column-order-v1";
+const COLUMN_ORDER_STORAGE_KEY = "tradertab-column-order-v3";
 
 function getSavedColumnOrder() {
   try {
@@ -584,10 +713,13 @@ function MatchTable({ games, t, lang, sortConfig, onSort }) {
     time: {
       label: t.time,
       render: (game) => (
-        <span className="table-time">
-          <Clock3 size={14} />
-          {game.time}
-        </span>
+        <div className="table-time-block">
+          <span className={`table-time ${getTimeToneClass(game.time)}`}>
+            <Clock3 size={14} />
+            {game.time}
+          </span>
+          <small>{formatGameDate(game.date, lang)}</small>
+        </div>
       ),
     },
     country: {
@@ -599,15 +731,22 @@ function MatchTable({ games, t, lang, sortConfig, onSort }) {
       render: (game) => (
         <div className="table-competition">
           <strong>{game.competition}</strong>
-          <small>{formatGameDate(game.date, lang)}</small>
+          <small>{game.country}</small>
         </div>
       ),
     },
     home: {
       label: t.home,
       render: (game) => (
-        <strong className="team-cell home-team">{game.home}</strong>
+        <div className="team-cell home-team">
+          <strong>{game.home}</strong>
+          <FormRace results={game.homeForm} />
+        </div>
       ),
+    },
+    homePosition: {
+      label: t.homePosition,
+      render: (game) => <PositionBadge position={game.homePosition} />,
     },
     homeOdd: {
       label: `${t.home} Odd`,
@@ -636,8 +775,15 @@ function MatchTable({ games, t, lang, sortConfig, onSort }) {
     away: {
       label: t.away,
       render: (game) => (
-        <strong className="team-cell away-team">{game.away}</strong>
+        <div className="team-cell away-team">
+          <strong>{game.away}</strong>
+          <FormRace results={game.awayForm} />
+        </div>
       ),
+    },
+    awayPosition: {
+      label: t.awayPosition,
+      render: (game) => <PositionBadge position={game.awayPosition} />,
     },
     classification: {
       label: t.classification,
@@ -735,7 +881,7 @@ function MobileList({ games, t, lang }) {
       {games.map((game) => (
         <article key={game.id} className="mobile-game-card">
           <div className="mobile-game-top">
-            <span className="table-time">
+            <span className={`table-time ${getTimeToneClass(game.time)}`}>
               <Clock3 size={15} />
               {game.time}
             </span>
@@ -747,7 +893,6 @@ function MobileList({ games, t, lang }) {
           </div>
 
           <div className="mobile-meta">
-            <span>{game.country}</span>
             <span>{game.competition}</span>
             <span>{formatGameDate(game.date, lang)}</span>
           </div>
@@ -756,10 +901,18 @@ function MobileList({ games, t, lang }) {
             <div className="mobile-team-row">
               <span className="mobile-team-label">{t.home}</span>
               <strong>{game.home}</strong>
+              <span className="mobile-team-details">
+                <PositionBadge position={game.homePosition} />
+                <FormRace results={game.homeForm} />
+              </span>
             </div>
             <div className="mobile-team-row away-row">
               <span className="mobile-team-label">{t.away}</span>
               <strong>{game.away}</strong>
+              <span className="mobile-team-details">
+                <PositionBadge position={game.awayPosition} />
+                <FormRace results={game.awayForm} />
+              </span>
             </div>
           </div>
 
@@ -814,6 +967,8 @@ function App() {
   );
   const [query, setQuery] = useState("");
   const [day, setDay] = useState("all");
+  const [timePeriod, setTimePeriod] = useState("all");
+  const [raceFilter, setRaceFilter] = useState("all");
   const [type, setType] = useState("all");
   const [gender, setGender] = useState("all");
   const [classification, setClassification] = useState("all");
@@ -826,6 +981,8 @@ function App() {
   const [maxAwayOdd, setMaxAwayOdd] = useState("");
   const [minOver25Odd, setMinOver25Odd] = useState("");
   const [minUnder25Odd, setMinUnder25Odd] = useState("");
+  const [maxHomePosition, setMaxHomePosition] = useState("");
+  const [maxAwayPosition, setMaxAwayPosition] = useState("");
   const [mobileFilters, setMobileFilters] = useState(false);
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -912,17 +1069,19 @@ function App() {
     [games],
   );
 
-  const parseMaxOdd = (value) => {
+  const parsePositiveNumber = (value) => {
     if (!String(value).trim()) return null;
     const parsed = Number(String(value).replace(",", "."));
     return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
   };
 
   const filteredGames = useMemo(() => {
-    const homeLimit = parseMaxOdd(maxHomeOdd);
-    const awayLimit = parseMaxOdd(maxAwayOdd);
-    const over25Limit = parseMaxOdd(minOver25Odd);
-    const under25Limit = parseMaxOdd(minUnder25Odd);
+    const homeLimit = parsePositiveNumber(maxHomeOdd);
+    const awayLimit = parsePositiveNumber(maxAwayOdd);
+    const over25Limit = parsePositiveNumber(minOver25Odd);
+    const under25Limit = parsePositiveNumber(minUnder25Odd);
+    const homePositionLimit = parsePositiveNumber(maxHomePosition);
+    const awayPositionLimit = parsePositiveNumber(maxAwayPosition);
     const normalized = query.trim().toLowerCase();
     const result = games.filter((game) => {
       const searchable =
@@ -930,18 +1089,37 @@ function App() {
       return (
         (!normalized || searchable.includes(normalized)) &&
         (day === "all" || game.day === day) &&
+        (timePeriod === "all" || game.timePeriod === timePeriod) &&
+        (raceFilter === "all" ||
+          (raceFilter === "yes"
+            ? game.homeForm.length > 0 || game.awayForm.length > 0
+            : game.homeForm.length === 0 && game.awayForm.length === 0)) &&
         (type === "all" || game.type === type) &&
         (gender === "all" || game.gender === gender) &&
         (classification === "all" || game.classification === classification) &&
         (country === "all" || game.country === country) &&
-        (homeLimit === null ||
-          (game.homeOdd > 0 && game.homeOdd <= homeLimit)) &&
-        (awayLimit === null ||
-          (game.awayOdd > 0 && game.awayOdd <= awayLimit)) &&
-        (over25Limit === null ||
-          (game.over25Odd > 0 && game.over25Odd >= over25Limit)) &&
-        (under25Limit === null ||
-          (game.under25Odd > 0 && game.under25Odd >= under25Limit))
+        (homeLimit === null
+          ? true
+          : game.homeOdd > 0 && game.homeOdd <= homeLimit) &&
+        (awayLimit === null
+          ? true
+          : game.awayOdd > 0 && game.awayOdd <= awayLimit) &&
+        (over25Limit === null
+          ? true
+          : game.over25Odd > 0 && game.over25Odd >= over25Limit) &&
+        (under25Limit === null
+          ? true
+          : game.under25Odd > 0 && game.under25Odd >= under25Limit) &&
+        (homePositionLimit === null
+          ? true
+          : game.homePosition !== null &&
+            game.homePosition > 0 &&
+            game.homePosition <= homePositionLimit) &&
+        (awayPositionLimit === null
+          ? true
+          : game.awayPosition !== null &&
+            game.awayPosition > 0 &&
+            game.awayPosition <= awayPositionLimit)
       );
     });
     const direction = sortConfig.direction === "asc" ? 1 : -1;
@@ -967,6 +1145,12 @@ function App() {
       switch (sortConfig.key) {
         case "time":
           comparison = timeValue(a) - timeValue(b);
+          break;
+        case "homePosition":
+          comparison = (a.homePosition ?? 999) - (b.homePosition ?? 999);
+          break;
+        case "awayPosition":
+          comparison = (a.awayPosition ?? 999) - (b.awayPosition ?? 999);
           break;
         case "homeOdd":
           comparison = a.homeOdd - b.homeOdd;
@@ -1010,6 +1194,8 @@ function App() {
   }, [
     query,
     day,
+    timePeriod,
+    raceFilter,
     type,
     gender,
     classification,
@@ -1019,6 +1205,8 @@ function App() {
     maxAwayOdd,
     minOver25Odd,
     minUnder25Odd,
+    maxHomePosition,
+    maxAwayPosition,
     sortConfig,
     lang,
     t,
@@ -1036,6 +1224,8 @@ function App() {
   const resetFilters = () => {
     setQuery("");
     setDay("all");
+    setTimePeriod("all");
+    setRaceFilter("all");
     setType("all");
     setGender("all");
     setClassification("all");
@@ -1045,6 +1235,8 @@ function App() {
     setMaxAwayOdd("");
     setMinOver25Odd("");
     setMinUnder25Odd("");
+    setMaxHomePosition("");
+    setMaxAwayPosition("");
   };
 
   const handleSort = (key) => {
@@ -1155,6 +1347,38 @@ function App() {
           </div>
           <div className={`filters-grid-wrap ${mobileFilters ? "open" : ""}`}>
             <div className="filter-grid">
+              <label className="select-field">
+                <span>{t.timeRange}</span>
+                <div>
+                  <Clock3 size={17} />
+                  <select
+                    value={timePeriod}
+                    onChange={(event) => setTimePeriod(event.target.value)}
+                  >
+                    <option value="all">{t.all}</option>
+                    <option value="dawn">{t.dawn}</option>
+                    <option value="morning">{t.morning}</option>
+                    <option value="afternoon">{t.afternoon}</option>
+                    <option value="night">{t.night}</option>
+                  </select>
+                  <ChevronDown size={15} />
+                </div>
+              </label>
+              <label className="select-field">
+                <span>{t.raceFilter}</span>
+                <div>
+                  <TrendingUp size={17} />
+                  <select
+                    value={raceFilter}
+                    onChange={(event) => setRaceFilter(event.target.value)}
+                  >
+                    <option value="all">{t.all}</option>
+                    <option value="yes">{t.yes}</option>
+                    <option value="no">{t.no}</option>
+                  </select>
+                  <ChevronDown size={15} />
+                </div>
+              </label>
               <label className="select-field">
                 <span>{t.competitionType}</span>
                 <div>
@@ -1271,6 +1495,36 @@ function App() {
                     onChange={(event) => setMinUnder25Odd(event.target.value)}
                     placeholder={t.maxOddPlaceholder}
                     aria-label={t.minUnder25Odd}
+                  />
+                </div>
+              </label>
+              <label className="select-field odd-filter-field position-filter-field">
+                <span>{t.homePosition}</span>
+                <div>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    min="1"
+                    step="1"
+                    value={maxHomePosition}
+                    onChange={(event) => setMaxHomePosition(event.target.value)}
+                    placeholder={t.positionPlaceholder}
+                    aria-label={t.homePosition}
+                  />
+                </div>
+              </label>
+              <label className="select-field odd-filter-field position-filter-field">
+                <span>{t.awayPosition}</span>
+                <div>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    min="1"
+                    step="1"
+                    value={maxAwayPosition}
+                    onChange={(event) => setMaxAwayPosition(event.target.value)}
+                    placeholder={t.positionPlaceholder}
+                    aria-label={t.awayPosition}
                   />
                 </div>
               </label>

@@ -1031,3 +1031,527 @@ footer {
     width: 100%;
   }
 }
+
+/* Posição e sequência recente */
+.position-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 28px;
+  padding: 0 9px;
+  border: 1px solid rgba(120, 165, 255, .28);
+  border-radius: 9px;
+  background: linear-gradient(180deg, rgba(120, 165, 255, .18), rgba(120, 165, 255, .08));
+  color: var(--blue-accent);
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06);
+}
+.form-race {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.form-result {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 23px;
+  height: 23px;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 3px 8px rgba(0,0,0,.18);
+}
+.form-v { background: linear-gradient(180deg, #27c875, #159354); }
+.form-e { background: linear-gradient(180deg, #ffbd2e, #e58b00); }
+.form-d { background: linear-gradient(180deg, #f34f59, #c92838); }
+.mobile-team-details {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  grid-column: 2;
+  min-height: 28px;
+}
+.away-row .mobile-team-details { justify-content: flex-start; }
+.games-table th.column-homePosition,
+.games-table td.column-homePosition,
+.games-table th.column-awayPosition,
+.games-table td.column-awayPosition { width: 76px; text-align: center; }
+.games-table th.column-homeForm,
+.games-table td.column-homeForm,
+.games-table th.column-awayForm,
+.games-table td.column-awayForm { min-width: 132px; text-align: center; }
+.odds-filter-row { grid-template-columns: repeat(6, minmax(145px, 1fr)); max-width: none; }
+@media (max-width: 1180px) {
+  .odds-filter-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .odds-filter-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .form-result { width: 21px; height: 21px; font-size: 10px; }
+}
+@media (max-width: 480px) {
+  .odds-filter-row { grid-template-columns: 1fr; }
+}
+
+/* Forma recente integrada abaixo do nome do time */
+.games-table .team-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 7px;
+  min-width: 138px;
+  line-height: 1.15;
+}
+.games-table .team-cell .form-race:empty {
+  display: none;
+}
+.games-table .team-cell .form-result {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  font-size: 9px;
+}
+.games-table th.column-homeForm,
+.games-table td.column-homeForm,
+.games-table th.column-awayForm,
+.games-table td.column-awayForm {
+  display: none;
+}
+
+/* ===== Rebalance visual spacing: cleaner, less cramped desktop table ===== */
+.table-shell {
+  border-radius: 18px;
+}
+
+.games-table td.column-time,
+.games-table td.column-homePosition,
+.games-table td.column-awayPosition,
+.games-table td.column-homeOdd,
+.games-table td.column-drawOdd,
+.games-table td.column-awayOdd,
+.games-table td.column-classification,
+.games-table td.column-over25Odd,
+.games-table td.column-under25Odd,
+.games-table th.column-time,
+.games-table th.column-homePosition,
+.games-table th.column-awayPosition,
+.games-table th.column-homeOdd,
+.games-table th.column-drawOdd,
+.games-table th.column-awayOdd,
+.games-table th.column-classification,
+.games-table th.column-over25Odd,
+.games-table th.column-under25Odd {
+  text-align: center;
+}
+
+.games-table .table-country {
+  display: inline-block;
+  line-height: 1.3;
+}
+
+.games-table .table-competition strong {
+  line-height: 1.24;
+}
+
+.games-table .table-competition small {
+  display: inline-block;
+  margin-top: 5px;
+}
+
+.games-table .team-cell strong {
+  display: block;
+  line-height: 1.24;
+}
+
+.odd-cell {
+  min-width: 60px;
+  min-height: 38px;
+  padding: 0 10px;
+  border-radius: 12px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 8px 18px rgba(0,0,0,.12);
+}
+
+.classification {
+  min-height: 34px;
+  min-width: 124px;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.15;
+  padding: 0 12px;
+}
+
+.position-badge {
+  min-width: 42px;
+  height: 30px;
+  border-radius: 10px;
+}
+
+@media (min-width: 861px) {
+  .table-shell {
+    padding: 6px 10px 10px;
+  }
+
+  .games-table {
+    min-width: 1410px;
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .games-table th {
+    padding: 12px 10px;
+    font-size: 10.5px;
+    letter-spacing: .045em;
+  }
+
+  .games-table td {
+    padding: 15px 10px;
+  }
+
+  .games-table tbody tr:nth-child(even) {
+    background: rgba(255,255,255,.018);
+  }
+
+  .games-table tbody tr:hover {
+    background: rgba(57,210,155,.075);
+  }
+
+  .games-table th.column-time,
+  .games-table td.column-time { width: 88px; }
+
+  .games-table th.column-country,
+  .games-table td.column-country { width: 124px; }
+
+  .games-table th.column-competition,
+  .games-table td.column-competition { width: 172px; }
+
+  .games-table th.column-home,
+  .games-table td.column-home,
+  .games-table th.column-away,
+  .games-table td.column-away { width: 188px; }
+
+  .games-table th.column-homePosition,
+  .games-table td.column-homePosition,
+  .games-table th.column-awayPosition,
+  .games-table td.column-awayPosition { width: 84px; }
+
+  .games-table th.column-homeOdd,
+  .games-table td.column-homeOdd,
+  .games-table th.column-drawOdd,
+  .games-table td.column-drawOdd,
+  .games-table th.column-awayOdd,
+  .games-table td.column-awayOdd { width: 82px; }
+
+  .games-table th.column-classification,
+  .games-table td.column-classification { width: 148px; }
+
+  .games-table th.column-over25Odd,
+  .games-table td.column-over25Odd,
+  .games-table th.column-under25Odd,
+  .games-table td.column-under25Odd { width: 98px; }
+
+  .games-table td.column-country,
+  .games-table td.column-competition,
+  .games-table td.column-home,
+  .games-table td.column-away {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .games-table td.column-competition .table-competition strong,
+  .games-table td.column-home .team-cell strong,
+  .games-table td.column-away .team-cell strong {
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: initial;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .games-table td.column-country .table-country {
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  .games-table .team-cell {
+    min-width: 0;
+    gap: 8px;
+  }
+
+  .games-table td.column-home .form-race,
+  .games-table td.column-away .form-race {
+    flex-wrap: wrap;
+    row-gap: 5px;
+  }
+
+  .games-table .team-cell .form-result {
+    width: 22px;
+    height: 22px;
+    font-size: 10px;
+    border-radius: 6px;
+  }
+
+  .games-table td.column-classification .classification {
+    width: 100%;
+    max-width: 132px;
+  }
+}
+
+/* ===== Fit table without horizontal scroll and hide country column from visual listing ===== */
+@media (min-width: 861px) {
+  .table-shell {
+    overflow-x: hidden;
+    padding: 4px 8px 8px;
+  }
+
+  .games-table {
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+  }
+
+  .games-table th {
+    padding: 11px 7px;
+    font-size: 10px;
+    letter-spacing: .035em;
+  }
+
+  .games-table td {
+    padding: 13px 7px;
+  }
+
+  .games-table th.column-time,
+  .games-table td.column-time { width: 6.5%; }
+
+  .games-table th.column-competition,
+  .games-table td.column-competition { width: 13.5%; }
+
+  .games-table th.column-home,
+  .games-table td.column-home,
+  .games-table th.column-away,
+  .games-table td.column-away { width: 14.5%; }
+
+  .games-table th.column-homePosition,
+  .games-table td.column-homePosition,
+  .games-table th.column-awayPosition,
+  .games-table td.column-awayPosition { width: 5%; }
+
+  .games-table th.column-homeOdd,
+  .games-table td.column-homeOdd,
+  .games-table th.column-drawOdd,
+  .games-table td.column-drawOdd,
+  .games-table th.column-awayOdd,
+  .games-table td.column-awayOdd,
+  .games-table th.column-over25Odd,
+  .games-table td.column-over25Odd,
+  .games-table th.column-under25Odd,
+  .games-table td.column-under25Odd { width: 6%; }
+
+  .games-table th.column-classification,
+  .games-table td.column-classification { width: 11%; }
+
+  .games-table td.column-competition,
+  .games-table td.column-home,
+  .games-table td.column-away {
+    padding-left: 9px;
+    padding-right: 9px;
+  }
+
+  .games-table .table-time {
+    gap: 5px;
+    font-size: 12px;
+  }
+
+  .games-table .table-competition strong,
+  .games-table .team-cell strong {
+    font-size: 13px;
+    line-height: 1.18;
+  }
+
+  .games-table .table-competition small {
+    font-size: 11px;
+    margin-top: 4px;
+  }
+
+  .games-table .team-cell {
+    gap: 6px;
+  }
+
+  .games-table .team-cell .form-result {
+    width: 19px;
+    height: 19px;
+    font-size: 9px;
+  }
+
+  .position-badge {
+    min-width: 36px;
+    height: 28px;
+    padding: 0 7px;
+    font-size: 11px;
+  }
+
+  .odd-cell {
+    min-width: 0;
+    width: 100%;
+    max-width: 58px;
+    min-height: 34px;
+    padding: 0 6px;
+    font-size: 12px;
+    border-radius: 10px;
+  }
+
+  .games-table td.column-homeOdd .odd-cell,
+  .games-table td.column-drawOdd .odd-cell,
+  .games-table td.column-awayOdd .odd-cell,
+  .games-table td.column-over25Odd .odd-cell,
+  .games-table td.column-under25Odd .odd-cell {
+    margin: 0 auto;
+  }
+
+  .classification {
+    min-width: 0;
+    width: 100%;
+    max-width: 124px;
+    min-height: 32px;
+    padding: 0 10px;
+    font-size: 10px;
+  }
+
+  .sortable-header {
+    gap: 3px;
+  }
+
+  .column-drag-handle {
+    width: 14px;
+    margin-left: -3px;
+  }
+}
+
+@media (max-width: 860px) {
+  .mobile-meta {
+    gap: 6px 10px;
+  }
+
+  .mobile-meta span:not(:last-child)::after {
+    margin-left: 10px;
+  }
+}
+
+/* ===== Time color rules by period ===== */
+.table-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 800;
+}
+
+.table-time.time-dawn {
+  color: #06080c;
+  background: rgba(255, 255, 255, .92);
+  padding: 5px 9px;
+  border-radius: 999px;
+}
+
+.table-time.time-morning {
+  color: #8ec0ff;
+}
+
+.table-time.time-afternoon {
+  color: #ff9b3d;
+}
+
+.table-time.time-night {
+  color: #315fc6;
+}
+
+:root[data-theme='light'] .table-time.time-dawn {
+  background: rgba(6, 8, 12, .06);
+}
+
+@media (max-width: 860px) {
+  .mobile-game-top .table-time.time-dawn {
+    padding: 4px 8px;
+  }
+}
+
+/* ===== Filter layout refinement: keep all select filters on one line on desktop ===== */
+.filter-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.filter-grid .select-field div {
+  height: 46px;
+  padding: 0 11px;
+}
+
+.filter-grid .select-field > span {
+  margin-bottom: 7px;
+  font-size: 11px;
+}
+
+@media (max-width: 1320px) {
+  .filter-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1180px) {
+  .filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== Move date under time and country under competition ===== */
+.table-time-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  text-align: center;
+}
+
+.table-time-block small {
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1;
+  padding-left: 0;
+  text-align: center;
+}
+
+.table-competition small {
+  color: var(--text-soft);
+  opacity: .88;
+}
+
+/* ===== First select row: time, race, type, gender, classification and country ===== */
+.filter-grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+@media (max-width: 1420px) {
+  .filter-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .filters-grid-wrap.open .filter-grid {
+    grid-template-columns: 1fr;
+  }
+}
