@@ -11,6 +11,9 @@ import {
   Globe2,
   GripVertical,
   LayoutGrid,
+  LockKeyhole,
+  LogIn,
+  LogOut,
   Moon,
   RefreshCw,
   Search,
@@ -18,8 +21,18 @@ import {
   Sun,
   TrendingUp,
   Trophy,
+  UserRound,
   X,
 } from "lucide-react";
+import AuthModal from "./AuthModal";
+import CookieConsent from "./CookieConsent";
+import PrivacyPolicy from "./PrivacyPolicy";
+import {
+  loadColumnOrder,
+  logout,
+  observeAuth,
+  saveColumnOrder,
+} from "./firebase";
 import "./styles.css";
 
 const languageOptions = [
@@ -92,7 +105,12 @@ const translations = {
     lowestOdd: "Menor odd favorita",
     dateLabel: "Datas",
     footer:
-      "TraderTab organiza dados pré-jogo em uma experiência clara, profissional e intuitiva. 18+ Ministério da Fazenda adverte: Aposta não é investimento.",
+      "TraderTab organiza dados pré-jogo em uma experiência clara, profissional e intuitiva.",
+    responsibleWarning:
+      "18+ Ministério da Fazenda adverte: Aposta não é investimento.",
+    privacyPolicy: "Política de Privacidade",
+    cookiePreferences: "Preferências de cookies",
+    privacyContact: "Contato de privacidade",
     validOnly: "Somente jogos futuros com horário válido",
     confidence: "Confiança",
     high: "Alta",
@@ -100,6 +118,12 @@ const translations = {
     low: "Baixa",
     loading: "Carregando jogos do servidor...",
     loadError: "Não foi possível carregar os jogos.",
+    serverUnavailable:
+      "O servidor está temporariamente indisponível. Tente novamente em instantes.",
+    serverInvalidResponse:
+      "O servidor retornou uma resposta inválida. Tente novamente.",
+    connectionError:
+      "Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.",
     retry: "Tentar novamente",
     refresh: "Atualizar dados",
     lastUpdate: "Última atualização",
@@ -112,6 +136,20 @@ const translations = {
     quickFilters: "Filtros rápidos",
     results: "Resultados",
     dataTab: "Aba principal",
+    login: "Entrar",
+    account: "Minha conta",
+    logout: "Sair",
+    memberAccess: "Recursos para membros",
+    lockedTitle: "Entre para liberar as ferramentas de análise",
+    lockedText:
+      "Filtros, Race e personalização das colunas ficam disponíveis gratuitamente após o login.",
+    unlock: "Entrar gratuitamente",
+    completeProfile: "Completar cadastro",
+    profileRequiredTitle: "Complete seu cadastro para liberar os recursos",
+    profileRequiredText:
+      "Data de nascimento e país são obrigatórios. O clube do coração é opcional.",
+    dragLocked: "Entre para reorganizar as colunas",
+    copyright: "© 2026 TraderTab. Todos os direitos reservados.",
   },
   en: {
     brandTag: "Professional pre-match view",
@@ -177,6 +215,9 @@ const translations = {
     dateLabel: "Dates",
     footer:
       "TraderTab organizes pre-match data in a clear, professional and intuitive experience.",
+    privacyPolicy: "Privacy Policy",
+    cookiePreferences: "Cookie preferences",
+    privacyContact: "Privacy contact",
     validOnly: "Future matches with a valid time only",
     confidence: "Confidence",
     high: "High",
@@ -184,6 +225,12 @@ const translations = {
     low: "Low",
     loading: "Loading matches from the server...",
     loadError: "The matches could not be loaded.",
+    serverUnavailable:
+      "The server is temporarily unavailable. Please try again shortly.",
+    serverInvalidResponse:
+      "The server returned an invalid response. Please try again.",
+    connectionError:
+      "Unable to connect to the server. Check your internet connection and try again.",
     retry: "Try again",
     refresh: "Refresh data",
     lastUpdate: "Last update",
@@ -196,6 +243,20 @@ const translations = {
     quickFilters: "Quick filters",
     results: "Results",
     dataTab: "Main tab",
+    login: "Sign in",
+    account: "My account",
+    logout: "Sign out",
+    memberAccess: "Member features",
+    lockedTitle: "Sign in to unlock analysis tools",
+    lockedText:
+      "Filters, Race and column customization are available for free after signing in.",
+    unlock: "Sign in for free",
+    completeProfile: "Complete registration",
+    profileRequiredTitle: "Complete registration to unlock features",
+    profileRequiredText:
+      "Date of birth and country are required. Favorite club is optional.",
+    dragLocked: "Sign in to reorder columns",
+    copyright: "© 2026 TraderTab. All rights reserved.",
   },
   es: {
     brandTag: "Vista profesional prepartido",
@@ -261,6 +322,9 @@ const translations = {
     dateLabel: "Fechas",
     footer:
       "TraderTab organiza datos prepartido en una experiencia clara, profesional e intuitiva.",
+    privacyPolicy: "Política de Privacidad",
+    cookiePreferences: "Preferencias de cookies",
+    privacyContact: "Contacto de privacidad",
     validOnly: "Solo partidos futuros con horario válido",
     confidence: "Confianza",
     high: "Alta",
@@ -268,6 +332,12 @@ const translations = {
     low: "Baja",
     loading: "Cargando partidos desde la servidor...",
     loadError: "No fue posible cargar los partidos.",
+    serverUnavailable:
+      "El servidor no está disponible temporalmente. Inténtalo de nuevo en unos instantes.",
+    serverInvalidResponse:
+      "El servidor devolvió una respuesta no válida. Inténtalo de nuevo.",
+    connectionError:
+      "No fue posible conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.",
     retry: "Intentar de nuevo",
     refresh: "Actualizar datos",
     lastUpdate: "Última actualización",
@@ -280,6 +350,20 @@ const translations = {
     quickFilters: "Filtros rápidos",
     results: "Resultados",
     dataTab: "Pestaña principal",
+    login: "Entrar",
+    account: "Mi cuenta",
+    logout: "Salir",
+    memberAccess: "Funciones para miembros",
+    lockedTitle: "Entra para desbloquear las herramientas de análisis",
+    lockedText:
+      "Filtros, Race y personalización de columnas están disponibles gratis al iniciar sesión.",
+    unlock: "Entrar gratis",
+    completeProfile: "Completar registro",
+    profileRequiredTitle: "Completa el registro para habilitar las funciones",
+    profileRequiredText:
+      "La fecha de nacimiento y el país son obligatorios. El club es opcional.",
+    dragLocked: "Entra para reorganizar las columnas",
+    copyright: "© 2026 TraderTab. Todos los derechos reservados.",
   },
 };
 
@@ -576,7 +660,6 @@ function Logo() {
       <div className="brand-mark">TT</div>
       <div>
         <strong>TraderTab</strong>
-        <span>Match intelligence</span>
       </div>
     </div>
   );
@@ -635,16 +718,21 @@ const DEFAULT_COLUMN_ORDER = [
 
 const COLUMN_ORDER_STORAGE_KEY = "tradertab-column-order-v3";
 
-function getSavedColumnOrder() {
+function isValidColumnOrder(saved) {
+  return (
+    Array.isArray(saved) &&
+    saved.length === DEFAULT_COLUMN_ORDER.length &&
+    DEFAULT_COLUMN_ORDER.every((key) => saved.includes(key))
+  );
+}
+
+function getSavedColumnOrder(userId) {
+  if (!userId) return DEFAULT_COLUMN_ORDER;
   try {
-    const saved = JSON.parse(localStorage.getItem(COLUMN_ORDER_STORAGE_KEY));
-    if (
-      Array.isArray(saved) &&
-      saved.length === DEFAULT_COLUMN_ORDER.length &&
-      DEFAULT_COLUMN_ORDER.every((key) => saved.includes(key))
-    ) {
-      return saved;
-    }
+    const saved = JSON.parse(
+      localStorage.getItem(`${COLUMN_ORDER_STORAGE_KEY}-${userId}`),
+    );
+    if (isValidColumnOrder(saved)) return saved;
   } catch {
     // Ignora preferências antigas ou inválidas.
   }
@@ -661,6 +749,8 @@ function SortableHeader({
   onDragOver,
   onDrop,
   isDragging,
+  canReorder,
+  dragLockedText,
 }) {
   const active = sortConfig.key === sortKey;
   const Icon = active
@@ -683,15 +773,21 @@ function SortableHeader({
       onDrop={onDrop}
     >
       <div className="column-header-content">
-        <span
-          className="column-drag-handle"
-          draggable
-          onDragStart={onDragStart}
-          title="Arraste para reorganizar a coluna"
-          aria-label={`Reorganizar coluna ${label}`}
-        >
-          <GripVertical size={14} strokeWidth={2.2} />
-        </span>
+        {canReorder ? (
+          <span
+            className="column-drag-handle"
+            draggable
+            onDragStart={onDragStart}
+            title="Arraste para reorganizar a coluna"
+            aria-label={`Reorganizar coluna ${label}`}
+          >
+            <GripVertical size={14} strokeWidth={2.2} />
+          </span>
+        ) : (
+          <span className="column-drag-locked" title={dragLockedText}>
+            <LockKeyhole size={12} strokeWidth={2.2} />
+          </span>
+        )}
         <button
           type="button"
           className={`sortable-header ${active ? "active" : ""}`}
@@ -705,9 +801,45 @@ function SortableHeader({
   );
 }
 
-function MatchTable({ games, t, lang, sortConfig, onSort }) {
-  const [columnOrder, setColumnOrder] = useState(getSavedColumnOrder);
+function MatchTable({
+  games,
+  t,
+  lang,
+  sortConfig,
+  onSort,
+  userId,
+  showRace,
+}) {
+  const [columnOrder, setColumnOrder] = useState(() =>
+    getSavedColumnOrder(userId),
+  );
   const [draggedColumn, setDraggedColumn] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const localOrder = getSavedColumnOrder(userId);
+    setColumnOrder(localOrder);
+
+    if (userId) {
+      loadColumnOrder(userId)
+        .then((remoteOrder) => {
+          if (!cancelled && isValidColumnOrder(remoteOrder)) {
+            setColumnOrder(remoteOrder);
+            localStorage.setItem(
+              `${COLUMN_ORDER_STORAGE_KEY}-${userId}`,
+              JSON.stringify(remoteOrder),
+            );
+          }
+        })
+        .catch(() => {
+          // Mantém a preferência local caso a sincronização esteja indisponível.
+        });
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
 
   const columns = {
     time: {
@@ -740,7 +872,7 @@ function MatchTable({ games, t, lang, sortConfig, onSort }) {
       render: (game) => (
         <div className="team-cell home-team">
           <strong>{game.home}</strong>
-          <FormRace results={game.homeForm} />
+          {showRace && <FormRace results={game.homeForm} />}
         </div>
       ),
     },
@@ -777,7 +909,7 @@ function MatchTable({ games, t, lang, sortConfig, onSort }) {
       render: (game) => (
         <div className="team-cell away-team">
           <strong>{game.away}</strong>
-          <FormRace results={game.awayForm} />
+          {showRace && <FormRace results={game.awayForm} />}
         </div>
       ),
     },
@@ -814,7 +946,7 @@ function MatchTable({ games, t, lang, sortConfig, onSort }) {
   };
 
   const moveColumn = (targetColumn) => {
-    if (!draggedColumn || draggedColumn === targetColumn) return;
+    if (!userId || !draggedColumn || draggedColumn === targetColumn) return;
 
     setColumnOrder((currentOrder) => {
       const nextOrder = [...currentOrder];
@@ -822,7 +954,13 @@ function MatchTable({ games, t, lang, sortConfig, onSort }) {
       const targetIndex = nextOrder.indexOf(targetColumn);
       nextOrder.splice(sourceIndex, 1);
       nextOrder.splice(targetIndex, 0, draggedColumn);
-      localStorage.setItem(COLUMN_ORDER_STORAGE_KEY, JSON.stringify(nextOrder));
+      localStorage.setItem(
+        `${COLUMN_ORDER_STORAGE_KEY}-${userId}`,
+        JSON.stringify(nextOrder),
+      );
+      saveColumnOrder(userId, nextOrder).catch(() => {
+        // A cópia local continua válida e será sincronizada no próximo ajuste.
+      });
       return nextOrder;
     });
 
@@ -842,7 +980,10 @@ function MatchTable({ games, t, lang, sortConfig, onSort }) {
                 sortConfig={sortConfig}
                 onSort={onSort}
                 isDragging={draggedColumn === columnKey}
+                canReorder={Boolean(userId)}
+                dragLockedText={t.dragLocked}
                 onDragStart={(event) => {
+                  if (!userId) return;
                   setDraggedColumn(columnKey);
                   event.dataTransfer.effectAllowed = "move";
                   event.dataTransfer.setData("text/plain", columnKey);
@@ -875,7 +1016,7 @@ function MatchTable({ games, t, lang, sortConfig, onSort }) {
   );
 }
 
-function MobileList({ games, t, lang }) {
+function MobileList({ games, t, lang, showRace }) {
   return (
     <div className="mobile-cards">
       {games.map((game) => (
@@ -903,7 +1044,7 @@ function MobileList({ games, t, lang }) {
               <strong>{game.home}</strong>
               <span className="mobile-team-details">
                 <PositionBadge position={game.homePosition} />
-                <FormRace results={game.homeForm} />
+                {showRace && <FormRace results={game.homeForm} />}
               </span>
             </div>
             <div className="mobile-team-row away-row">
@@ -911,7 +1052,7 @@ function MobileList({ games, t, lang }) {
               <strong>{game.away}</strong>
               <span className="mobile-team-details">
                 <PositionBadge position={game.awayPosition} />
-                <FormRace results={game.awayForm} />
+                {showRace && <FormRace results={game.awayForm} />}
               </span>
             </div>
           </div>
@@ -988,9 +1129,24 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [authUser, setAuthUser] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
+  const [authReady, setAuthReady] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const [cookieSettingsOpen, setCookieSettingsOpen] = useState(false);
+  const [currentHash, setCurrentHash] = useState(
+    () => window.location.hash.toLowerCase(),
+  );
   const listSectionRef = useRef(null);
   const filterScrollInitialized = useRef(false);
   const t = translations[lang];
+  const hasMemberAccess = Boolean(
+    authUser &&
+      userProfile?.birthDate &&
+      userProfile?.countryCode &&
+      Number(userProfile?.age) >= 18,
+  );
 
   const loadGames = async () => {
     setLoading(true);
@@ -1001,10 +1157,14 @@ function App() {
         `${GOOGLE_SHEETS_URL}${separator}_=${Date.now()}`,
         { cache: "no-store" },
       );
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+        const error = new Error("server-unavailable");
+        error.status = response.status;
+        throw error;
+      }
       const payload = await response.json();
       if (payload?.success === false)
-        throw new Error(payload.error || "Google Apps Script error");
+        throw new Error("server-invalid-response");
       const rows = Array.isArray(payload?.games)
         ? payload.games
         : Array.isArray(payload)
@@ -1023,7 +1183,19 @@ function App() {
       setLastUpdated(new Date());
     } catch (error) {
       console.error("[TraderTab] Falha ao ler Google Sheets", error);
-      setLoadError(error instanceof Error ? error.message : String(error));
+      if (
+        error?.message === "server-unavailable" ||
+        Number(error?.status) >= 500
+      ) {
+        setLoadError("serverUnavailable");
+      } else if (
+        error?.message === "server-invalid-response" ||
+        error instanceof SyntaxError
+      ) {
+        setLoadError("serverInvalidResponse");
+      } else {
+        setLoadError("connectionError");
+      }
     } finally {
       setLoading(false);
     }
@@ -1061,6 +1233,34 @@ function App() {
   }, [theme]);
 
   useEffect(() => localStorage.setItem("tradertab-language", lang), [lang]);
+
+  useEffect(() => {
+    const handleHashChange = () =>
+      setCurrentHash(window.location.hash.toLowerCase());
+
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
+
+  useEffect(
+    () =>
+      observeAuth((session) => {
+        setAuthUser(session?.user || null);
+        setUserProfile(session?.profile || null);
+        setAuthReady(true);
+
+        if (session?.user) {
+          const profileIsComplete = Boolean(
+            session.profile?.birthDate &&
+              session.profile?.countryCode &&
+              Number(session.profile?.age) >= 18,
+          );
+
+          setAuthModalOpen(!profileIsComplete);
+        }
+      }),
+    [],
+  );
 
   const countries = useMemo(
     () => [...new Set(games.map((game) => game.country))].sort(),
@@ -1290,6 +1490,10 @@ function App() {
     setMaxAwayPosition("");
   };
 
+  useEffect(() => {
+    if (authReady && !hasMemberAccess) resetFilters();
+  }, [authReady, hasMemberAccess]);
+
   const handleSort = (key) => {
     setSortConfig((current) => ({
       key,
@@ -1316,12 +1520,90 @@ function App() {
     { value: "dayPlus3", label: formatFilterDate(3) },
   ];
 
+  if (currentHash === "#privacidade") {
+    return (
+      <div className="app-shell">
+        <PrivacyPolicy
+          language={lang}
+          onBack={() => {
+            window.location.hash = "";
+          }}
+        />
+        <CookieConsent
+          language={lang}
+          settingsOpen={cookieSettingsOpen}
+          onSettingsClose={() => setCookieSettingsOpen(false)}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="app-shell">
       <header className="topbar">
         <div className="topbar-inner">
           <Logo />
           <div className="topbar-actions">
+            {authUser ? (
+              <div className="account-menu-wrap">
+                <button
+                  type="button"
+                  className="account-button"
+                  onClick={() => setAccountMenuOpen((current) => !current)}
+                  aria-expanded={accountMenuOpen}
+                >
+                  {authUser.photoURL ? (
+                    <img src={authUser.photoURL} alt="" referrerPolicy="no-referrer" />
+                  ) : (
+                    <span className="account-avatar">
+                      {(authUser.email || "U").charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                  <span className="account-button-copy">
+                    <strong>
+                      {authUser.displayName ||
+                        authUser.email?.split("@")[0] ||
+                        t.account}
+                    </strong>
+                    <small>{t.account}</small>
+                  </span>
+                  <ChevronDown size={15} />
+                </button>
+                {accountMenuOpen && (
+                  <div className="account-popover">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAccountMenuOpen(false);
+                        setAuthModalOpen(true);
+                      }}
+                    >
+                      <UserRound size={17} />
+                      {t.account}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAccountMenuOpen(false);
+                        logout();
+                      }}
+                    >
+                      <LogOut size={17} />
+                      {t.logout}
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                type="button"
+                className="login-button"
+                onClick={() => setAuthModalOpen(true)}
+              >
+                <LogIn size={18} />
+                {t.login}
+              </button>
+            )}
             <div className="language-menu">
               <Globe2 size={17} />
               <select
@@ -1350,6 +1632,12 @@ function App() {
       </header>
 
       <main className="page">
+        {lang === "pt" && (
+          <aside className="responsible-warning" role="note">
+            {t.responsibleWarning}
+          </aside>
+        )}
+
         <section className="date-filter-only">
           <Segmented
             value={day}
@@ -1359,7 +1647,9 @@ function App() {
           />
         </section>
 
-        <section className="filters-section">
+        {hasMemberAccess ? (
+          <>
+            <section className="filters-section">
           <div className="section-heading">
             <div>
               <Filter size={18} />
@@ -1581,7 +1871,26 @@ function App() {
               </label>
             </div>
           </div>
-        </section>
+            </section>
+          </>
+        ) : (
+          <section className="locked-access">
+            <span className="locked-access-icon">
+              <LockKeyhole size={24} />
+            </span>
+            <div>
+              <small>{t.memberAccess}</small>
+              <h2>
+                {authUser ? t.profileRequiredTitle : t.lockedTitle}
+              </h2>
+              <p>{authUser ? t.profileRequiredText : t.lockedText}</p>
+            </div>
+            <button type="button" onClick={() => setAuthModalOpen(true)}>
+              <LogIn size={18} />
+              {authUser ? t.completeProfile : t.unlock}
+            </button>
+          </section>
+        )}
 
         <section ref={listSectionRef} className="list-section">
           <div className="section-heading list-heading">
@@ -1607,7 +1916,7 @@ function App() {
             <section className="empty-state error-state">
               <X size={30} />
               <h3>{t.loadError}</h3>
-              <p>{loadError}</p>
+              <p>{t[loadError] || t.loadError}</p>
               <button type="button" onClick={loadGames}>
                 {t.retry}
               </button>
@@ -1621,10 +1930,17 @@ function App() {
                   lang={lang}
                   sortConfig={sortConfig}
                   onSort={handleSort}
+                  userId={hasMemberAccess ? authUser?.uid : null}
+                  showRace={hasMemberAccess}
                 />
               </div>
               <div className="mobile-table">
-                <MobileList games={filteredGames} t={t} lang={lang} />
+                <MobileList
+                  games={filteredGames}
+                  t={t}
+                  lang={lang}
+                  showRace={hasMemberAccess}
+                />
               </div>
             </>
           ) : (
@@ -1639,7 +1955,33 @@ function App() {
           )}
         </section>
       </main>
-      <footer>{t.footer}</footer>
+      <footer className="app-footer">
+        <p>{t.footer}</p>
+        <nav aria-label="Privacidade">
+          <a href="#privacidade">{t.privacyPolicy}</a>
+          <button type="button" onClick={() => setCookieSettingsOpen(true)}>
+            {t.cookiePreferences}
+          </button>
+          <a href="mailto:myradardev@gmail.com">{t.privacyContact}</a>
+        </nav>
+        <p className="footer-copyright">{t.copyright}</p>
+      </footer>
+      {authModalOpen && (
+        <AuthModal
+          language={lang}
+          user={authUser}
+          profile={userProfile}
+          onClose={() => setAuthModalOpen(false)}
+          onProfileSaved={(nextProfile) =>
+            setUserProfile((current) => ({ ...current, ...nextProfile }))
+          }
+        />
+      )}
+      <CookieConsent
+        language={lang}
+        settingsOpen={cookieSettingsOpen}
+        onSettingsClose={() => setCookieSettingsOpen(false)}
+      />
     </div>
   );
 }
