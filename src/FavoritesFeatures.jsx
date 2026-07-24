@@ -390,6 +390,23 @@ function FavoriteStar({ game, isFavorite, onToggle, busy, t }) {
   );
 }
 
+function CardRace({ results }) {
+  if (!Array.isArray(results) || results.length === 0) return null;
+
+  return (
+    <span className="feature-team-race form-race" aria-label={results.join(" ")}>
+      {results.map((result, index) => (
+        <span
+          key={`${result}-${index}`}
+          className={`form-result form-${String(result).toLowerCase()}`}
+        >
+          {result}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 function GamePreviewCard({
   game,
   language,
@@ -422,6 +439,7 @@ function GamePreviewCard({
         <div>
           <span>{t.home}</span>
           <strong>{game.home}</strong>
+          <CardRace results={game.homeForm} />
           {game.homePosition && (
             <small>
               {t.position} {game.homePosition}
@@ -431,6 +449,7 @@ function GamePreviewCard({
         <div>
           <span>{t.away}</span>
           <strong>{game.away}</strong>
+          <CardRace results={game.awayForm} />
           {game.awayPosition && (
             <small>
               {t.position} {game.awayPosition}
