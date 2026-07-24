@@ -3,7 +3,7 @@
 O projeto usa:
 
 - **Firebase Authentication** para Google e e-mail/senha.
-- **Cloud Firestore** para data de nascimento, idade calculada, país, clube do coração opcional e ordem das colunas.
+- **Cloud Firestore** para perfil, ordem das colunas, preferências favoritas e jogos marcados.
 - **Vercel** apenas para publicar o front-end.
 
 A aplicação não grava nem recebe a senha para persistência. O cadastro, a
@@ -48,8 +48,27 @@ users/{uid}
   country
   favoriteClub
   preferences.columnOrder
+  favorites.teams
+  favorites.leagues
+  favorites.homeOddMin
+  favorites.homeOddMax
+  favorites.awayOddMin
+  favorites.awayOddMax
+  favorites.overOddMin
+  favorites.overOddMax
+  favorites.underOddMin
+  favorites.underOddMax
+  favorites.positionsMin
+  favorites.positionsMax
   createdAt
   updatedAt
+```
+
+Os jogos marcados são salvos separadamente para continuarem disponíveis mesmo
+quando deixarem de aparecer na fonte principal:
+
+```text
+users/{uid}/favoriteGames/{gameId}
 ```
 
 As regras impedem que uma pessoa leia ou altere o perfil de outra.
@@ -88,6 +107,8 @@ Valide estes cenários:
 4. A ordem das colunas permanece após sair, entrar novamente ou trocar de
    dispositivo.
 5. **Esqueci minha senha** envia o e-mail de recuperação.
+6. Preferências de times, ligas, odds e posições permanecem após novo login.
+7. Jogos marcados aparecem em **Meus Jogos**, agrupados pela data.
 
 ## Recomendação de produção
 

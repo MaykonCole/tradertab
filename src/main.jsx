@@ -18,6 +18,7 @@ import {
   RefreshCw,
   Search,
   SlidersHorizontal,
+  Star,
   Sun,
   TrendingUp,
   Trophy,
@@ -26,14 +27,27 @@ import {
 } from "lucide-react";
 import AuthModal from "./AuthModal";
 import CookieConsent from "./CookieConsent";
+import {
+  FavoritePreferencesPage,
+  MyGamesPage,
+  matchesFavoritePreferences,
+} from "./FavoritesFeatures";
 import PrivacyPolicy from "./PrivacyPolicy";
 import {
+  loadFavoritePreferences,
   loadColumnOrder,
   logout,
   observeAuth,
+  observeFavoriteGames,
+  removeFavoriteGame,
+  saveFavoriteGame,
+  saveFavoritePreferences,
   saveColumnOrder,
 } from "./firebase";
 import "./styles.css";
+import logoPt from "./assets/logo-pt.png";
+import logoEs from "./assets/logo-es.png";
+import logoEn from "./assets/logo-en.png";
 
 const languageOptions = [
   { key: "pt", label: "Português", short: "PT", flag: "🇧🇷" },
@@ -109,6 +123,7 @@ const translations = {
     responsibleWarning:
       "18+ Ministério da Fazenda adverte: Aposta não é investimento.",
     privacyPolicy: "Política de Privacidade",
+    privacyShortcut: "Privacidade",
     cookiePreferences: "Preferências de cookies",
     privacyContact: "Contato de privacidade",
     validOnly: "Somente jogos futuros com horário válido",
@@ -138,6 +153,11 @@ const translations = {
     dataTab: "Aba principal",
     login: "Entrar",
     account: "Minha conta",
+    myFavorites: "Meus Filtros",
+    myGames: "Meus Jogos",
+    addFavoriteGame: "Adicionar aos Meus Jogos",
+    removeFavoriteGame: "Remover dos Meus Jogos",
+    favoriteSaveError: "Não foi possível atualizar o jogo favorito.",
     logout: "Sair",
     memberAccess: "Recursos para membros",
     lockedTitle: "Entre para liberar as ferramentas de análise",
@@ -216,6 +236,7 @@ const translations = {
     footer:
       "TraderTab organizes pre-match data in a clear, professional and intuitive experience.",
     privacyPolicy: "Privacy Policy",
+    privacyShortcut: "Privacy",
     cookiePreferences: "Cookie preferences",
     privacyContact: "Privacy contact",
     validOnly: "Future matches with a valid time only",
@@ -245,6 +266,11 @@ const translations = {
     dataTab: "Main tab",
     login: "Sign in",
     account: "My account",
+    myFavorites: "My Filters",
+    myGames: "My Matches",
+    addFavoriteGame: "Add to My Matches",
+    removeFavoriteGame: "Remove from My Matches",
+    favoriteSaveError: "Unable to update the favorite match.",
     logout: "Sign out",
     memberAccess: "Member features",
     lockedTitle: "Sign in to unlock analysis tools",
@@ -323,6 +349,7 @@ const translations = {
     footer:
       "TraderTab organiza datos prepartido en una experiencia clara, profesional e intuitiva.",
     privacyPolicy: "Política de Privacidad",
+    privacyShortcut: "Privacidad",
     cookiePreferences: "Preferencias de cookies",
     privacyContact: "Contacto de privacidad",
     validOnly: "Solo partidos futuros con horario válido",
@@ -352,6 +379,11 @@ const translations = {
     dataTab: "Pestaña principal",
     login: "Entrar",
     account: "Mi cuenta",
+    myFavorites: "Mis Filtros",
+    myGames: "Mis Partidos",
+    addFavoriteGame: "Agregar a Mis Partidos",
+    removeFavoriteGame: "Eliminar de Mis Partidos",
+    favoriteSaveError: "No fue posible actualizar el partido favorito.",
     logout: "Salir",
     memberAccess: "Funciones para miembros",
     lockedTitle: "Entra para desbloquear las herramientas de análisis",
@@ -439,6 +471,24 @@ const getDayKey = (dateValue) => {
         : difference === 3
           ? "dayPlus3"
           : "other";
+};
+
+const isUpcomingGame = (game) => {
+  const date = parseDate(game.date);
+  const minutes = parseTimeMinutes(game.time);
+  if (!date || minutes === null) return false;
+
+  const kickoff = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    Math.floor(minutes / 60),
+    minutes % 60,
+    0,
+    0,
+  );
+
+  return kickoff.getTime() > Date.now();
 };
 
 const parseTimeMinutes = (value) => {
@@ -654,14 +704,29 @@ const classTone = {
   strongFavorite: "accent",
 };
 
-function Logo() {
+function Logo({ onClick, language }) {
+  const logoByLanguage = {
+    pt: logoPt,
+    en: logoEn,
+    es: logoEs,
+  };
+
   return (
-    <div className="brand">
-      <div className="brand-mark">TT</div>
-      <div>
+    <button
+      type="button"
+      className="brand brand-button"
+      onClick={onClick}
+      aria-label="Voltar para a página principal do TraderTab"
+    >
+      <img
+        src={logoByLanguage[language] || logoPt}
+        alt="TraderTab"
+        className="brand-logo-image"
+      />
+      <span>
         <strong>TraderTab</strong>
-      </div>
-    </div>
+      </span>
+    </button>
   );
 }
 
@@ -809,6 +874,9 @@ function MatchTable({
   onSort,
   userId,
   showRace,
+  favoriteIds,
+  favoriteBusyIds,
+  onToggleFavorite,
 }) {
   const [columnOrder, setColumnOrder] = useState(() =>
     getSavedColumnOrder(userId),
@@ -972,6 +1040,11 @@ function MatchTable({
       <table className="games-table">
         <thead>
           <tr>
+            {userId && (
+              <th className="column-favorite" aria-label={t.myGames}>
+                <Star size={15} />
+              </th>
+            )}
             {columnOrder.map((columnKey) => (
               <SortableHeader
                 key={columnKey}
@@ -1003,6 +1076,37 @@ function MatchTable({
         <tbody>
           {games.map((game) => (
             <tr key={game.id}>
+              {userId && (
+                <td className="column-favorite">
+                  <button
+                    type="button"
+                    className={`game-favorite-button ${
+                      favoriteIds.has(String(game.id)) ? "active" : ""
+                    }`}
+                    onClick={() => onToggleFavorite(game)}
+                    disabled={favoriteBusyIds.has(String(game.id))}
+                    title={
+                      favoriteIds.has(String(game.id))
+                        ? t.removeFavoriteGame
+                        : t.addFavoriteGame
+                    }
+                    aria-label={
+                      favoriteIds.has(String(game.id))
+                        ? t.removeFavoriteGame
+                        : t.addFavoriteGame
+                    }
+                  >
+                    <Star
+                      size={18}
+                      fill={
+                        favoriteIds.has(String(game.id))
+                          ? "currentColor"
+                          : "none"
+                      }
+                    />
+                  </button>
+                </td>
+              )}
               {columnOrder.map((columnKey) => (
                 <td key={columnKey} className={`column-${columnKey}`}>
                   {columns[columnKey].render(game)}
@@ -1016,7 +1120,16 @@ function MatchTable({
   );
 }
 
-function MobileList({ games, t, lang, showRace }) {
+function MobileList({
+  games,
+  t,
+  lang,
+  showRace,
+  userId,
+  favoriteIds,
+  favoriteBusyIds,
+  onToggleFavorite,
+}) {
   return (
     <div className="mobile-cards">
       {games.map((game) => (
@@ -1026,11 +1139,37 @@ function MobileList({ games, t, lang, showRace }) {
               <Clock3 size={15} />
               {game.time}
             </span>
-            <span
-              className={`classification ${classTone[game.classification]}`}
-            >
-              {t[game.classification]}
-            </span>
+            <div className="mobile-game-actions">
+              <span
+                className={`classification ${classTone[game.classification]}`}
+              >
+                {t[game.classification]}
+              </span>
+              {userId && (
+                <button
+                  type="button"
+                  className={`game-favorite-button ${
+                    favoriteIds.has(String(game.id)) ? "active" : ""
+                  }`}
+                  onClick={() => onToggleFavorite(game)}
+                  disabled={favoriteBusyIds.has(String(game.id))}
+                  aria-label={
+                    favoriteIds.has(String(game.id))
+                      ? t.removeFavoriteGame
+                      : t.addFavoriteGame
+                  }
+                >
+                  <Star
+                    size={20}
+                    fill={
+                      favoriteIds.has(String(game.id))
+                        ? "currentColor"
+                        : "none"
+                    }
+                  />
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="mobile-meta">
@@ -1134,6 +1273,23 @@ function App() {
   const [authReady, setAuthReady] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const [favoritePreferences, setFavoritePreferences] = useState({
+    teams: [],
+    leagues: [],
+    homeOddMin: null,
+    homeOddMax: null,
+    awayOddMin: null,
+    awayOddMax: null,
+    overOddMin: null,
+    overOddMax: null,
+    underOddMin: null,
+    underOddMax: null,
+    positionsMin: null,
+    positionsMax: null,
+  });
+  const [favoriteGames, setFavoriteGames] = useState([]);
+  const [favoriteBusyIds, setFavoriteBusyIds] = useState(() => new Set());
+  const [favoriteMessage, setFavoriteMessage] = useState("");
   const [cookieSettingsOpen, setCookieSettingsOpen] = useState(false);
   const [currentHash, setCurrentHash] = useState(
     () => window.location.hash.toLowerCase(),
@@ -1262,6 +1418,55 @@ function App() {
     [],
   );
 
+  useEffect(() => {
+    if (!hasMemberAccess || !authUser?.uid) {
+      setFavoriteGames([]);
+      setFavoritePreferences({
+        teams: [],
+        leagues: [],
+        homeOddMin: null,
+        homeOddMax: null,
+        awayOddMin: null,
+        awayOddMax: null,
+        overOddMin: null,
+        overOddMax: null,
+        underOddMin: null,
+        underOddMax: null,
+        positionsMin: null,
+        positionsMax: null,
+      });
+      return undefined;
+    }
+
+    let cancelled = false;
+
+    loadFavoritePreferences(authUser.uid)
+      .then((preferences) => {
+        if (!cancelled) setFavoritePreferences(preferences);
+      })
+      .catch(() => {
+        if (!cancelled) setFavoriteMessage(t.connectionError);
+      });
+
+    const unsubscribe = observeFavoriteGames(
+      authUser.uid,
+      (savedGames) => {
+        if (!cancelled) {
+          setFavoriteGames(savedGames);
+          setFavoriteMessage("");
+        }
+      },
+      () => {
+        if (!cancelled) setFavoriteMessage(t.connectionError);
+      },
+    );
+
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
+  }, [hasMemberAccess, authUser?.uid, lang]);
+
   const countries = useMemo(
     () => [...new Set(games.map((game) => game.country))].sort(),
     [games],
@@ -1270,6 +1475,65 @@ function App() {
     () => new Set(games.map((game) => game.competition)).size,
     [games],
   );
+  const availableTeams = useMemo(
+    () =>
+      [...new Set(games.flatMap((game) => [game.home, game.away]))]
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b)),
+    [games],
+  );
+  const availableLeagues = useMemo(
+    () =>
+      [...new Set(games.map((game) => game.competition))]
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b)),
+    [games],
+  );
+  const favoriteIds = useMemo(
+    () => new Set(favoriteGames.map((game) => String(game.id))),
+    [favoriteGames],
+  );
+  const favoritePreferenceGames = useMemo(
+    () =>
+      games.filter(
+        (game) =>
+          isUpcomingGame(game) &&
+          matchesFavoritePreferences(game, favoritePreferences),
+      ),
+    [games, favoritePreferences],
+  );
+
+  const savePreferences = async (preferences) => {
+    const saved = await saveFavoritePreferences(authUser.uid, preferences);
+    setFavoritePreferences(saved);
+  };
+
+  const toggleFavoriteGame = async (game) => {
+    if (!hasMemberAccess || !authUser?.uid) {
+      setAuthModalOpen(true);
+      return;
+    }
+
+    const gameId = String(game.id);
+    setFavoriteMessage("");
+    setFavoriteBusyIds((current) => new Set(current).add(gameId));
+
+    try {
+      if (favoriteIds.has(gameId)) {
+        await removeFavoriteGame(authUser.uid, gameId);
+      } else {
+        await saveFavoriteGame(authUser.uid, game);
+      }
+    } catch {
+      setFavoriteMessage(t.favoriteSaveError);
+    } finally {
+      setFavoriteBusyIds((current) => {
+        const next = new Set(current);
+        next.delete(gameId);
+        return next;
+      });
+    }
+  };
 
   const parsePositiveNumber = (value) => {
     if (!String(value).trim()) return null;
@@ -1520,116 +1784,181 @@ function App() {
     { value: "dayPlus3", label: formatFilterDate(3) },
   ];
 
+  const goHome = () => {
+    setAccountMenuOpen(false);
+    window.location.hash = "";
+  };
+
+  const renderTopbar = () => (
+    <header className="topbar">
+      <div className="topbar-inner">
+        <Logo onClick={goHome} language={lang} />
+        <nav className="topbar-shortcuts" aria-label="Acessos principais">
+          {authUser && hasMemberAccess && (
+            <>
+              <button
+                type="button"
+                className={`topbar-shortcut ${currentHash === "#favoritos" ? "active" : ""}`}
+                onClick={() => { window.location.hash = "favoritos"; }}
+              >
+                <SlidersHorizontal size={18} />
+                <span>{t.myFavorites}</span>
+                {favoritePreferenceGames.length > 0 && (
+                  <span className="topbar-shortcut-count">{favoritePreferenceGames.length}</span>
+                )}
+              </button>
+              <button
+                type="button"
+                className={`topbar-shortcut ${currentHash === "#meus-jogos" ? "active" : ""}`}
+                onClick={() => { window.location.hash = "meus-jogos"; }}
+              >
+                <Star size={18} />
+                <span>{t.myGames}</span>
+                {favoriteGames.length > 0 && (
+                  <span className="topbar-shortcut-count">{favoriteGames.length}</span>
+                )}
+              </button>
+            </>
+          )}
+        </nav>
+        <div className="topbar-actions">
+          {authUser ? (
+            <div className="account-menu-wrap">
+              <button
+                type="button"
+                className="account-button"
+                onClick={() => setAccountMenuOpen((current) => !current)}
+                aria-expanded={accountMenuOpen}
+              >
+                {authUser.photoURL ? (
+                  <img src={authUser.photoURL} alt="" referrerPolicy="no-referrer" />
+                ) : (
+                  <span className="account-avatar">{(authUser.email || "U").charAt(0).toUpperCase()}</span>
+                )}
+                <span className="account-button-copy">
+                  <strong>{authUser.displayName || authUser.email?.split("@")[0] || t.account}</strong>
+                  <small>{t.account}</small>
+                </span>
+                <ChevronDown size={15} />
+              </button>
+              {accountMenuOpen && (
+                <div className="account-popover">
+                  <button type="button" onClick={() => { setAccountMenuOpen(false); setAuthModalOpen(true); }}>
+                    <UserRound size={17} />{t.account}
+                  </button>
+                  <button type="button" onClick={() => { setAccountMenuOpen(false); logout(); }}>
+                    <LogOut size={17} />{t.logout}
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button type="button" className="login-button" onClick={() => setAuthModalOpen(true)}>
+              <LogIn size={18} />{t.login}
+            </button>
+          )}
+          <div className="language-menu">
+            <Globe2 size={17} />
+            <select value={lang} onChange={(event) => setLang(event.target.value)} aria-label={t.language}>
+              {languageOptions.map((item) => (
+                <option key={item.key} value={item.key}>{item.flag} {item.short}</option>
+              ))}
+            </select>
+            <ChevronDown size={14} />
+          </div>
+          <button className="icon-button" type="button" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} aria-label={t.theme}>
+            {theme === "dark" ? <Sun size={19} /> : <Moon size={19} />}
+          </button>
+        </div>
+      </div>
+    </header>
+  );
+
+  const renderGlobalOverlays = () => (
+    <>
+      {authModalOpen && (
+        <AuthModal
+          language={lang}
+          user={authUser}
+          profile={userProfile}
+          onClose={() => setAuthModalOpen(false)}
+          onProfileSaved={(nextProfile) => setUserProfile((current) => ({ ...current, ...nextProfile }))}
+        />
+      )}
+      <CookieConsent
+        language={lang}
+        settingsOpen={cookieSettingsOpen}
+        onSettingsClose={() => setCookieSettingsOpen(false)}
+      />
+    </>
+  );
+
+  const renderFooter = () => (
+    <footer className="app-footer">
+      <p>{t.footer}</p>
+      <nav aria-label="Privacidade">
+        <a href="#privacidade">{t.privacyPolicy}</a>
+        <button type="button" onClick={() => setCookieSettingsOpen(true)}>
+          {t.cookiePreferences}
+        </button>
+        <a href="mailto:myradardev@gmail.com">{t.privacyContact}</a>
+      </nav>
+      <p className="footer-copyright">{t.copyright}</p>
+    </footer>
+  );
+
+
   if (currentHash === "#privacidade") {
     return (
       <div className="app-shell">
-        <PrivacyPolicy
+        {renderTopbar()}
+        <PrivacyPolicy language={lang} />
+        {renderFooter()}
+        {renderGlobalOverlays()}
+      </div>
+    );
+  }
+
+  if (currentHash === "#favoritos" && hasMemberAccess) {
+    return (
+      <div className="app-shell">
+        {renderTopbar()}
+        <FavoritePreferencesPage
           language={lang}
-          onBack={() => {
-            window.location.hash = "";
-          }}
+          preferences={favoritePreferences}
+          teams={availableTeams}
+          leagues={availableLeagues}
+          matchingGames={favoritePreferenceGames}
+          favoriteIds={favoriteIds}
+          favoriteBusyIds={favoriteBusyIds}
+          onSave={savePreferences}
+          onToggleGame={toggleFavoriteGame}
         />
-        <CookieConsent
+        {renderFooter()}
+        {renderGlobalOverlays()}
+      </div>
+    );
+  }
+
+  if (currentHash === "#meus-jogos" && hasMemberAccess) {
+    return (
+      <div className="app-shell">
+        {renderTopbar()}
+        <MyGamesPage
           language={lang}
-          settingsOpen={cookieSettingsOpen}
-          onSettingsClose={() => setCookieSettingsOpen(false)}
+          games={favoriteGames}
+          favoriteBusyIds={favoriteBusyIds}
+          onToggleGame={toggleFavoriteGame}
         />
+        {renderFooter()}
+        {renderGlobalOverlays()}
       </div>
     );
   }
 
   return (
     <div className="app-shell">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <Logo />
-          <div className="topbar-actions">
-            {authUser ? (
-              <div className="account-menu-wrap">
-                <button
-                  type="button"
-                  className="account-button"
-                  onClick={() => setAccountMenuOpen((current) => !current)}
-                  aria-expanded={accountMenuOpen}
-                >
-                  {authUser.photoURL ? (
-                    <img src={authUser.photoURL} alt="" referrerPolicy="no-referrer" />
-                  ) : (
-                    <span className="account-avatar">
-                      {(authUser.email || "U").charAt(0).toUpperCase()}
-                    </span>
-                  )}
-                  <span className="account-button-copy">
-                    <strong>
-                      {authUser.displayName ||
-                        authUser.email?.split("@")[0] ||
-                        t.account}
-                    </strong>
-                    <small>{t.account}</small>
-                  </span>
-                  <ChevronDown size={15} />
-                </button>
-                {accountMenuOpen && (
-                  <div className="account-popover">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setAccountMenuOpen(false);
-                        setAuthModalOpen(true);
-                      }}
-                    >
-                      <UserRound size={17} />
-                      {t.account}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setAccountMenuOpen(false);
-                        logout();
-                      }}
-                    >
-                      <LogOut size={17} />
-                      {t.logout}
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <button
-                type="button"
-                className="login-button"
-                onClick={() => setAuthModalOpen(true)}
-              >
-                <LogIn size={18} />
-                {t.login}
-              </button>
-            )}
-            <div className="language-menu">
-              <Globe2 size={17} />
-              <select
-                value={lang}
-                onChange={(event) => setLang(event.target.value)}
-                aria-label={t.language}
-              >
-                {languageOptions.map((item) => (
-                  <option key={item.key} value={item.key}>
-                    {item.flag} {item.short}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown size={14} />
-            </div>
-            <button
-              className="icon-button"
-              type="button"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              aria-label={t.theme}
-            >
-              {theme === "dark" ? <Sun size={19} /> : <Moon size={19} />}
-            </button>
-          </div>
-        </div>
-      </header>
+      {renderTopbar()}
 
       <main className="page">
         {lang === "pt" && (
@@ -1892,6 +2221,15 @@ function App() {
           </section>
         )}
 
+        {favoriteMessage && hasMemberAccess && (
+          <div className="favorite-inline-message" role="alert">
+            {favoriteMessage}
+            <button type="button" onClick={() => setFavoriteMessage("")}>
+              <X size={15} />
+            </button>
+          </div>
+        )}
+
         <section ref={listSectionRef} className="list-section">
           <div className="section-heading list-heading">
             <div>
@@ -1899,6 +2237,9 @@ function App() {
               <strong>{t.listTitle}</strong>
             </div>
             <div className="list-actions">
+              <span className="listed-games-count">
+                {filteredGames.length} {t.gamesFound}
+              </span>
               <span>
                 {lastUpdated
                   ? `${t.lastUpdate}: ${lastUpdated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
@@ -1932,6 +2273,9 @@ function App() {
                   onSort={handleSort}
                   userId={hasMemberAccess ? authUser?.uid : null}
                   showRace={hasMemberAccess}
+                  favoriteIds={favoriteIds}
+                  favoriteBusyIds={favoriteBusyIds}
+                  onToggleFavorite={toggleFavoriteGame}
                 />
               </div>
               <div className="mobile-table">
@@ -1940,6 +2284,10 @@ function App() {
                   t={t}
                   lang={lang}
                   showRace={hasMemberAccess}
+                  userId={hasMemberAccess ? authUser?.uid : null}
+                  favoriteIds={favoriteIds}
+                  favoriteBusyIds={favoriteBusyIds}
+                  onToggleFavorite={toggleFavoriteGame}
                 />
               </div>
             </>
@@ -1955,33 +2303,8 @@ function App() {
           )}
         </section>
       </main>
-      <footer className="app-footer">
-        <p>{t.footer}</p>
-        <nav aria-label="Privacidade">
-          <a href="#privacidade">{t.privacyPolicy}</a>
-          <button type="button" onClick={() => setCookieSettingsOpen(true)}>
-            {t.cookiePreferences}
-          </button>
-          <a href="mailto:myradardev@gmail.com">{t.privacyContact}</a>
-        </nav>
-        <p className="footer-copyright">{t.copyright}</p>
-      </footer>
-      {authModalOpen && (
-        <AuthModal
-          language={lang}
-          user={authUser}
-          profile={userProfile}
-          onClose={() => setAuthModalOpen(false)}
-          onProfileSaved={(nextProfile) =>
-            setUserProfile((current) => ({ ...current, ...nextProfile }))
-          }
-        />
-      )}
-      <CookieConsent
-        language={lang}
-        settingsOpen={cookieSettingsOpen}
-        onSettingsClose={() => setCookieSettingsOpen(false)}
-      />
+      {renderFooter()}
+      {renderGlobalOverlays()}
     </div>
   );
 }
