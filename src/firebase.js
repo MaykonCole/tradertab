@@ -17,9 +17,12 @@ import {
   signOut,
 } from "firebase/auth";
 import {
+  collection,
+  deleteDoc,
   doc,
   getDoc,
   getFirestore,
+  onSnapshot,
   serverTimestamp,
   setDoc,
 } from "firebase/firestore";
@@ -338,4 +341,165 @@ export const saveColumnOrder = async (userId, columnOrder) => {
   trackEvent("column_reordered", {
     column_count: columnOrder.length,
   });
+};
+
+const emptyFavoritePreferences = {
+  teams: [],
+  leagues: [],
+  homeOddMin: null,
+  homeOddMax: null,
+  awayOddMin: null,
+  awayOddMax: null,
+  overOddMin: null,
+  overOddMax: null,
+  underOddMin: null,
+  underOddMax: null,
+  positionsMin: null,
+  positionsMax: null,
+};
+
+const sanitizeNumber = (value) => {
+  if (value === "" || value === null || value === undefined) return null;
+  const parsed = Number(String(value).replace(",", "."));
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+};
+
+const sanitizeStringList = (values) =>
+  [...new Set((Array.isArray(values) ? values : []).map((item) => String(item).trim()))]
+    .filter(Boolean)
+    .slice(0, 100);
+
+export const loadFavoritePreferences = async (userId) => {
+  ensureConfigured();
+
+  const snapshot = await getDoc(doc(db, "users", userId));
+  const stored = snapshot.exists() ? snapshot.data()?.favorites : null;
+
+  return {
+    ...emptyFavoritePreferences,
+    ...(stored || {}),
+    teams: sanitizeStringList(stored?.teams),
+    leagues: sanitizeStringList(stored?.leagues),
+    // Migra o range genérico usado pela versão anterior para Casa e Fora.
+    homeOddMin: stored?.homeOddMin ?? stored?.oddsMin ?? null,
+    homeOddMax: stored?.homeOddMax ?? stored?.oddsMax ?? null,
+    awayOddMin: stored?.awayOddMin ?? stored?.oddsMin ?? null,
+    awayOddMax: stored?.awayOddMax ?? stored?.oddsMax ?? null,
+  };
+};
+
+export const saveFavoritePreferences = async (userId, preferences) => {
+  ensureConfigured();
+
+  const sanitized = {
+    teams: sanitizeStringList(preferences.teams),
+    leagues: sanitizeStringList(preferences.leagues),
+    homeOddMin: sanitizeNumber(preferences.homeOddMin),
+    homeOddMax: sanitizeNumber(preferences.homeOddMax),
+    awayOddMin: sanitizeNumber(preferences.awayOddMin),
+    awayOddMax: sanitizeNumber(preferences.awayOddMax),
+    overOddMin: sanitizeNumber(preferences.overOddMin),
+    overOddMax: sanitizeNumber(preferences.overOddMax),
+    underOddMin: sanitizeNumber(preferences.underOddMin),
+    underOddMax: sanitizeNumber(preferences.underOddMax),
+    positionsMin: sanitizeNumber(preferences.positionsMin),
+    positionsMax: sanitizeNumber(preferences.positionsMax),
+  };
+
+  await setDoc(
+    doc(db, "users", userId),
+    {
+      favorites: sanitized,
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true },
+  );
+
+  trackEvent("favorite_preferences_saved", {
+    team_count: sanitized.teams.length,
+    league_count: sanitized.leagues.length,
+    has_odds_range: Boolean(
+      sanitized.homeOddMin ||
+        sanitized.homeOddMax ||
+        sanitized.awayOddMin ||
+        sanitized.awayOddMax ||
+        sanitized.overOddMin ||
+        sanitized.overOddMax ||
+        sanitized.underOddMin ||
+        sanitized.underOddMax,
+    ),
+    has_positions_range: Boolean(
+      sanitized.positionsMin || sanitized.positionsMax,
+    ),
+  });
+
+  return sanitized;
+};
+
+const favoriteGameDocumentId = (gameId) =>
+  encodeURIComponent(String(gameId || "")).slice(0, 1200);
+
+const favoriteGameSnapshot = (game) => ({
+  externalId: String(game.id),
+  date: String(game.date || ""),
+  time: String(game.time || ""),
+  country: String(game.country || ""),
+  competition: String(game.competition || ""),
+  home: String(game.home || ""),
+  away: String(game.away || ""),
+  homePosition: sanitizeNumber(game.homePosition),
+  awayPosition: sanitizeNumber(game.awayPosition),
+  homeOdd: sanitizeNumber(game.homeOdd),
+  drawOdd: sanitizeNumber(game.drawOdd),
+  awayOdd: sanitizeNumber(game.awayOdd),
+  over25Odd: sanitizeNumber(game.over25Odd),
+  under25Odd: sanitizeNumber(game.under25Odd),
+  classification: String(game.classification || "balanced"),
+  homeForm: sanitizeStringList(game.homeForm).slice(0, 8),
+  awayForm: sanitizeStringList(game.awayForm).slice(0, 8),
+});
+
+export const observeFavoriteGames = (userId, callback, onError) => {
+  ensureConfigured();
+
+  return onSnapshot(
+    collection(db, "users", userId, "favoriteGames"),
+    (snapshot) => {
+      callback(
+        snapshot.docs.map((favoriteDoc) => ({
+          id: favoriteDoc.data().externalId || favoriteDoc.id,
+          ...favoriteDoc.data(),
+        })),
+      );
+    },
+    onError,
+  );
+};
+
+export const saveFavoriteGame = async (userId, game) => {
+  ensureConfigured();
+
+  const gameId = favoriteGameDocumentId(game.id);
+  if (!gameId) throw new Error("favorite-game-invalid");
+
+  await setDoc(
+    doc(db, "users", userId, "favoriteGames", gameId),
+    {
+      ...favoriteGameSnapshot(game),
+      savedAt: serverTimestamp(),
+    },
+    { merge: true },
+  );
+
+  trackEvent("favorite_game_added");
+};
+
+export const removeFavoriteGame = async (userId, gameId) => {
+  ensureConfigured();
+
+  const documentId = favoriteGameDocumentId(gameId);
+  if (!documentId) return;
+
+  await deleteDoc(doc(db, "users", userId, "favoriteGames", documentId));
+  trackEvent("favorite_game_removed");
 };

@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowLeft, Mail, ShieldCheck } from "lucide-react";
+import { Mail, ShieldCheck } from "lucide-react";
 
 const content = {
   pt: {
@@ -11,14 +11,15 @@ const content = {
     collected: [
       "Conta: e-mail, nome, foto e provedor de login fornecidos pelo Firebase Authentication.",
       "Perfil: data de nascimento, idade calculada, país e clube do coração opcional informados pelo usuário.",
-      "Preferências: idioma, tema, consentimento de cookies e ordem das colunas.",
+      "Preferências: idioma, tema, consentimento de cookies, ordem das colunas, times, ligas e ranges favoritos.",
+      "Jogos favoritos: dados da partida marcada pelo usuário, como data, horário, competição, times, posições e odds.",
       "Medição opcional: páginas visitadas, dispositivo, localização aproximada e interações com recursos, somente quando o usuário autoriza o Google Analytics.",
     ],
     purposeTitle: "Finalidades",
     purposes: [
       "Autenticar a conta e manter a sessão.",
       "Personalizar a experiência e salvar preferências.",
-      "Liberar filtros, Race e reorganização de colunas para usuários autenticados.",
+      "Liberar filtros, Race, reorganização de colunas, Meus Filtros e Meus Jogos para usuários autenticados.",
       "Entender o uso do site e melhorar o produto quando a medição for autorizada.",
       "Proteger o serviço e diagnosticar falhas.",
     ],
@@ -36,7 +37,6 @@ const content = {
       "Você pode solicitar acesso, correção ou exclusão de dados da sua conta pelo contato abaixo. Podemos pedir confirmação da identidade antes de atender à solicitação.",
     contactTitle: "Contato",
     contactText: "E-mail para assuntos de privacidade:",
-    back: "Voltar ao TraderTab",
   },
   en: {
     title: "Privacy Policy",
@@ -47,14 +47,15 @@ const content = {
     collected: [
       "Account: email, name, photo and login provider supplied by Firebase Authentication.",
       "Profile: date of birth, calculated age, country and optional favorite club entered by the user.",
-      "Preferences: language, theme, cookie consent and column order.",
+      "Preferences: language, theme, cookie consent, column order, teams, leagues and favorite ranges.",
+      "Favorite matches: match data starred by the user, such as date, time, competition, teams, positions and odds.",
       "Optional measurement: visited pages, device, approximate location and feature interactions, only when Google Analytics is authorized.",
     ],
     purposeTitle: "Purposes",
     purposes: [
       "Authenticate the account and maintain the session.",
       "Personalize the experience and save preferences.",
-      "Unlock filters, Race and column reordering for authenticated users.",
+      "Unlock filters, Race, column reordering, My Filters and My Matches for authenticated users.",
       "Understand usage and improve the product when measurement is authorized.",
       "Protect the service and diagnose failures.",
     ],
@@ -72,7 +73,6 @@ const content = {
       "You may request access, correction or deletion of account data using the contact below. We may request identity confirmation before completing a request.",
     contactTitle: "Contact",
     contactText: "Privacy contact email:",
-    back: "Back to TraderTab",
   },
   es: {
     title: "Política de Privacidad",
@@ -83,14 +83,15 @@ const content = {
     collected: [
       "Cuenta: correo, nombre, foto y proveedor de acceso suministrados por Firebase Authentication.",
       "Perfil: fecha de nacimiento, edad calculada, país y club favorito opcional informados por el usuario.",
-      "Preferencias: idioma, tema, consentimiento de cookies y orden de columnas.",
+      "Preferencias: idioma, tema, consentimiento de cookies, orden de columnas, equipos, ligas y rangos favoritos.",
+      "Partidos favoritos: datos del partido marcado, como fecha, horario, competición, equipos, posiciones y cuotas.",
       "Medición opcional: páginas visitadas, dispositivo, ubicación aproximada e interacciones, solo cuando se autoriza Google Analytics.",
     ],
     purposeTitle: "Finalidades",
     purposes: [
       "Autenticar la cuenta y mantener la sesión.",
       "Personalizar la experiencia y guardar preferencias.",
-      "Habilitar filtros, Race y reorganización de columnas.",
+      "Habilitar filtros, Race, reorganización de columnas, Mis Filtros y Mis Partidos.",
       "Entender el uso y mejorar el producto cuando se autoriza la medición.",
       "Proteger el servicio y diagnosticar fallos.",
     ],
@@ -108,21 +109,15 @@ const content = {
       "Puedes solicitar acceso, corrección o eliminación de datos usando el contacto siguiente. Podemos pedir confirmación de identidad.",
     contactTitle: "Contacto",
     contactText: "Correo para asuntos de privacidad:",
-    back: "Volver a TraderTab",
   },
 };
 
-export default function PrivacyPolicy({ language, onBack }) {
+export default function PrivacyPolicy({ language }) {
   const t = content[language] || content.pt;
 
   return (
     <main className="privacy-page">
       <div className="privacy-shell">
-        <button type="button" className="privacy-back" onClick={onBack}>
-          <ArrowLeft size={18} />
-          {t.back}
-        </button>
-
         <header className="privacy-header">
           <span>
             <ShieldCheck size={28} />
