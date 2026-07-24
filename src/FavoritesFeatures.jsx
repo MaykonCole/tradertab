@@ -59,7 +59,7 @@ const copy = {
   },
   en: {
     back: "Back to matches",
-    preferencesTitle: "My Filters",
+    preferencesTitle: "My Filter",
     preferencesSubtitle:
       "Choose only the criteria you want. A match appears when it meets any configured criterion.",
     teams: "Favorite teams",
@@ -130,8 +130,7 @@ const copy = {
     noMatchesText:
       "Tus preferencias están guardadas. Los nuevos partidos aparecerán automáticamente.",
     myGamesTitle: "Mis Partidos",
-    myGamesSubtitle:
-      "Partidos marcados con estrella, organizados por fecha.",
+    myGamesSubtitle: "Partidos marcados con estrella, organizados por fecha.",
     noGamesTitle: "No hay partidos favoritos",
     noGamesText:
       "Usa la estrella de la lista principal para guardar un partido aquí.",
@@ -181,24 +180,26 @@ const getGoalsOddTone = (odd, market) => {
 const isWithinRange = (value, minimum, maximum) => {
   if (!Number.isFinite(Number(value)) || Number(value) <= 0) return false;
   const numeric = Number(value);
-  return (minimum === null || numeric >= minimum) &&
-    (maximum === null || numeric <= maximum);
+  return (
+    (minimum === null || numeric >= minimum) &&
+    (maximum === null || numeric <= maximum)
+  );
 };
 
 export const hasFavoriteCriteria = (preferences) =>
   Boolean(
     preferences?.teams?.length ||
-      preferences?.leagues?.length ||
-      numberOrNull(preferences?.homeOddMin) !== null ||
-      numberOrNull(preferences?.homeOddMax) !== null ||
-      numberOrNull(preferences?.awayOddMin) !== null ||
-      numberOrNull(preferences?.awayOddMax) !== null ||
-      numberOrNull(preferences?.overOddMin) !== null ||
-      numberOrNull(preferences?.overOddMax) !== null ||
-      numberOrNull(preferences?.underOddMin) !== null ||
-      numberOrNull(preferences?.underOddMax) !== null ||
-      numberOrNull(preferences?.positionsMin) !== null ||
-      numberOrNull(preferences?.positionsMax) !== null,
+    preferences?.leagues?.length ||
+    numberOrNull(preferences?.homeOddMin) !== null ||
+    numberOrNull(preferences?.homeOddMax) !== null ||
+    numberOrNull(preferences?.awayOddMin) !== null ||
+    numberOrNull(preferences?.awayOddMax) !== null ||
+    numberOrNull(preferences?.overOddMin) !== null ||
+    numberOrNull(preferences?.overOddMax) !== null ||
+    numberOrNull(preferences?.underOddMin) !== null ||
+    numberOrNull(preferences?.underOddMax) !== null ||
+    numberOrNull(preferences?.positionsMin) !== null ||
+    numberOrNull(preferences?.positionsMax) !== null,
   );
 
 export const matchesFavoritePreferences = (game, preferences) => {
@@ -329,7 +330,9 @@ function MultiPicker({ label, placeholder, options, selected, onChange, t }) {
               {item}
               <button
                 type="button"
-                onClick={() => onChange(selected.filter((value) => value !== item))}
+                onClick={() =>
+                  onChange(selected.filter((value) => value !== item))
+                }
                 aria-label={`Remover ${item}`}
               >
                 <X size={13} />
@@ -394,7 +397,10 @@ function CardRace({ results }) {
   if (!Array.isArray(results) || results.length === 0) return null;
 
   return (
-    <span className="feature-team-race form-race" aria-label={results.join(" ")}>
+    <span
+      className="feature-team-race form-race"
+      aria-label={results.join(" ")}
+    >
       {results.map((result, index) => (
         <span
           key={`${result}-${index}`}
@@ -422,7 +428,9 @@ function GamePreviewCard({
         <div>
           <div className="feature-time-stack">
             <span>{game.time}</span>
-            <small className="feature-date-top">{formatDate(game.date, language)}</small>
+            <small className="feature-date-top">
+              {formatDate(game.date, language)}
+            </small>
           </div>
           <strong>{game.competition}</strong>
           <small>{game.country}</small>
@@ -507,7 +515,7 @@ export function FavoritePreferencesPage({
   favoriteIds,
   favoriteBusyIds,
   onSave,
-  onToggleGame
+  onToggleGame,
 }) {
   const t = copy[language] || copy.pt;
   const [form, setForm] = useState(preferences);
@@ -695,16 +703,18 @@ export function MyGamesPage({
   language,
   games,
   favoriteBusyIds,
-  onToggleGame
+  onToggleGame,
 }) {
   const t = copy[language] || copy.pt;
-  const sortedGames = useMemo(() => (
-    [...games].sort((a, b) => {
-      const aDate = parseDate(a.date)?.getTime() || 0;
-      const bDate = parseDate(b.date)?.getTime() || 0;
-      return aDate - bDate || String(a.time).localeCompare(String(b.time));
-    })
-  ), [games]);
+  const sortedGames = useMemo(
+    () =>
+      [...games].sort((a, b) => {
+        const aDate = parseDate(a.date)?.getTime() || 0;
+        const bDate = parseDate(b.date)?.getTime() || 0;
+        return aDate - bDate || String(a.time).localeCompare(String(b.time));
+      }),
+    [games],
+  );
 
   return (
     <FeatureShell
