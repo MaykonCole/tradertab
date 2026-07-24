@@ -29,7 +29,8 @@ const copy = {
     min: "Mínima",
     max: "Máxima",
     optional: "Opcional",
-    save: "Salvar filtros",
+    save: "Salvar configurações",
+    clear: "Limpar filtros",
     saving: "Salvando...",
     saved: "Preferências salvas com sucesso.",
     invalidRange: "O valor mínimo não pode ser maior que o máximo.",
@@ -59,7 +60,7 @@ const copy = {
   },
   en: {
     back: "Back to matches",
-    preferencesTitle: "My Filters",
+    preferencesTitle: "My Filter",
     preferencesSubtitle:
       "Choose only the criteria you want. A match appears when it meets any configured criterion.",
     teams: "Favorite teams",
@@ -74,7 +75,8 @@ const copy = {
     min: "Minimum",
     max: "Maximum",
     optional: "Optional",
-    save: "Save filters",
+    save: "Save settings",
+    clear: "Clear filters",
     saving: "Saving...",
     saved: "Preferences saved successfully.",
     invalidRange: "The minimum value cannot be greater than the maximum.",
@@ -117,7 +119,8 @@ const copy = {
     min: "Mínima",
     max: "Máxima",
     optional: "Opcional",
-    save: "Guardar filtros",
+    save: "Guardar configuración",
+    clear: "Limpiar filtros",
     saving: "Guardando...",
     saved: "Preferencias guardadas correctamente.",
     invalidRange: "El valor mínimo no puede ser mayor que el máximo.",
@@ -130,8 +133,7 @@ const copy = {
     noMatchesText:
       "Tus preferencias están guardadas. Los nuevos partidos aparecerán automáticamente.",
     myGamesTitle: "Mis Partidos",
-    myGamesSubtitle:
-      "Partidos marcados con estrella, organizados por fecha.",
+    myGamesSubtitle: "Partidos marcados con estrella, organizados por fecha.",
     noGamesTitle: "No hay partidos favoritos",
     noGamesText:
       "Usa la estrella de la lista principal para guardar un partido aquí.",
@@ -178,27 +180,35 @@ const getGoalsOddTone = (odd, market) => {
   return `odd-${prefix}-dark`;
 };
 
+const getLeagueFilterValue = (game) => {
+  const competition = String(game?.competition || "").trim();
+  const country = String(game?.country || "").trim();
+  return country && country !== "—" ? `${country} - ${competition}` : competition;
+};
+
 const isWithinRange = (value, minimum, maximum) => {
   if (!Number.isFinite(Number(value)) || Number(value) <= 0) return false;
   const numeric = Number(value);
-  return (minimum === null || numeric >= minimum) &&
-    (maximum === null || numeric <= maximum);
+  return (
+    (minimum === null || numeric >= minimum) &&
+    (maximum === null || numeric <= maximum)
+  );
 };
 
 export const hasFavoriteCriteria = (preferences) =>
   Boolean(
     preferences?.teams?.length ||
-      preferences?.leagues?.length ||
-      numberOrNull(preferences?.homeOddMin) !== null ||
-      numberOrNull(preferences?.homeOddMax) !== null ||
-      numberOrNull(preferences?.awayOddMin) !== null ||
-      numberOrNull(preferences?.awayOddMax) !== null ||
-      numberOrNull(preferences?.overOddMin) !== null ||
-      numberOrNull(preferences?.overOddMax) !== null ||
-      numberOrNull(preferences?.underOddMin) !== null ||
-      numberOrNull(preferences?.underOddMax) !== null ||
-      numberOrNull(preferences?.positionsMin) !== null ||
-      numberOrNull(preferences?.positionsMax) !== null,
+    preferences?.leagues?.length ||
+    numberOrNull(preferences?.homeOddMin) !== null ||
+    numberOrNull(preferences?.homeOddMax) !== null ||
+    numberOrNull(preferences?.awayOddMin) !== null ||
+    numberOrNull(preferences?.awayOddMax) !== null ||
+    numberOrNull(preferences?.overOddMin) !== null ||
+    numberOrNull(preferences?.overOddMax) !== null ||
+    numberOrNull(preferences?.underOddMin) !== null ||
+    numberOrNull(preferences?.underOddMax) !== null ||
+    numberOrNull(preferences?.positionsMin) !== null ||
+    numberOrNull(preferences?.positionsMax) !== null,
   );
 
 export const matchesFavoritePreferences = (game, preferences) => {
@@ -219,8 +229,21 @@ export const matchesFavoritePreferences = (game, preferences) => {
   const matchesTeam =
     teams.size > 0 &&
     (teams.has(normalize(game.home)) || teams.has(normalize(game.away)));
+  const leagueFilterValue = normalize(getLeagueFilterValue(game));
+  const competitionOnly = normalize(game.competition);
+  const country = normalize(game.country);
+  const legacyLeagueFilterValue =
+    country && country !== normalize("—")
+      ? normalize(`${game.competition} - ${game.country}`)
+      : competitionOnly;
   const matchesLeague =
-    leagues.size > 0 && leagues.has(normalize(game.competition));
+    leagues.size > 0 &&
+    [...leagues].some(
+      (selectedLeague) =>
+        selectedLeague === leagueFilterValue ||
+        selectedLeague === legacyLeagueFilterValue ||
+        (!selectedLeague.includes(" - ") && selectedLeague === competitionOnly),
+    );
   const matchesHomeOdds =
     (homeOddMin !== null || homeOddMax !== null) &&
     isWithinRange(game.homeOdd, homeOddMin, homeOddMax);
@@ -258,6 +281,32 @@ const parseDate = (value) => {
     return new Date(Number(local[3]), Number(local[2]) - 1, Number(local[1]));
   const date = new Date(text);
   return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const parseTimeMinutes = (value) => {
+  const match = String(value ?? "").trim().match(/^(\d{2}):(\d{2})$/);
+  if (!match) return null;
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  return hours <= 23 && minutes <= 59 ? hours * 60 + minutes : null;
+};
+
+const isUpcomingGame = (game) => {
+  const date = parseDate(game.date);
+  const minutes = parseTimeMinutes(game.time);
+  if (!date || minutes === null) return false;
+
+  const kickoff = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    Math.floor(minutes / 60),
+    minutes % 60,
+    0,
+    0,
+  );
+
+  return kickoff.getTime() > Date.now();
 };
 
 const locale = { pt: "pt-BR", en: "en-US", es: "es-ES" };
@@ -329,7 +378,9 @@ function MultiPicker({ label, placeholder, options, selected, onChange, t }) {
               {item}
               <button
                 type="button"
-                onClick={() => onChange(selected.filter((value) => value !== item))}
+                onClick={() =>
+                  onChange(selected.filter((value) => value !== item))
+                }
                 aria-label={`Remover ${item}`}
               >
                 <X size={13} />
@@ -394,7 +445,10 @@ function CardRace({ results }) {
   if (!Array.isArray(results) || results.length === 0) return null;
 
   return (
-    <span className="feature-team-race form-race" aria-label={results.join(" ")}>
+    <span
+      className="feature-team-race form-race"
+      aria-label={results.join(" ")}
+    >
       {results.map((result, index) => (
         <span
           key={`${result}-${index}`}
@@ -422,7 +476,9 @@ function GamePreviewCard({
         <div>
           <div className="feature-time-stack">
             <span>{game.time}</span>
-            <small className="feature-date-top">{formatDate(game.date, language)}</small>
+            <small className="feature-date-top">
+              {formatDate(game.date, language)}
+            </small>
           </div>
           <strong>{game.competition}</strong>
           <small>{game.country}</small>
@@ -503,11 +559,11 @@ export function FavoritePreferencesPage({
   preferences,
   teams,
   leagues,
-  matchingGames,
+  games,
   favoriteIds,
   favoriteBusyIds,
   onSave,
-  onToggleGame
+  onToggleGame,
 }) {
   const t = copy[language] || copy.pt;
   const [form, setForm] = useState(preferences);
@@ -515,6 +571,33 @@ export function FavoritePreferencesPage({
   const [saving, setSaving] = useState(false);
 
   useEffect(() => setForm(preferences), [preferences]);
+
+  const liveMatchingGames = useMemo(
+    () =>
+      games.filter(
+        (game) =>
+          isUpcomingGame(game) && matchesFavoritePreferences(game, form),
+      ),
+    [games, form],
+  );
+
+  const clearFilters = () => {
+    setForm({
+      teams: [],
+      leagues: [],
+      homeOddMin: null,
+      homeOddMax: null,
+      awayOddMin: null,
+      awayOddMax: null,
+      overOddMin: null,
+      overOddMax: null,
+      underOddMin: null,
+      underOddMax: null,
+      positionsMin: null,
+      positionsMax: null,
+    });
+    setStatus("");
+  };
 
   const save = async (event) => {
     event.preventDefault();
@@ -648,26 +731,38 @@ export function FavoritePreferencesPage({
                 : t.saveError}
           </p>
         )}
-        <button className="favorites-save" type="submit" disabled={saving}>
-          {saving ? t.saving : t.save}
-        </button>
+        <div className="favorites-actions">
+          <button
+            className="favorites-clear"
+            type="button"
+            onClick={clearFilters}
+            disabled={saving}
+          >
+            <Trash2 size={16} />
+            {t.clear}
+          </button>
+          <button className="favorites-save" type="submit" disabled={saving}>
+            <Check size={16} />
+            {saving ? t.saving : t.save}
+          </button>
+        </div>
       </form>
 
       <section className="feature-results">
         <div className="feature-section-title">
           <Trophy size={19} />
           <h2>{t.matches}</h2>
-          <span>{matchingGames.length}</span>
+          <span>{liveMatchingGames.length}</span>
         </div>
-        {!hasFavoriteCriteria(preferences) ? (
+        {!hasFavoriteCriteria(form) ? (
           <div className="feature-empty">
             <Heart size={30} />
             <h3>{t.noCriteriaTitle}</h3>
             <p>{t.noCriteriaText}</p>
           </div>
-        ) : matchingGames.length ? (
+        ) : liveMatchingGames.length ? (
           <div className="feature-games-grid">
-            {matchingGames.map((game) => (
+            {liveMatchingGames.map((game) => (
               <GamePreviewCard
                 key={game.id}
                 game={game}
@@ -695,16 +790,18 @@ export function MyGamesPage({
   language,
   games,
   favoriteBusyIds,
-  onToggleGame
+  onToggleGame,
 }) {
   const t = copy[language] || copy.pt;
-  const sortedGames = useMemo(() => (
-    [...games].sort((a, b) => {
-      const aDate = parseDate(a.date)?.getTime() || 0;
-      const bDate = parseDate(b.date)?.getTime() || 0;
-      return aDate - bDate || String(a.time).localeCompare(String(b.time));
-    })
-  ), [games]);
+  const sortedGames = useMemo(
+    () =>
+      [...games].sort((a, b) => {
+        const aDate = parseDate(a.date)?.getTime() || 0;
+        const bDate = parseDate(b.date)?.getTime() || 0;
+        return aDate - bDate || String(a.time).localeCompare(String(b.time));
+      }),
+    [games],
+  );
 
   return (
     <FeatureShell
