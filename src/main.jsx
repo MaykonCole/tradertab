@@ -1472,7 +1472,14 @@ function App() {
     [games],
   );
   const leaguesCount = useMemo(
-    () => new Set(games.map((game) => game.competition)).size,
+    () =>
+      new Set(
+        games.map((game) =>
+          game.country && game.country !== "—"
+            ? `${game.country} - ${game.competition}`
+            : game.competition,
+        ),
+      ).size,
     [games],
   );
   const availableTeams = useMemo(
@@ -1484,7 +1491,15 @@ function App() {
   );
   const availableLeagues = useMemo(
     () =>
-      [...new Set(games.map((game) => game.competition))]
+      [
+        ...new Set(
+          games.map((game) =>
+            game.country && game.country !== "—"
+              ? `${game.country} - ${game.competition}`
+              : game.competition,
+          ),
+        ),
+      ]
         .filter(Boolean)
         .sort((a, b) => a.localeCompare(b)),
     [games],
@@ -1928,7 +1943,7 @@ function App() {
           preferences={favoritePreferences}
           teams={availableTeams}
           leagues={availableLeagues}
-          matchingGames={favoritePreferenceGames}
+          games={games}
           favoriteIds={favoriteIds}
           favoriteBusyIds={favoriteBusyIds}
           onSave={savePreferences}

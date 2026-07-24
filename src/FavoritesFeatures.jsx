@@ -29,7 +29,8 @@ const copy = {
     min: "Mínima",
     max: "Máxima",
     optional: "Opcional",
-    save: "Salvar filtros",
+    save: "Salvar configurações",
+    clear: "Limpar filtros",
     saving: "Salvando...",
     saved: "Preferências salvas com sucesso.",
     invalidRange: "O valor mínimo não pode ser maior que o máximo.",
@@ -74,7 +75,8 @@ const copy = {
     min: "Minimum",
     max: "Maximum",
     optional: "Optional",
-    save: "Save filters",
+    save: "Save settings",
+    clear: "Clear filters",
     saving: "Saving...",
     saved: "Preferences saved successfully.",
     invalidRange: "The minimum value cannot be greater than the maximum.",
@@ -117,7 +119,8 @@ const copy = {
     min: "Mínima",
     max: "Máxima",
     optional: "Opcional",
-    save: "Guardar filtros",
+    save: "Guardar configuración",
+    clear: "Limpiar filtros",
     saving: "Guardando...",
     saved: "Preferencias guardadas correctamente.",
     invalidRange: "El valor mínimo no puede ser mayor que el máximo.",
@@ -177,6 +180,12 @@ const getGoalsOddTone = (odd, market) => {
   return `odd-${prefix}-dark`;
 };
 
+const getLeagueFilterValue = (game) => {
+  const competition = String(game?.competition || "").trim();
+  const country = String(game?.country || "").trim();
+  return country && country !== "—" ? `${country} - ${competition}` : competition;
+};
+
 const isWithinRange = (value, minimum, maximum) => {
   if (!Number.isFinite(Number(value)) || Number(value) <= 0) return false;
   const numeric = Number(value);
@@ -220,8 +229,21 @@ export const matchesFavoritePreferences = (game, preferences) => {
   const matchesTeam =
     teams.size > 0 &&
     (teams.has(normalize(game.home)) || teams.has(normalize(game.away)));
+  const leagueFilterValue = normalize(getLeagueFilterValue(game));
+  const competitionOnly = normalize(game.competition);
+  const country = normalize(game.country);
+  const legacyLeagueFilterValue =
+    country && country !== normalize("—")
+      ? normalize(`${game.competition} - ${game.country}`)
+      : competitionOnly;
   const matchesLeague =
-    leagues.size > 0 && leagues.has(normalize(game.competition));
+    leagues.size > 0 &&
+    [...leagues].some(
+      (selectedLeague) =>
+        selectedLeague === leagueFilterValue ||
+        selectedLeague === legacyLeagueFilterValue ||
+        (!selectedLeague.includes(" - ") && selectedLeague === competitionOnly),
+    );
   const matchesHomeOdds =
     (homeOddMin !== null || homeOddMax !== null) &&
     isWithinRange(game.homeOdd, homeOddMin, homeOddMax);
@@ -259,6 +281,32 @@ const parseDate = (value) => {
     return new Date(Number(local[3]), Number(local[2]) - 1, Number(local[1]));
   const date = new Date(text);
   return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const parseTimeMinutes = (value) => {
+  const match = String(value ?? "").trim().match(/^(\d{2}):(\d{2})$/);
+  if (!match) return null;
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  return hours <= 23 && minutes <= 59 ? hours * 60 + minutes : null;
+};
+
+const isUpcomingGame = (game) => {
+  const date = parseDate(game.date);
+  const minutes = parseTimeMinutes(game.time);
+  if (!date || minutes === null) return false;
+
+  const kickoff = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    Math.floor(minutes / 60),
+    minutes % 60,
+    0,
+    0,
+  );
+
+  return kickoff.getTime() > Date.now();
 };
 
 const locale = { pt: "pt-BR", en: "en-US", es: "es-ES" };
@@ -511,7 +559,7 @@ export function FavoritePreferencesPage({
   preferences,
   teams,
   leagues,
-  matchingGames,
+  games,
   favoriteIds,
   favoriteBusyIds,
   onSave,
@@ -523,6 +571,33 @@ export function FavoritePreferencesPage({
   const [saving, setSaving] = useState(false);
 
   useEffect(() => setForm(preferences), [preferences]);
+
+  const liveMatchingGames = useMemo(
+    () =>
+      games.filter(
+        (game) =>
+          isUpcomingGame(game) && matchesFavoritePreferences(game, form),
+      ),
+    [games, form],
+  );
+
+  const clearFilters = () => {
+    setForm({
+      teams: [],
+      leagues: [],
+      homeOddMin: null,
+      homeOddMax: null,
+      awayOddMin: null,
+      awayOddMax: null,
+      overOddMin: null,
+      overOddMax: null,
+      underOddMin: null,
+      underOddMax: null,
+      positionsMin: null,
+      positionsMax: null,
+    });
+    setStatus("");
+  };
 
   const save = async (event) => {
     event.preventDefault();
@@ -656,26 +731,38 @@ export function FavoritePreferencesPage({
                 : t.saveError}
           </p>
         )}
-        <button className="favorites-save" type="submit" disabled={saving}>
-          {saving ? t.saving : t.save}
-        </button>
+        <div className="favorites-actions">
+          <button
+            className="favorites-clear"
+            type="button"
+            onClick={clearFilters}
+            disabled={saving}
+          >
+            <Trash2 size={16} />
+            {t.clear}
+          </button>
+          <button className="favorites-save" type="submit" disabled={saving}>
+            <Check size={16} />
+            {saving ? t.saving : t.save}
+          </button>
+        </div>
       </form>
 
       <section className="feature-results">
         <div className="feature-section-title">
           <Trophy size={19} />
           <h2>{t.matches}</h2>
-          <span>{matchingGames.length}</span>
+          <span>{liveMatchingGames.length}</span>
         </div>
-        {!hasFavoriteCriteria(preferences) ? (
+        {!hasFavoriteCriteria(form) ? (
           <div className="feature-empty">
             <Heart size={30} />
             <h3>{t.noCriteriaTitle}</h3>
             <p>{t.noCriteriaText}</p>
           </div>
-        ) : matchingGames.length ? (
+        ) : liveMatchingGames.length ? (
           <div className="feature-games-grid">
-            {matchingGames.map((game) => (
+            {liveMatchingGames.map((game) => (
               <GamePreviewCard
                 key={game.id}
                 game={game}
