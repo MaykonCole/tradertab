@@ -3700,3 +3700,26 @@ footer {
     min-width: 98px;
   }
 }
+
+
+/* Race dos times nos cards de Meus Filtros e Meus Jogos */
+.feature-team-race {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 3px;
+  min-height: 14px;
+}
+
+.feature-team-race .form-result {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  font-size: 7px;
+  line-height: 14px;
+  color: #fff;
+}
+
+:root[data-theme='light'] .feature-team-race .form-result {
+  color: #000;
+}
