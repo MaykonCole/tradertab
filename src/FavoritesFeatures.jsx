@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   CalendarDays,
   Check,
+  ChevronDown,
   Heart,
   Search,
   ShieldCheck,
@@ -44,7 +45,7 @@ const copy = {
       "Suas preferências estão salvas. Novos jogos aparecerão automaticamente quando corresponderem.",
     myGamesTitle: "Meus Jogos",
     myGamesSubtitle:
-      "Partidas marcadas com estrela, organizadas pela data do jogo.",
+      "Partidas marcadas com estrela, ordenadas conforme a opção selecionada.",
     noGamesTitle: "Nenhum jogo favoritado",
     noGamesText:
       "Use a estrela na listagem principal para guardar uma partida aqui.",
@@ -57,6 +58,13 @@ const copy = {
     position: "Pos.",
     protected: "Preferências sincronizadas com sua conta",
     searchEmpty: "Nenhuma opção encontrada",
+    sortBy: "Ordenar por",
+    sortChampionship: "Por Campeonato",
+    sortDate: "Por Data",
+    sortHomeOdd: "Por Odd Casa",
+    sortAwayOdd: "Por Odd Fora",
+    sortOverOdd: "Por Odd Over",
+    sortUnderOdd: "Por Odd Under",
   },
   en: {
     back: "Back to matches",
@@ -89,7 +97,7 @@ const copy = {
     noMatchesText:
       "Your preferences are saved. New matching games will appear automatically.",
     myGamesTitle: "My Matches",
-    myGamesSubtitle: "Starred matches organized by match date.",
+    myGamesSubtitle: "Starred matches sorted according to the selected option.",
     noGamesTitle: "No starred matches",
     noGamesText: "Use the star in the main list to save a match here.",
     remove: "Remove from my matches",
@@ -101,6 +109,13 @@ const copy = {
     position: "Pos.",
     protected: "Preferences synced with your account",
     searchEmpty: "No options found",
+    sortBy: "Sort by",
+    sortChampionship: "By Competition",
+    sortDate: "By Date",
+    sortHomeOdd: "By Home Odd",
+    sortAwayOdd: "By Away Odd",
+    sortOverOdd: "By Over Odd",
+    sortUnderOdd: "By Under Odd",
   },
   es: {
     back: "Volver a los partidos",
@@ -133,7 +148,7 @@ const copy = {
     noMatchesText:
       "Tus preferencias están guardadas. Los nuevos partidos aparecerán automáticamente.",
     myGamesTitle: "Mis Partidos",
-    myGamesSubtitle: "Partidos marcados con estrella, organizados por fecha.",
+    myGamesSubtitle: "Partidos marcados con estrella, ordenados según la opción seleccionada.",
     noGamesTitle: "No hay partidos favoritos",
     noGamesText:
       "Usa la estrella de la lista principal para guardar un partido aquí.",
@@ -146,6 +161,13 @@ const copy = {
     position: "Pos.",
     protected: "Preferencias sincronizadas con tu cuenta",
     searchEmpty: "No se encontraron opciones",
+    sortBy: "Ordenar por",
+    sortChampionship: "Por Campeonato",
+    sortDate: "Por Fecha",
+    sortHomeOdd: "Por Cuota Local",
+    sortAwayOdd: "Por Cuota Visitante",
+    sortOverOdd: "Por Cuota Over",
+    sortUnderOdd: "Por Cuota Under",
   },
 };
 
@@ -291,22 +313,18 @@ const parseTimeMinutes = (value) => {
   return hours <= 23 && minutes <= 59 ? hours * 60 + minutes : null;
 };
 
-const isUpcomingGame = (game) => {
+const isTodayOrFutureGame = (game) => {
   const date = parseDate(game.date);
-  const minutes = parseTimeMinutes(game.time);
-  if (!date || minutes === null) return false;
+  if (!date) return false;
 
-  const kickoff = new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-    Math.floor(minutes / 60),
-    minutes % 60,
-    0,
-    0,
+  const today = new Date();
+  const todayStart = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate(),
   );
 
-  return kickoff.getTime() > Date.now();
+  return date.getTime() >= todayStart.getTime();
 };
 
 const locale = { pt: "pt-BR", en: "en-US", es: "es-ES" };
@@ -321,6 +339,90 @@ const formatDate = (value, language) => {
     year: "numeric",
   }).format(date);
 };
+
+const getDateKey = (value) => {
+  const date = parseDate(value);
+  if (!date) return String(value || "");
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const formatDateGroupLabel = (value, language) => {
+  const date = parseDate(value);
+  if (!date) return String(value || "");
+  const datePart = new Intl.DateTimeFormat(locale[language] || "pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+  const weekday = new Intl.DateTimeFormat(locale[language] || "pt-BR", {
+    weekday: "long",
+  }).format(date);
+  return `${datePart} - ${weekday.charAt(0).toUpperCase()}${weekday.slice(1)}`;
+};
+
+const compareDateAndTime = (a, b) => {
+  const aDate = parseDate(a.date)?.getTime() || 0;
+  const bDate = parseDate(b.date)?.getTime() || 0;
+  const aTime = parseTimeMinutes(a.time) ?? Number.MAX_SAFE_INTEGER;
+  const bTime = parseTimeMinutes(b.time) ?? Number.MAX_SAFE_INTEGER;
+  return aDate - bDate || aTime - bTime;
+};
+
+function CollapsibleDateGroups({ games, language, renderGame }) {
+  const groups = useMemo(() => {
+    const map = new Map();
+    [...games].sort(compareDateAndTime).forEach((game) => {
+      const key = getDateKey(game.date);
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(game);
+    });
+    return [...map.entries()];
+  }, [games]);
+  const [collapsed, setCollapsed] = useState(() => new Set());
+
+  return (
+    <div className="feature-date-groups">
+      {groups.map(([dateKey, dateGames]) => {
+        const isCollapsed = collapsed.has(dateKey);
+        return (
+          <section className="feature-date-group" key={dateKey}>
+            <button
+              type="button"
+              className="feature-date-toggle"
+              aria-expanded={!isCollapsed}
+              onClick={() =>
+                setCollapsed((current) => {
+                  const next = new Set(current);
+                  if (next.has(dateKey)) next.delete(dateKey);
+                  else next.add(dateKey);
+                  return next;
+                })
+              }
+            >
+              <span className="feature-date-toggle-title">
+                <CalendarDays size={17} />
+                {formatDateGroupLabel(dateGames[0]?.date, language)}
+              </span>
+              <span className="feature-date-toggle-meta">
+                <strong>{dateGames.length}</strong>
+                <ChevronDown size={18} />
+              </span>
+            </button>
+            {!isCollapsed && (
+              <div className="feature-games-grid">
+                {dateGames.map(renderGame)}
+              </div>
+            )}
+          </section>
+        );
+      })}
+    </div>
+  );
+}
+
 
 function MultiPicker({ label, placeholder, options, selected, onChange, t }) {
   const [search, setSearch] = useState("");
@@ -576,7 +678,7 @@ export function FavoritePreferencesPage({
     () =>
       games.filter(
         (game) =>
-          isUpcomingGame(game) && matchesFavoritePreferences(game, form),
+          isTodayOrFutureGame(game) && matchesFavoritePreferences(game, form),
       ),
     [games, form],
   );
@@ -761,8 +863,10 @@ export function FavoritePreferencesPage({
             <p>{t.noCriteriaText}</p>
           </div>
         ) : liveMatchingGames.length ? (
-          <div className="feature-games-grid">
-            {liveMatchingGames.map((game) => (
+          <CollapsibleDateGroups
+            games={liveMatchingGames}
+            language={language}
+            renderGame={(game) => (
               <GamePreviewCard
                 key={game.id}
                 game={game}
@@ -772,8 +876,8 @@ export function FavoritePreferencesPage({
                 onToggle={onToggleGame}
                 busy={favoriteBusyIds.has(String(game.id))}
               />
-            ))}
-          </div>
+            )}
+          />
         ) : (
           <div className="feature-empty">
             <Search size={30} />
@@ -793,15 +897,39 @@ export function MyGamesPage({
   onToggleGame,
 }) {
   const t = copy[language] || copy.pt;
-  const sortedGames = useMemo(
-    () =>
-      [...games].sort((a, b) => {
-        const aDate = parseDate(a.date)?.getTime() || 0;
-        const bDate = parseDate(b.date)?.getTime() || 0;
-        return aDate - bDate || String(a.time).localeCompare(String(b.time));
-      }),
+  const [sortBy, setSortBy] = useState("date");
+  const visibleGames = useMemo(
+    () => games.filter(isTodayOrFutureGame),
     [games],
   );
+  const sortedGames = useMemo(() => {
+    const oddValue = (value) => {
+      const number = Number(value);
+      return Number.isFinite(number) && number > 0
+        ? number
+        : Number.MAX_SAFE_INTEGER;
+    };
+
+    return [...visibleGames].sort((a, b) => {
+      if (sortBy === "competition") {
+        return (
+          String(a.competition || "").localeCompare(
+            String(b.competition || ""),
+            locale[language] || "pt-BR",
+          ) || compareDateAndTime(a, b)
+        );
+      }
+      if (sortBy === "homeOdd")
+        return oddValue(a.homeOdd) - oddValue(b.homeOdd) || compareDateAndTime(a, b);
+      if (sortBy === "awayOdd")
+        return oddValue(a.awayOdd) - oddValue(b.awayOdd) || compareDateAndTime(a, b);
+      if (sortBy === "overOdd")
+        return oddValue(a.over25Odd) - oddValue(b.over25Odd) || compareDateAndTime(a, b);
+      if (sortBy === "underOdd")
+        return oddValue(a.under25Odd) - oddValue(b.under25Odd) || compareDateAndTime(a, b);
+      return compareDateAndTime(a, b);
+    });
+  }, [visibleGames, sortBy, language]);
 
   return (
     <FeatureShell
@@ -810,6 +938,19 @@ export function MyGamesPage({
       icon={<Star size={27} fill="currentColor" />}
       t={t}
     >
+      <div className="my-games-toolbar">
+        <label>
+          <span>{t.sortBy}</span>
+          <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
+            <option value="competition">{t.sortChampionship}</option>
+            <option value="date">{t.sortDate}</option>
+            <option value="homeOdd">{t.sortHomeOdd}</option>
+            <option value="awayOdd">{t.sortAwayOdd}</option>
+            <option value="overOdd">{t.sortOverOdd}</option>
+            <option value="underOdd">{t.sortUnderOdd}</option>
+          </select>
+        </label>
+      </div>
       {sortedGames.length ? (
         <div className="feature-games-grid my-games-grid">
           {sortedGames.map((game) => (

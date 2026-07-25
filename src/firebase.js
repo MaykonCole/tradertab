@@ -375,16 +375,36 @@ export const loadFavoritePreferences = async (userId) => {
   const snapshot = await getDoc(doc(db, "users", userId));
   const stored = snapshot.exists() ? snapshot.data()?.favorites : null;
 
+  const hasStoredField = (field) =>
+    Object.prototype.hasOwnProperty.call(stored || {}, field);
+
+  const readOddPreference = (currentField, legacyField) => {
+    // Um valor null salvo representa um campo que o usuário apagou.
+    // Só usa o campo legado quando a propriedade nova ainda não existe.
+    if (hasStoredField(currentField)) {
+      return sanitizeNumber(stored[currentField]);
+    }
+
+    return sanitizeNumber(stored?.[legacyField]);
+  };
+
   return {
     ...emptyFavoritePreferences,
     ...(stored || {}),
     teams: sanitizeStringList(stored?.teams),
     leagues: sanitizeStringList(stored?.leagues),
-    // Migra o range genérico usado pela versão anterior para Casa e Fora.
-    homeOddMin: stored?.homeOddMin ?? stored?.oddsMin ?? null,
-    homeOddMax: stored?.homeOddMax ?? stored?.oddsMax ?? null,
-    awayOddMin: stored?.awayOddMin ?? stored?.oddsMin ?? null,
-    awayOddMax: stored?.awayOddMax ?? stored?.oddsMax ?? null,
+    // Migra o range genérico apenas para usuários que ainda não possuem
+    // os novos campos de Casa e Fora. Campos apagados não voltam mais.
+    homeOddMin: readOddPreference("homeOddMin", "oddsMin"),
+    homeOddMax: readOddPreference("homeOddMax", "oddsMax"),
+    awayOddMin: readOddPreference("awayOddMin", "oddsMin"),
+    awayOddMax: readOddPreference("awayOddMax", "oddsMax"),
+    overOddMin: sanitizeNumber(stored?.overOddMin),
+    overOddMax: sanitizeNumber(stored?.overOddMax),
+    underOddMin: sanitizeNumber(stored?.underOddMin),
+    underOddMax: sanitizeNumber(stored?.underOddMax),
+    positionsMin: sanitizeNumber(stored?.positionsMin),
+    positionsMax: sanitizeNumber(stored?.positionsMax),
   };
 };
 
