@@ -475,20 +475,10 @@ const getDayKey = (dateValue) => {
 
 const isUpcomingGame = (game) => {
   const date = parseDate(game.date);
-  const minutes = parseTimeMinutes(game.time);
-  if (!date || minutes === null) return false;
-
-  const kickoff = new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-    Math.floor(minutes / 60),
-    minutes % 60,
-    0,
-    0,
-  );
-
-  return kickoff.getTime() > Date.now();
+  if (!date) return false;
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return date.getTime() >= today.getTime();
 };
 
 const parseTimeMinutes = (value) => {
@@ -1452,7 +1442,7 @@ function App() {
       authUser.uid,
       (savedGames) => {
         if (!cancelled) {
-          setFavoriteGames(savedGames);
+          setFavoriteGames(savedGames.filter(isUpcomingGame));
           setFavoriteMessage("");
         }
       },

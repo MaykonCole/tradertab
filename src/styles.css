@@ -3813,3 +3813,106 @@ footer {
     grid-template-columns: 1fr;
   }
 }
+
+/* Agrupamento recolhível por data em Meus Filtros */
+.feature-date-groups {
+  display: grid;
+  gap: 12px;
+}
+.feature-date-group {
+  min-width: 0;
+}
+.feature-date-toggle {
+  width: 100%;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 9px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+.feature-date-toggle:hover {
+  border-color: color-mix(in srgb, var(--green-accent) 45%, var(--border));
+}
+.feature-date-toggle-title,
+.feature-date-toggle-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.feature-date-toggle-title {
+  font-size: 13px;
+  font-weight: 900;
+  text-transform: capitalize;
+}
+.feature-date-toggle-title svg {
+  color: var(--green-accent);
+}
+.feature-date-toggle-meta strong {
+  min-width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--green-accent-soft);
+  color: var(--green-accent);
+  font-size: 10px;
+}
+.feature-date-toggle[aria-expanded="true"] .feature-date-toggle-meta svg {
+  transform: rotate(180deg);
+}
+.feature-date-toggle-meta svg {
+  transition: transform .18s ease;
+}
+
+/* Ordenação de Meus Jogos */
+.my-games-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin: 16px 0 12px;
+}
+.my-games-toolbar label {
+  min-width: 230px;
+  display: grid;
+  gap: 5px;
+}
+.my-games-toolbar label > span {
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.my-games-toolbar select {
+  min-height: 40px;
+  padding: 0 34px 0 11px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 750;
+  outline: 0;
+}
+.my-games-toolbar select:focus {
+  border-color: var(--green-accent);
+}
+
+@media (max-width: 700px) {
+  .feature-date-toggle {
+    min-height: 43px;
+    padding: 0 10px;
+  }
+  .feature-date-toggle-title {
+    font-size: 11px;
+  }
+  .my-games-toolbar,
+  .my-games-toolbar label {
+    width: 100%;
+  }
+}
