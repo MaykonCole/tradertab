@@ -1163,8 +1163,9 @@ function MobileList({
           </div>
 
           <div className="mobile-meta">
-            <span>{game.competition}</span>
-            <span>{formatGameDate(game.date, lang)}</span>
+            <span className="mobile-competition">{game.competition}</span>
+            <span className="mobile-country">{game.country}</span>
+            <span className="mobile-date">{formatGameDate(game.date, lang)}</span>
           </div>
 
           <div className="mobile-teams">
