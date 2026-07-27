@@ -582,8 +582,8 @@ function GamePreviewCard({
               {formatDate(game.date, language)}
             </small>
           </div>
-          <strong>{game.competition}</strong>
-          <small>{game.country}</small>
+          <strong className="feature-competition">{game.competition}</strong>
+          <small className="feature-country">{game.country}</small>
         </div>
         <FavoriteStar
           game={game}
