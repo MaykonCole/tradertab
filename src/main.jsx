@@ -156,7 +156,7 @@ const translations = {
     account: "Minha conta",
     myFavorites: "Meus Filtros",
     myGames: "Meus Jogos",
-    leader: "Leader",
+    leader: "Ladder",
     addFavoriteGame: "Adicionar aos Meus Jogos",
     removeFavoriteGame: "Remover dos Meus Jogos",
     favoriteSaveError: "Não foi possível atualizar o jogo favorito.",
@@ -1818,8 +1818,8 @@ function App() {
         <nav className="topbar-shortcuts" aria-label="Acessos principais">
           <button
             type="button"
-            className={`topbar-shortcut ${currentPath === "/leader" ? "active" : ""}`}
-            onClick={() => navigateTo("/leader")}
+            className={`topbar-shortcut ${currentPath === "/ladder" ? "active" : ""}`}
+            onClick={() => navigateTo("/ladder")}
           >
             <TrendingUp size={18} />
             <span>{t.leader}</span>
@@ -1938,7 +1938,7 @@ function App() {
   );
 
 
-  if (currentPath === "/leader") {
+  if (currentPath === "/ladder") {
     return (
       <div className="app-shell">
         {renderTopbar()}
