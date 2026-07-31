@@ -33,6 +33,7 @@ import {
   matchesFavoritePreferences,
 } from "./FavoritesFeatures";
 import PrivacyPolicy from "./PrivacyPolicy";
+import LeaderPage from "./LeaderPage";
 import {
   loadFavoritePreferences,
   loadColumnOrder,
@@ -155,6 +156,7 @@ const translations = {
     account: "Minha conta",
     myFavorites: "Meus Filtros",
     myGames: "Meus Jogos",
+    leader: "Leader",
     addFavoriteGame: "Adicionar aos Meus Jogos",
     removeFavoriteGame: "Remover dos Meus Jogos",
     favoriteSaveError: "Não foi possível atualizar o jogo favorito.",
@@ -268,6 +270,7 @@ const translations = {
     account: "My account",
     myFavorites: "My Filters",
     myGames: "My Matches",
+    leader: "Ladder",
     addFavoriteGame: "Add to My Matches",
     removeFavoriteGame: "Remove from My Matches",
     favoriteSaveError: "Unable to update the favorite match.",
@@ -381,6 +384,7 @@ const translations = {
     account: "Mi cuenta",
     myFavorites: "Mis Filtros",
     myGames: "Mis Partidos",
+    leader: "Escalera",
     addFavoriteGame: "Agregar a Mis Partidos",
     removeFavoriteGame: "Eliminar de Mis Partidos",
     favoriteSaveError: "No fue posible actualizar el partido favorito.",
@@ -1285,6 +1289,7 @@ function App() {
   const [currentHash, setCurrentHash] = useState(
     () => window.location.hash.toLowerCase(),
   );
+  const [currentPath, setCurrentPath] = useState(() => window.location.pathname.toLowerCase());
   const listSectionRef = useRef(null);
   const filterScrollInitialized = useRef(false);
   const t = translations[lang];
@@ -1382,11 +1387,17 @@ function App() {
   useEffect(() => localStorage.setItem("tradertab-language", lang), [lang]);
 
   useEffect(() => {
-    const handleHashChange = () =>
+    const handleLocationChange = () => {
       setCurrentHash(window.location.hash.toLowerCase());
+      setCurrentPath(window.location.pathname.toLowerCase());
+    };
 
-    window.addEventListener("hashchange", handleHashChange);
-    return () => window.removeEventListener("hashchange", handleHashChange);
+    window.addEventListener("hashchange", handleLocationChange);
+    window.addEventListener("popstate", handleLocationChange);
+    return () => {
+      window.removeEventListener("hashchange", handleLocationChange);
+      window.removeEventListener("popstate", handleLocationChange);
+    };
   }, []);
 
   useEffect(
@@ -1790,22 +1801,35 @@ function App() {
     { value: "dayPlus3", label: formatFilterDate(3) },
   ];
 
-  const goHome = () => {
+  const navigateTo = (path) => {
     setAccountMenuOpen(false);
-    window.location.hash = "";
+    window.history.pushState({}, "", path);
+    setCurrentPath(window.location.pathname.toLowerCase());
+    setCurrentHash(window.location.hash.toLowerCase());
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  const goHome = () => navigateTo("/");
 
   const renderTopbar = () => (
     <header className="topbar">
       <div className="topbar-inner">
         <Logo onClick={goHome} language={lang} />
         <nav className="topbar-shortcuts" aria-label="Acessos principais">
+          <button
+            type="button"
+            className={`topbar-shortcut ${currentPath === "/leader" ? "active" : ""}`}
+            onClick={() => navigateTo("/leader")}
+          >
+            <TrendingUp size={18} />
+            <span>{t.leader}</span>
+          </button>
           {authUser && hasMemberAccess && (
             <>
               <button
                 type="button"
                 className={`topbar-shortcut ${currentHash === "#favoritos" ? "active" : ""}`}
-                onClick={() => { window.location.hash = "favoritos"; }}
+                onClick={() => navigateTo("/#favoritos")}
               >
                 <SlidersHorizontal size={18} />
                 <span>{t.myFavorites}</span>
@@ -1816,7 +1840,7 @@ function App() {
               <button
                 type="button"
                 className={`topbar-shortcut ${currentHash === "#meus-jogos" ? "active" : ""}`}
-                onClick={() => { window.location.hash = "meus-jogos"; }}
+                onClick={() => navigateTo("/#meus-jogos")}
               >
                 <Star size={18} />
                 <span>{t.myGames}</span>
@@ -1903,7 +1927,7 @@ function App() {
     <footer className="app-footer">
       <p>{t.footer}</p>
       <nav aria-label="Privacidade">
-        <a href="#privacidade">{t.privacyPolicy}</a>
+        <a href="/#privacidade">{t.privacyPolicy}</a>
         <button type="button" onClick={() => setCookieSettingsOpen(true)}>
           {t.cookiePreferences}
         </button>
@@ -1913,6 +1937,17 @@ function App() {
     </footer>
   );
 
+
+  if (currentPath === "/leader") {
+    return (
+      <div className="app-shell">
+        {renderTopbar()}
+        <LeaderPage language={lang} />
+        {renderFooter()}
+        {renderGlobalOverlays()}
+      </div>
+    );
+  }
 
   if (currentHash === "#privacidade") {
     return (
