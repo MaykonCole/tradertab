@@ -4195,3 +4195,41 @@ footer {
   .leader-odd { font-size: 14px; }
   .leader-row-result { font-size: 11px; }
 }
+
+/* Quick results at the two ladder extremes */
+.leader-extremes-card {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--border);
+  box-shadow: var(--shadow);
+}
+.leader-extremes-card article {
+  min-width: 0;
+  padding: 15px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background: linear-gradient(180deg, var(--surface-2), var(--surface));
+}
+.leader-extremes-card span {
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 800;
+}
+.leader-extremes-card strong {
+  font-size: 16px;
+  font-weight: 950;
+  white-space: nowrap;
+}
+.leader-extremes-card strong.positive { color: var(--green-accent); }
+.leader-extremes-card strong.negative { color: #f07f8e; }
+.leader-extremes-card strong.neutral { color: var(--text-muted); }
+@media (max-width: 560px) {
+  .leader-extremes-card { grid-template-columns: 1fr; }
+  .leader-extremes-card article { padding: 13px 15px; }
+}

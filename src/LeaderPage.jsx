@@ -26,6 +26,8 @@ const copy = {
     stakeLabel: "Stake",
     liabilityLabel: "Responsabilidade",
     remove: "Remover entrada",
+    valueAt1000: "Valor na odd 1000",
+    valueAt101: "Valor na odd 1,01",
   },
   en: {
     eyebrow: "Trading simulator",
@@ -51,6 +53,8 @@ const copy = {
     stakeLabel: "Stake",
     liabilityLabel: "Liability",
     remove: "Remove entry",
+    valueAt1000: "Value at odds 1000",
+    valueAt101: "Value at odds 1.01",
   },
   es: {
     eyebrow: "Simulador de trading",
@@ -76,6 +80,8 @@ const copy = {
     stakeLabel: "Stake",
     liabilityLabel: "Responsabilidad",
     remove: "Eliminar entrada",
+    valueAt1000: "Valor en cuota 1000",
+    valueAt101: "Valor en cuota 1,01",
   },
 };
 
@@ -206,6 +212,10 @@ export default function LeaderPage({ language = "pt" }) {
     return `${percent > 0 ? "+" : ""}${percent.toFixed(2).replace(".", ",")}%`;
   };
 
+  const resultClassName = (value) => value > 0.004 ? "positive" : value < -0.004 ? "negative" : "neutral";
+  const valueAt1000 = hedgeResultAtOdd(1000);
+  const valueAt101 = hedgeResultAtOdd(1.01);
+
   return (
     <main className="page leader-page">
       <section className="leader-hero">
@@ -241,7 +251,7 @@ export default function LeaderPage({ language = "pt" }) {
           <div className="leader-ladder" ref={ladderRef}>
             {ODDS.map((odds) => {
               const rowResult = hedgeResultAtOdd(odds);
-              const resultClass = rowResult > 0.004 ? "positive" : rowResult < -0.004 ? "negative" : "neutral";
+              const resultClass = resultClassName(rowResult);
               const cells = {
                 result: <strong className={`leader-row-result ${resultClass}`}>{resultText(rowResult)}</strong>,
                 lay: <button type="button" className="leader-price lay" onClick={() => addEntry("lay", odds)} aria-label={`${t.lay} ${oddText(odds)}`}><span>{oddText(odds)}</span><small>{t.lay}</small></button>,
@@ -266,6 +276,17 @@ export default function LeaderPage({ language = "pt" }) {
               <label className="leader-amount"><span>{t.amount}</span><input type="number" min="0.01" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} /></label>
             </div>
             <label className="leader-check"><input type="checkbox" checked={showPercent} onChange={(e) => setShowPercent(e.target.checked)} /><span><Percent size={16} />{t.showPercent}</span></label>
+          </section>
+
+          <section className="leader-extremes-card" aria-label="Resultados nas odds extremas">
+            <article>
+              <span>{t.valueAt1000}</span>
+              <strong className={resultClassName(valueAt1000)}>{resultText(valueAt1000)}</strong>
+            </article>
+            <article>
+              <span>{t.valueAt101}</span>
+              <strong className={resultClassName(valueAt101)}>{resultText(valueAt101)}</strong>
+            </article>
           </section>
 
           <section className="leader-entries-card">
