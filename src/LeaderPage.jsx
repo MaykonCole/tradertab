@@ -4,7 +4,7 @@ import { Calculator, ChevronDown, Percent, RotateCcw, Trash2, TrendingUp } from 
 const copy = {
   pt: {
     eyebrow: "Simulador de trading",
-    title: "Leader Back & Lay",
+    title: "Ladder Back & Lay",
     subtitle: "Simule entradas, responsabilidade, comissão e resultado antes de operar.",
     commission: "Comissão (%)",
     mode: "Modo do valor",
