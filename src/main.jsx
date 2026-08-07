@@ -34,6 +34,7 @@ import {
 } from "./FavoritesFeatures";
 import PrivacyPolicy from "./PrivacyPolicy";
 import LeaderPage from "./LeaderPage";
+import OddsHistoryPage from "./OddsHistoryPage";
 import {
   loadFavoritePreferences,
   loadColumnOrder,
@@ -157,6 +158,8 @@ const translations = {
     myFavorites: "Meus Filtros",
     myGames: "Meus Jogos",
     leader: "Ladder",
+    oddsHistory: "Odds History",
+    oddsHistory: "Histórico Odds",
     addFavoriteGame: "Adicionar aos Meus Jogos",
     removeFavoriteGame: "Remover dos Meus Jogos",
     favoriteSaveError: "Não foi possível atualizar o jogo favorito.",
@@ -385,6 +388,7 @@ const translations = {
     myFavorites: "Mis Filtros",
     myGames: "Mis Partidos",
     leader: "Escalera",
+    oddsHistory: "Histórico Odds",
     addFavoriteGame: "Agregar a Mis Partidos",
     removeFavoriteGame: "Eliminar de Mis Partidos",
     favoriteSaveError: "No fue posible actualizar el partido favorito.",
@@ -404,7 +408,7 @@ const translations = {
 };
 
 const GOOGLE_SHEETS_URL =
-  "https://script.google.com/macros/s/AKfycbwGZfPNcAoyuIzDS2YxlC8_axKQ39sYjXOf9F2J7ALXwVtdCx5d8ByRfypKeNJ1srLX/exec";
+  "https://script.google.com/macros/s/AKfycbxuSAtXNbMuc_4t5Xas4d7ONzywWT5PUx1x1TNuu0WWXyGLci_aExuG__xAK1CDiwEE/exec";
 
 const countryFlags = {
   Brasil: "🇧🇷",
@@ -1824,6 +1828,16 @@ function App() {
             <TrendingUp size={18} />
             <span>{t.leader}</span>
           </button>
+          {authUser && (
+            <button
+              type="button"
+              className={`topbar-shortcut ${currentPath === "/historyodd" ? "active" : ""}`}
+              onClick={() => navigateTo("/historyOdd")}
+            >
+              <LayoutGrid size={18} />
+              <span>{t.oddsHistory}</span>
+            </button>
+          )}
           {authUser && hasMemberAccess && (
             <>
               <button
@@ -1943,6 +1957,17 @@ function App() {
       <div className="app-shell">
         {renderTopbar()}
         <LeaderPage language={lang} />
+        {renderFooter()}
+        {renderGlobalOverlays()}
+      </div>
+    );
+  }
+
+  if (currentPath === "/historyodd" && authUser) {
+    return (
+      <div className="app-shell">
+        {renderTopbar()}
+        <OddsHistoryPage language={lang} />
         {renderFooter()}
         {renderGlobalOverlays()}
       </div>
