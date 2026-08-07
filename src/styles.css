@@ -4233,3 +4233,429 @@ footer {
   .leader-extremes-card { grid-template-columns: 1fr; }
   .leader-extremes-card article { padding: 13px 15px; }
 }
+
+/* ==========================================
+   Odds History / Regua cards
+========================================== */
+.primary-button {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--green-accent) 0%, color-mix(in srgb, var(--green-accent) 78%, #0d3528) 100%);
+  color: #062118;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: var(--shadow);
+}
+
+.primary-button:hover {
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+}
+
+.odds-history-page {
+  padding-top: 26px;
+  padding-bottom: 18px;
+}
+
+.odds-history-hero,
+.odds-history-filters,
+.odds-history-state-card,
+.odds-history-card {
+  background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface) 100%);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.odds-history-hero {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 20px;
+  align-items: center;
+  padding: 26px;
+  border-radius: 24px;
+  margin-bottom: 18px;
+}
+
+.odds-history-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(214, 163, 30, 0.14);
+  color: #d6a31e;
+  font-weight: 800;
+  margin-bottom: 14px;
+}
+
+.odds-history-hero h1 {
+  margin: 0;
+  font-size: clamp(28px, 3vw, 40px);
+}
+
+.odds-history-hero p {
+  margin: 10px 0 0;
+  color: var(--text-soft);
+  max-width: 760px;
+  line-height: 1.6;
+}
+
+.odds-history-source {
+  display: grid;
+  gap: 6px;
+  min-width: 220px;
+  padding: 18px 20px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.03) 100%);
+  border: 1px solid var(--border);
+}
+
+.odds-history-source span {
+  color: var(--text-muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.odds-history-source strong {
+  font-size: 15px;
+}
+
+.odds-history-filters {
+  padding: 18px;
+  border-radius: 22px;
+  display: grid;
+  grid-template-columns: 1.05fr 1.2fr .65fr .75fr auto;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.odds-filter-group {
+  display: grid;
+  gap: 8px;
+}
+
+.odds-filter-group label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-soft);
+  font-weight: 700;
+}
+
+.odds-filter-group input,
+.odds-filter-group select {
+  min-height: 48px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface-3) 62%, transparent);
+  color: var(--text);
+  padding: 0 14px;
+}
+
+.odds-filter-actions {
+  display: flex;
+  gap: 10px;
+  align-items: end;
+  justify-content: end;
+}
+
+.odds-history-results-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 10px 0 14px;
+}
+
+.odds-history-results-head strong {
+  font-size: 15px;
+}
+
+.odds-history-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.odds-history-state-card {
+  border-radius: 22px;
+  padding: 26px;
+  text-align: center;
+  color: var(--text-soft);
+}
+
+.odds-history-state-card strong {
+  display: block;
+  color: var(--text);
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.odds-history-state-card p,
+.odds-history-state-card small {
+  margin: 0;
+  display: block;
+}
+
+.odds-history-error small {
+  margin-top: 10px;
+  color: #ff9f8f;
+}
+
+.odds-history-card {
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+.odds-history-card-head {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 13px 18px 9px;
+  text-align: left;
+}
+
+.odds-history-card-head:hover {
+  background: rgba(255,255,255,.025);
+}
+
+.odds-history-card-main {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.odds-history-card-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.odds-history-card-title-row h2 {
+  margin: 0;
+  font-size: clamp(18px, 2vw, 24px);
+}
+
+.odds-market-chip,
+.odds-period-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  border: 1px solid var(--border);
+}
+
+.odds-market-chip {
+  background: rgba(57,210,155,.12);
+  color: var(--green-accent);
+}
+
+.odds-period-chip.ft {
+  background: rgba(120,165,255,.16);
+  color: var(--blue-accent);
+}
+
+.odds-period-chip.ht {
+  background: rgba(214,163,30,.16);
+  color: #d6a31e;
+}
+
+.odds-history-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+  color: var(--text-soft);
+  font-size: 13px;
+}
+
+.odds-history-card-meta span {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.05);
+}
+
+.odds-history-expand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-soft);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.odds-history-expand svg {
+  transition: transform .2s ease;
+}
+
+.odds-history-expand.open svg {
+  transform: rotate(180deg);
+}
+
+.odds-history-card-body {
+  padding: 0 18px 10px;
+}
+
+.odds-regua-track {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  padding: 2px 2px 0;
+  overflow: hidden;
+}
+
+/* Linha única e contínua: a Régua não usa cards individuais. */
+.odds-regua-track::before {
+  content: "";
+  position: absolute;
+  left: 2.7%;
+  right: 2.7%;
+  top: 50%;
+  height: 2px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--border) 78%, transparent);
+  pointer-events: none;
+}
+
+.odds-regua-point {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  height: 46px;
+  padding: 0 1px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  display: grid;
+  grid-template-rows: 1fr 10px 1fr;
+  align-items: center;
+  justify-items: center;
+  gap: 0;
+}
+
+.odds-regua-point::before {
+  content: "";
+  grid-row: 2;
+  width: 2px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--text-muted);
+}
+
+.odds-regua-point::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--text-muted);
+  box-shadow: 0 0 0 2px var(--surface-2);
+}
+
+.odds-regua-point.filled::before,
+.odds-regua-point.filled::after {
+  background: #0f6e20;
+}
+
+:root[data-theme='dark'] .odds-regua-point.filled::before,
+:root[data-theme='dark'] .odds-regua-point.filled::after {
+  background: #55d46b;
+}
+
+.odds-regua-minute,
+.odds-regua-odd,
+.odds-regua-paid-between {
+  font-size: clamp(9px, .9vw, 13px);
+  line-height: 1;
+  font-weight: 900;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.odds-regua-minute {
+  grid-row: 1;
+  align-self: end;
+  padding-bottom: 2px;
+  color: #d6a31e;
+  letter-spacing: 0;
+}
+
+.odds-regua-odd {
+  grid-row: 3;
+  align-self: start;
+  padding-top: 2px;
+  color: #0f6e20;
+}
+
+:root[data-theme='dark'] .odds-regua-odd {
+  color: #55d46b;
+}
+
+.odds-regua-paid-between {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 0;
+  color: #8b3dff;
+  text-align: center;
+  background: var(--surface-2);
+  padding: 2px 3px;
+  border-radius: 4px;
+}
+
+.odds-regua-point.empty .odds-regua-odd {
+  color: var(--text-muted);
+}
+
+@media (max-width: 980px) {
+  .odds-history-hero,
+  .odds-history-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .odds-filter-actions {
+    justify-content: stretch;
+  }
+
+  .odds-filter-actions .ghost-button,
+  .odds-filter-actions .primary-button {
+    flex: 1 1 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .odds-history-card-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .odds-history-expand {
+    justify-content: space-between;
+  }
+
+  .odds-regua-track { padding-inline: 0; }
+}
