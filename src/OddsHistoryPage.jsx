@@ -25,8 +25,8 @@ const copy = {
     goals: "Gols",
     matchOdds: "Resultado da Partida",
     all: "Todos",
-    ht: "HT",
-    ft: "FT",
+    ht: "1° Tempo",
+    ft: "2° Tempo",
     clear: "Limpar filtros",
     refresh: "Atualizar",
     loading: "Carregando réguas da planilha...",
@@ -87,8 +87,8 @@ const copy = {
     goals: "Goles",
     matchOdds: "Resultado del Partido",
     all: "Todos",
-    ht: "HT",
-    ft: "FT",
+    ht: "Primer tiempo",
+    ft: "Segundo tiempo",
     clear: "Limpiar filtros",
     refresh: "Actualizar",
     loading: "Cargando reglas desde la hoja...",
@@ -547,7 +547,10 @@ export default function OddsHistoryPage({ language = "pt" }) {
                           role="listitem"
                         >
                           {index > 0 && (
-                            <span className="odds-regua-paid-between" aria-hidden="true">
+                            <span
+                              className="odds-regua-paid-between"
+                              aria-hidden="true"
+                            >
                               {paidText(point.paid)}
                             </span>
                           )}
@@ -555,12 +558,13 @@ export default function OddsHistoryPage({ language = "pt" }) {
                             {point.displayMinute}
                           </span>
                           <strong className="odds-regua-odd">
-                            {Number.isFinite(point.odd) ? oddText(point.odd) : "--"}
+                            {Number.isFinite(point.odd)
+                              ? oddText(point.odd)
+                              : "--"}
                           </strong>
                         </div>
                       ))}
                     </div>
-
                   </div>
                 )}
               </article>
