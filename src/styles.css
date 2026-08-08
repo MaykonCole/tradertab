@@ -4330,7 +4330,7 @@ footer {
   padding: 18px;
   border-radius: 22px;
   display: grid;
-  grid-template-columns: 1.05fr 1.2fr .65fr .75fr auto;
+  grid-template-columns: 1.05fr 1.2fr .65fr .75fr .9fr auto;
   gap: 14px;
   margin-bottom: 14px;
 }
@@ -4448,7 +4448,8 @@ footer {
 }
 
 .odds-market-chip,
-.odds-period-chip {
+.odds-period-chip,
+.odds-average-chip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -4473,6 +4474,12 @@ footer {
 .odds-period-chip.ht {
   background: rgba(214,163,30,.16);
   color: #d6a31e;
+}
+
+.odds-average-chip {
+  background: rgba(140, 82, 255, .14);
+  color: #a970ff;
+  border-color: rgba(140, 82, 255, .28);
 }
 
 .odds-history-card-meta {
