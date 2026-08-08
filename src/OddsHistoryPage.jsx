@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
+  ArrowUpDown,
   CalendarDays,
   ChevronDown,
   Filter,
@@ -22,6 +23,11 @@ const copy = {
     teamPlaceholder: "Buscar por time",
     period: "Período",
     marketFilter: "Mercado",
+    ordering: "Ordenação",
+    orderDate: "Data",
+    orderRecords: "Quant. Registros",
+    highestAverage: "% Médio Maior",
+    lowestAverage: "% Médio Menor",
     goals: "Gols",
     matchOdds: "Resultado da Partida",
     all: "Todos",
@@ -38,7 +44,8 @@ const copy = {
     market: "Mercado",
     collapse: "Ocultar régua",
     expand: "Exibir régua",
-    paid: "% pago",
+    paid: "% Pago",
+    averagePaid: "% Pago médio",
     noOdd: "Sem odd",
     updatedAt: "Atualizado em",
     createdAt: "Criado em",
@@ -53,6 +60,11 @@ const copy = {
     teamPlaceholder: "Search team",
     period: "Period",
     marketFilter: "Market",
+    ordering: "Ordering",
+    orderDate: "Date",
+    orderRecords: "Record count",
+    highestAverage: "Highest avg. %",
+    lowestAverage: "Lowest avg. %",
     goals: "Goals",
     matchOdds: "Match Odds",
     all: "All",
@@ -69,7 +81,8 @@ const copy = {
     market: "Market",
     collapse: "Hide ladder",
     expand: "Show ladder",
-    paid: "% paid",
+    paid: "% Paid",
+    averagePaid: "Avg. %",
     noOdd: "No odds",
     updatedAt: "Updated at",
     createdAt: "Created at",
@@ -84,6 +97,11 @@ const copy = {
     teamPlaceholder: "Buscar equipo",
     period: "Periodo",
     marketFilter: "Mercado",
+    ordering: "Ordenación",
+    orderDate: "Fecha",
+    orderRecords: "Cant. registros",
+    highestAverage: "% medio mayor",
+    lowestAverage: "% medio menor",
     goals: "Goles",
     matchOdds: "Resultado del Partido",
     all: "Todos",
@@ -100,7 +118,8 @@ const copy = {
     market: "Mercado",
     collapse: "Ocultar regla",
     expand: "Mostrar regla",
-    paid: "% pagado",
+    paid: "% Pagado",
+    averagePaid: "% Medio",
     noOdd: "Sin cuota",
     updatedAt: "Actualizado en",
     createdAt: "Creado en",
@@ -281,7 +300,141 @@ const normalizeReguaRow = (row) => {
     updatedAt: getField(row, "AtualizadoEm", "updatedAt"),
     points,
     realPoints,
+    sourceRecordCount: 1,
   };
+};
+
+const normalizeKeyPart = (value) =>
+  String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+
+const recordTimestamp = (record) => {
+  const candidates = [record?.updatedAt, record?.createdAt];
+  for (const value of candidates) {
+    if (!value) continue;
+    const parsed = new Date(value).getTime();
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return 0;
+};
+
+const mergeReguaRecords = (records) => {
+  const groups = new Map();
+
+  records.forEach((record) => {
+    // Uma régua representa um único jogo/data/período/mercado.
+    // Usuários ou gravações diferentes do mesmo contexto alimentam a mesma régua.
+    const key = [
+      record.dateKey || toInputDate(record.date),
+      normalizeKeyPart(record.homeTeam),
+      normalizeKeyPart(record.awayTeam),
+      normalizeKeyPart(record.period),
+      // A tela agrupa pelo tipo visual do mercado. Ex.: diferentes nomes de
+      // mercado classificados como "Gols" pertencem à mesma régua do jogo.
+      normalizeKeyPart(record.marketType || record.market),
+    ].join("|");
+
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(record);
+  });
+
+  return Array.from(groups.entries()).map(([key, group]) => {
+    if (group.length === 1) return group[0];
+
+    const ordered = [...group].sort(
+      (a, b) => recordTimestamp(a) - recordTimestamp(b),
+    );
+    const base = ordered[ordered.length - 1];
+
+    const points = SHEET_MINUTES.map((sheetMinute) => {
+      let selectedPoint = null;
+      let sourceRecord = null;
+
+      // Se houver sobreposição no mesmo minuto, prevalece a gravação mais recente.
+      // Guardamos também de qual régua original o ponto veio para NÃO criar
+      // percentuais artificiais entre registros diferentes durante a mesclagem.
+      for (const record of ordered) {
+        const point = record.points.find(
+          (item) => item.sheetMinute === sheetMinute,
+        );
+        if (point && Number.isFinite(point.odd)) {
+          selectedPoint = point;
+          sourceRecord = record;
+        }
+      }
+
+      return {
+        id: String(sheetMinute),
+        sheetMinute,
+        displayMinute: base.period === "HT" ? sheetMinute - 45 : sheetMinute,
+        odd: selectedPoint?.odd ?? null,
+        paid: null,
+        sourceRecord,
+        sourcePoint: selectedPoint,
+      };
+    });
+
+    // O percentual só é real quando os dois pontos consecutivos pertencem à
+    // MESMA régua original. Nunca calculamos um percentual novo na fronteira
+    // criada pela mesclagem (ex.: 55 de uma régua + 60 de outra régua).
+    points.forEach((point, index) => {
+      if (index === 0 || !point.sourceRecord) return;
+      const previous = points[index - 1];
+      if (
+        !previous.sourceRecord ||
+        previous.sourceRecord !== point.sourceRecord
+      )
+        return;
+
+      // Mantém exatamente o percentual salvo na régua original, sem recalcular.
+      point.paid = Number.isFinite(point.sourcePoint?.paid)
+        ? point.sourcePoint.paid
+        : null;
+    });
+
+    const users = Array.from(
+      new Set(
+        group
+          .flatMap((record) => String(record.user || "").split("-"))
+          .map((value) => value.trim())
+          .filter(Boolean),
+      ),
+    );
+
+    // Remove os metadados internos de origem antes de enviar os pontos para a UI.
+    const mergedPoints = points.map(
+      ({ sourceRecord, sourcePoint, ...point }) => point,
+    );
+    const realPoints = mergedPoints.filter((point) =>
+      Number.isFinite(point.odd),
+    );
+
+    return {
+      ...base,
+      id: `merged-${key}`,
+      reguaId: group
+        .map((record) => record.reguaId)
+        .filter(Boolean)
+        .join("|"),
+      user: users.join(" - "),
+      points: mergedPoints,
+      realPoints,
+      sourceRecordCount: group.length,
+    };
+  });
+};
+
+const getAveragePaid = (record) => {
+  const values = (record?.points || [])
+    .map((point) => point.paid)
+    .filter((value) => Number.isFinite(value));
+
+  if (values.length === 0) return null;
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
 };
 
 const looksLikeRegua = (row) => {
@@ -334,13 +487,14 @@ export default function OddsHistoryPage({ language = "pt" }) {
   const [teamFilter, setTeamFilter] = useState("");
   const [periodFilter, setPeriodFilter] = useState("all");
   const [marketFilter, setMarketFilter] = useState("all");
+  const [sortOrder, setSortOrder] = useState("date");
   const [expandedIds, setExpandedIds] = useState(() => new Set());
 
   const loadData = async () => {
     setLoading(true);
     setError("");
     try {
-      const nextRecords = await fetchReguas();
+      const nextRecords = mergeReguaRecords(await fetchReguas());
       nextRecords.sort((a, b) => {
         const dateA = parseDate(a.date)?.getTime() || 0;
         const dateB = parseDate(b.date)?.getTime() || 0;
@@ -362,7 +516,7 @@ export default function OddsHistoryPage({ language = "pt" }) {
   const filteredRecords = useMemo(() => {
     const search = teamFilter.trim().toLowerCase();
 
-    return records.filter((record) => {
+    const filtered = records.filter((record) => {
       if (dateFilter && record.dateKey !== dateFilter) return false;
       if (
         periodFilter !== "all" &&
@@ -377,7 +531,41 @@ export default function OddsHistoryPage({ language = "pt" }) {
         .toLowerCase()
         .includes(search);
     });
-  }, [dateFilter, marketFilter, periodFilter, records, teamFilter]);
+
+    return [...filtered].sort((a, b) => {
+      const dateA = parseDate(a.date)?.getTime() || 0;
+      const dateB = parseDate(b.date)?.getTime() || 0;
+
+      if (sortOrder === "date") {
+        if (dateA !== dateB) return dateB - dateA;
+      } else if (sortOrder === "records") {
+        // "Quant. Registros" representa a quantidade de odds reais existentes
+        // na régua final, e não a quantidade de linhas/registros mesclados.
+        const countA = (a.realPoints || []).length;
+        const countB = (b.realPoints || []).length;
+        if (countA !== countB) return countB - countA;
+        if (dateA !== dateB) return dateB - dateA;
+      } else {
+        const averageA = getAveragePaid(a);
+        const averageB = getAveragePaid(b);
+
+        // Réguas sem nenhum percentual real ficam sempre no final.
+        if (!Number.isFinite(averageA) && !Number.isFinite(averageB)) {
+          if (dateA !== dateB) return dateB - dateA;
+        } else if (!Number.isFinite(averageA)) {
+          return 1;
+        } else if (!Number.isFinite(averageB)) {
+          return -1;
+        } else if (averageA !== averageB) {
+          return sortOrder === "highest"
+            ? averageB - averageA
+            : averageA - averageB;
+        }
+      }
+
+      return `${a.match} ${a.market}`.localeCompare(`${b.match} ${b.market}`);
+    });
+  }, [dateFilter, marketFilter, periodFilter, records, sortOrder, teamFilter]);
 
   const toggleExpanded = (id) => {
     setExpandedIds((current) => {
@@ -393,6 +581,7 @@ export default function OddsHistoryPage({ language = "pt" }) {
     setTeamFilter("");
     setPeriodFilter("all");
     setMarketFilter("all");
+    setSortOrder("date");
   };
 
   return (
@@ -464,6 +653,22 @@ export default function OddsHistoryPage({ language = "pt" }) {
             <option value="goals">{t.goals}</option>
           </select>
         </div>
+        <div className="odds-filter-group odds-filter-average">
+          <label htmlFor="odds-history-order">
+            <ArrowUpDown size={16} />
+            {t.ordering}
+          </label>
+          <select
+            id="odds-history-order"
+            value={sortOrder}
+            onChange={(event) => setSortOrder(event.target.value)}
+          >
+            <option value="date">{t.orderDate}</option>
+            <option value="records">{t.orderRecords}</option>
+            <option value="highest">{t.highestAverage}</option>
+            <option value="lowest">{t.lowestAverage}</option>
+          </select>
+        </div>
         <div className="odds-filter-actions">
           <button type="button" className="ghost-button" onClick={clearFilters}>
             {t.clear}
@@ -497,6 +702,7 @@ export default function OddsHistoryPage({ language = "pt" }) {
         <section className="odds-history-grid">
           {filteredRecords.map((record) => {
             const isExpanded = expandedIds.has(record.id);
+            const averagePaid = getAveragePaid(record);
 
             return (
               <article
@@ -520,6 +726,14 @@ export default function OddsHistoryPage({ language = "pt" }) {
                       >
                         {record.period}
                       </span>
+                      {Number.isFinite(averagePaid) && (
+                        <span
+                          className="odds-average-chip"
+                          title={`${t.averagePaid}: ${paidText(averagePaid)}`}
+                        >
+                          {t.averagePaid}: {paidText(averagePaid)}
+                        </span>
+                      )}
                     </div>
                     <div className="odds-history-card-meta">
                       <span>{formatDate(record.date, language)}</span>
@@ -547,7 +761,10 @@ export default function OddsHistoryPage({ language = "pt" }) {
                           role="listitem"
                         >
                           {index > 0 && (
-                            <span className="odds-regua-paid-between" aria-hidden="true">
+                            <span
+                              className="odds-regua-paid-between"
+                              aria-hidden="true"
+                            >
                               {paidText(point.paid)}
                             </span>
                           )}
@@ -555,12 +772,13 @@ export default function OddsHistoryPage({ language = "pt" }) {
                             {point.displayMinute}
                           </span>
                           <strong className="odds-regua-odd">
-                            {Number.isFinite(point.odd) ? oddText(point.odd) : "--"}
+                            {Number.isFinite(point.odd)
+                              ? oddText(point.odd)
+                              : "--"}
                           </strong>
                         </div>
                       ))}
                     </div>
-
                   </div>
                 )}
               </article>
