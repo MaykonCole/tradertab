@@ -4727,3 +4727,76 @@ footer {
     padding-inline: 14px;
   }
 }
+
+/* HistoryOdd Trial action */
+.odds-history-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.odds-history-trial-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 9px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(34, 197, 94, 0.38);
+  background: rgba(34, 197, 94, 0.10);
+  color: #22c55e;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease,
+    opacity 160ms ease;
+}
+
+.odds-history-trial-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: rgba(34, 197, 94, 0.17);
+  border-color: rgba(34, 197, 94, 0.62);
+}
+
+.odds-history-trial-button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.odds-history-trial-message {
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 10px;
+  padding: 8px 11px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.odds-history-trial-message.success {
+  color: #43c77a;
+  background: rgba(67, 199, 122, 0.1);
+}
+
+.odds-history-trial-message.warning {
+  color: #dba91e;
+  background: rgba(219, 169, 30, 0.1);
+}
+
+.odds-history-trial-message.error {
+  color: #ef6464;
+  background: rgba(239, 100, 100, 0.1);
+}
+
+@media (max-width: 520px) {
+  .odds-history-actions {
+    gap: 8px;
+  }
+
+  .odds-history-trial-button {
+    min-height: 38px;
+    padding-inline: 14px;
+  }
+}

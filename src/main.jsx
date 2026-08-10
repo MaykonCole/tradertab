@@ -1997,7 +1997,7 @@ function App() {
     return (
       <div className="app-shell">
         {renderTopbar()}
-        <OddsHistoryPage language={lang} />
+        <OddsHistoryPage language={lang} authUser={authUser} />
         {renderFooter()}
         {renderGlobalOverlays()}
       </div>

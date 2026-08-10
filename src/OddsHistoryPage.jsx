@@ -7,6 +7,7 @@ import {
   Filter,
   RefreshCw,
   Search,
+  ShieldCheck,
   TrendingUp,
 } from "lucide-react";
 
@@ -23,6 +24,11 @@ const copy = {
     subtitle:
       "Consulte as réguas salvas na planilha e visualize a evolução das odds em uma régua compacta, contínua e fácil de ler.",
     downloadHistoryOdd: "Download HistoryOdd",
+    requestTrial: "Licença Gratuita",
+    trialRequesting: "Ativando licença...",
+    trialSuccess: "Licença gratuita de 10 dias ativada com sucesso.",
+    trialAlreadyUsed: "Este e-mail já utilizou a licença gratuita.",
+    trialError: "Não foi possível ativar a licença gratuita agora. Tente novamente.",
     date: "Data",
     team: "Time",
     teamPlaceholder: "Buscar por time",
@@ -61,6 +67,11 @@ const copy = {
     subtitle:
       "Browse the saved ladder records from the spreadsheet and view odds progression on a compact, continuous and readable ruler.",
     downloadHistoryOdd: "Download HistoryOdd",
+    requestTrial: "Free License",
+    trialRequesting: "Activating license...",
+    trialSuccess: "10-day free license activated successfully.",
+    trialAlreadyUsed: "This email has already used the free license.",
+    trialError: "We could not activate the free license right now. Try again.",
     date: "Date",
     team: "Team",
     teamPlaceholder: "Search team",
@@ -99,6 +110,11 @@ const copy = {
     subtitle:
       "Consulta las reglas guardadas en la hoja y visualiza la evolución de las cuotas en tarjetas modernas, claras y fáciles de leer.",
     downloadHistoryOdd: "Descargar HistoryOdd",
+    requestTrial: "Licencia Gratuita",
+    trialRequesting: "Activando licencia...",
+    trialSuccess: "Licencia gratuita de 10 días activada correctamente.",
+    trialAlreadyUsed: "Este correo ya utilizó la licencia gratuita.",
+    trialError: "No fue posible activar la licencia gratuita ahora. Inténtalo de nuevo.",
     date: "Fecha",
     team: "Equipo",
     teamPlaceholder: "Buscar equipo",
@@ -485,7 +501,7 @@ async function fetchReguas() {
   return records.map(normalizeReguaRow);
 }
 
-export default function OddsHistoryPage({ language = "pt" }) {
+export default function OddsHistoryPage({ language = "pt", authUser = null }) {
   const t = copy[language] || copy.pt;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -496,6 +512,9 @@ export default function OddsHistoryPage({ language = "pt" }) {
   const [marketFilter, setMarketFilter] = useState("all");
   const [sortOrder, setSortOrder] = useState("date");
   const [expandedIds, setExpandedIds] = useState(() => new Set());
+  const [trialBusy, setTrialBusy] = useState(false);
+  const [trialMessage, setTrialMessage] = useState("");
+  const [trialMessageType, setTrialMessageType] = useState("");
 
   const loadData = async () => {
     setLoading(true);
@@ -590,6 +609,48 @@ export default function OddsHistoryPage({ language = "pt" }) {
     });
   };
 
+
+  const requestHistoryOddTrial = async () => {
+    if (!authUser || typeof authUser.getIdToken !== "function" || trialBusy) return;
+
+    setTrialBusy(true);
+    setTrialMessage("");
+    setTrialMessageType("");
+
+    try {
+      const idToken = await authUser.getIdToken(true);
+      const response = await fetch("/api/generate-historyodd-trial", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({}),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (response.status === 409 || payload?.error === "trial-already-used") {
+        setTrialMessage(t.trialAlreadyUsed);
+        setTrialMessageType("warning");
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(payload?.error || `trial-${response.status}`);
+      }
+
+      setTrialMessage(t.trialSuccess);
+      setTrialMessageType("success");
+    } catch (trialError) {
+      console.error("[TraderTab] Falha ao solicitar Trial do HistoryOdd", trialError);
+      setTrialMessage(t.trialError);
+      setTrialMessageType("error");
+    } finally {
+      setTrialBusy(false);
+    }
+  };
+
   const clearFilters = () => {
     setDateFilter("");
     setTeamFilter("");
@@ -614,14 +675,31 @@ export default function OddsHistoryPage({ language = "pt" }) {
               alt="HistoryOdd"
               className="odds-history-download-icon"
             />
-            <a
-              className="odds-history-download-button"
-              href={HISTORY_ODD_DOWNLOAD_URL}
-              aria-label={t.downloadHistoryOdd}
-            >
-              {t.downloadHistoryOdd}
-            </a>
+            <div className="odds-history-actions">
+              <a
+                className="odds-history-download-button"
+                href={HISTORY_ODD_DOWNLOAD_URL}
+                aria-label={t.downloadHistoryOdd}
+              >
+                {t.downloadHistoryOdd}
+              </a>
+              <button
+                type="button"
+                className="odds-history-trial-button"
+                onClick={requestHistoryOddTrial}
+                disabled={trialBusy}
+                aria-label={t.requestTrial}
+              >
+                <ShieldCheck size={17} />
+                {trialBusy ? t.trialRequesting : t.requestTrial}
+              </button>
+            </div>
           </div>
+          {trialMessage ? (
+            <div className={`odds-history-trial-message ${trialMessageType}`} role="status">
+              {trialMessage}
+            </div>
+          ) : null}
         </div>
       </section>
 
