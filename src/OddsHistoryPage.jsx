@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import historyOddIcon from "./assets/historyodd-icon.png";
 import {
   ArrowUpDown,
   CalendarDays,
@@ -12,12 +13,16 @@ import {
 const REGUA_SHEETS_URL =
   "https://script.google.com/macros/s/AKfycbxuSAtXNbMuc_4t5Xas4d7ONzywWT5PUx1x1TNuu0WWXyGLci_aExuG__xAK1CDiwEE/exec";
 
+const HISTORY_ODD_DOWNLOAD_URL =
+  "https://github.com/MaykonCole/HistoryOdd-Releases/releases/latest/download/HistoryOdd-win-Setup.exe";
+
 const copy = {
   pt: {
     eyebrow: "Histórico de mercado",
     title: "Histórico Odds",
     subtitle:
       "Consulte as réguas salvas na planilha e visualize a evolução das odds em uma régua compacta, contínua e fácil de ler.",
+    downloadHistoryOdd: "Download HistoryOdd",
     date: "Data",
     team: "Time",
     teamPlaceholder: "Buscar por time",
@@ -55,6 +60,7 @@ const copy = {
     title: "Odds History",
     subtitle:
       "Browse the saved ladder records from the spreadsheet and view odds progression on a compact, continuous and readable ruler.",
+    downloadHistoryOdd: "Download HistoryOdd",
     date: "Date",
     team: "Team",
     teamPlaceholder: "Search team",
@@ -92,6 +98,7 @@ const copy = {
     title: "Histórico Odds",
     subtitle:
       "Consulta las reglas guardadas en la hoja y visualiza la evolución de las cuotas en tarjetas modernas, claras y fáciles de leer.",
+    downloadHistoryOdd: "Descargar HistoryOdd",
     date: "Fecha",
     team: "Equipo",
     teamPlaceholder: "Buscar equipo",
@@ -601,6 +608,20 @@ export default function OddsHistoryPage({ language = "pt" }) {
           </span>
           <h1>{t.title}</h1>
           <p>{t.subtitle}</p>
+          <div className="odds-history-download">
+            <img
+              src={historyOddIcon}
+              alt="HistoryOdd"
+              className="odds-history-download-icon"
+            />
+            <a
+              className="odds-history-download-button"
+              href={HISTORY_ODD_DOWNLOAD_URL}
+              aria-label={t.downloadHistoryOdd}
+            >
+              {t.downloadHistoryOdd}
+            </a>
+          </div>
         </div>
       </section>
 

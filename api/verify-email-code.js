@@ -4,6 +4,7 @@ import {
   sameOriginRequest,
   setJsonHeaders,
   verifyChallenge,
+  createLicenseGrant,
 } from "./_emailVerification.js";
 
 export default async function handler(req, res) {
@@ -31,7 +32,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "invalid-or-expired-code" });
     }
 
-    return res.status(200).json({ verified: true });
+    return res.status(200).json({ verified: true, licenseGrant: createLicenseGrant(email) });
   } catch (error) {
     console.error("[TraderTab] Verification error", error);
     return res.status(500).json({ error: "verification-failed" });

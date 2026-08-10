@@ -21,21 +21,13 @@ import {
   saveUserProfile,
 } from "./firebase";
 
-const HISTORY_ODD_TRIAL_LICENSE_URL =
-  "https://myradar-license-server.myradarapp.workers.dev/generate-license";
-
-const generateHistoryOddTrialLicense = async (customerEmail) => {
-  const response = await fetch(HISTORY_ODD_TRIAL_LICENSE_URL, {
+const generateHistoryOddTrialLicense = async (customerEmail, licenseGrant) => {
+  const response = await fetch("/api/generate-historyodd-trial", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      durationDays: 10,
-      customerEmail,
-      maxDevices: 1,
-      productName: "HistoryOddPro",
-    }),
+    body: JSON.stringify({ customerEmail, licenseGrant }),
   });
 
   if (!response.ok) {
@@ -44,7 +36,6 @@ const generateHistoryOddTrialLicense = async (customerEmail) => {
 
   return response;
 };
-
 
 const requestVerificationCode = async (email) => {
   const response = await fetch("/api/send-verification-code", {
@@ -77,7 +68,7 @@ const verifyEmailCode = async (email, code, challenge) => {
     throw error;
   }
 
-  return true;
+  return data;
 };
 
 const copy = {
@@ -467,8 +458,9 @@ export default function AuthModal({
       }
 
       // Segunda etapa: valida o código no servidor antes de criar a conta.
+      let verificationResult;
       try {
-        await verifyEmailCode(
+        verificationResult = await verifyEmailCode(
           customerEmail,
           verificationCode,
           verificationChallenge,
@@ -487,7 +479,10 @@ export default function AuthModal({
       // integração adicional e não deve invalidar o cadastro se o serviço
       // externo estiver temporariamente indisponível.
       try {
-        await generateHistoryOddTrialLicense(customerEmail);
+        await generateHistoryOddTrialLicense(
+          customerEmail,
+          verificationResult.licenseGrant,
+        );
       } catch (licenseError) {
         console.error(
           "[TraderTab] Falha ao gerar licença Trial do HistoryOdd",

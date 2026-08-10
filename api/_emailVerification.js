@@ -73,6 +73,52 @@ export function verifyChallenge(email, code, challenge) {
   );
 }
 
+
+const LICENSE_GRANT_TTL_MS = 5 * 60 * 1000;
+
+export function createLicenseGrant(email) {
+  const expiresAt = Date.now() + LICENSE_GRANT_TTL_MS;
+  const nonce = crypto.randomBytes(16).toString("base64url");
+  const payload = `${email}|${expiresAt}|${nonce}`;
+  const signature = signPayload(payload, getSecret());
+
+  return Buffer.from(
+    JSON.stringify({ email, expiresAt, nonce, signature }),
+    "utf8",
+  ).toString("base64url");
+}
+
+export function verifyLicenseGrant(email, grant) {
+  let parsed;
+  try {
+    parsed = JSON.parse(Buffer.from(String(grant || ""), "base64url").toString("utf8"));
+  } catch {
+    return false;
+  }
+
+  if (
+    !parsed ||
+    parsed.email !== email ||
+    !Number.isFinite(parsed.expiresAt) ||
+    parsed.expiresAt < Date.now() ||
+    parsed.expiresAt > Date.now() + LICENSE_GRANT_TTL_MS + 30_000 ||
+    typeof parsed.nonce !== "string" ||
+    typeof parsed.signature !== "string"
+  ) {
+    return false;
+  }
+
+  const payload = `${email}|${parsed.expiresAt}|${parsed.nonce}`;
+  const expected = signPayload(payload, getSecret());
+  const provided = Buffer.from(parsed.signature);
+  const expectedBuffer = Buffer.from(expected);
+
+  return (
+    provided.length === expectedBuffer.length &&
+    crypto.timingSafeEqual(provided, expectedBuffer)
+  );
+}
+
 export function generateCode() {
   return crypto.randomInt(100000, 1000000).toString();
 }
