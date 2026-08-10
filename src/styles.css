@@ -4666,3 +4666,64 @@ footer {
 
   .odds-regua-track { padding-inline: 0; }
 }
+
+/* Odds visibility for visitors */
+.odd-cell.odd-locked {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+  cursor: help;
+  color: var(--text-muted);
+  background: var(--surface-3);
+  border-color: var(--border);
+}
+
+/* HistoryOdd download */
+.odds-history-download {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.odds-history-download-icon {
+  width: 46px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 10px;
+  flex: 0 0 auto;
+}
+
+.odds-history-download-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 9px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(139, 61, 255, 0.38);
+  background: rgba(139, 61, 255, 0.10);
+  color: #9b5cff;
+  font-weight: 800;
+  text-decoration: none;
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+}
+
+.odds-history-download-button:hover {
+  transform: translateY(-1px);
+  background: rgba(139, 61, 255, 0.17);
+  border-color: rgba(139, 61, 255, 0.62);
+}
+
+@media (max-width: 520px) {
+  .odds-history-download-icon {
+    width: 42px;
+    height: 38px;
+  }
+
+  .odds-history-download-button {
+    min-height: 38px;
+    padding-inline: 14px;
+  }
+}

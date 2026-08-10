@@ -174,6 +174,7 @@ const translations = {
     profileRequiredText:
       "Data de nascimento e país são obrigatórios. O clube do coração é opcional.",
     dragLocked: "Entre para reorganizar as colunas",
+    oddsLoginRequired: "Para visualizar as Odds é preciso estar logado.",
     copyright: "© 2026 TraderTab. Todos os direitos reservados.",
   },
   en: {
@@ -288,6 +289,7 @@ const translations = {
     profileRequiredText:
       "Date of birth and country are required. Favorite club is optional.",
     dragLocked: "Sign in to reorder columns",
+    oddsLoginRequired: "You need to be signed in to view the odds.",
     copyright: "© 2026 TraderTab. All rights reserved.",
   },
   es: {
@@ -403,6 +405,7 @@ const translations = {
     profileRequiredText:
       "La fecha de nacimiento y el país son obligatorios. El club es opcional.",
     dragLocked: "Entra para reorganizar las columnas",
+    oddsLoginRequired: "Debes iniciar sesión para ver las cuotas.",
     copyright: "© 2026 TraderTab. Todos los derechos reservados.",
   },
 };
@@ -875,6 +878,7 @@ function MatchTable({
   favoriteIds,
   favoriteBusyIds,
   onToggleFavorite,
+  canViewOdds,
 }) {
   const [columnOrder, setColumnOrder] = useState(() =>
     getSavedColumnOrder(userId),
@@ -906,6 +910,21 @@ function MatchTable({
       cancelled = true;
     };
   }, [userId]);
+
+  const renderOdd = (value, toneClass) =>
+    canViewOdds ? (
+      <span className={`odd-cell ${toneClass}`}>
+        {value ? value.toFixed(2) : "—"}
+      </span>
+    ) : (
+      <span
+        className="odd-cell odd-locked"
+        title={t.oddsLoginRequired}
+        aria-label={t.oddsLoginRequired}
+      >
+        <LockKeyhole size={15} strokeWidth={2.2} />
+      </span>
+    );
 
   const columns = {
     time: {
@@ -948,27 +967,15 @@ function MatchTable({
     },
     homeOdd: {
       label: `${t.home} Odd`,
-      render: (game) => (
-        <span className={`odd-cell ${getOddTone(game.homeOdd)}`}>
-          {game.homeOdd ? game.homeOdd.toFixed(2) : "—"}
-        </span>
-      ),
+      render: (game) => renderOdd(game.homeOdd, getOddTone(game.homeOdd)),
     },
     drawOdd: {
       label: t.draw,
-      render: (game) => (
-        <span className={`odd-cell ${getOddTone(game.drawOdd)}`}>
-          {game.drawOdd ? game.drawOdd.toFixed(2) : "—"}
-        </span>
-      ),
+      render: (game) => renderOdd(game.drawOdd, getOddTone(game.drawOdd)),
     },
     awayOdd: {
       label: `${t.away} Odd`,
-      render: (game) => (
-        <span className={`odd-cell ${getOddTone(game.awayOdd)}`}>
-          {game.awayOdd ? game.awayOdd.toFixed(2) : "—"}
-        </span>
-      ),
+      render: (game) => renderOdd(game.awayOdd, getOddTone(game.awayOdd)),
     },
     away: {
       label: t.away,
@@ -993,21 +1000,13 @@ function MatchTable({
     },
     over25Odd: {
       label: t.over25,
-      render: (game) => (
-        <span className={`odd-cell ${getGoalsOddTone(game.over25Odd, "over")}`}>
-          {game.over25Odd ? game.over25Odd.toFixed(2) : "—"}
-        </span>
-      ),
+      render: (game) =>
+        renderOdd(game.over25Odd, getGoalsOddTone(game.over25Odd, "over")),
     },
     under25Odd: {
       label: t.under25,
-      render: (game) => (
-        <span
-          className={`odd-cell ${getGoalsOddTone(game.under25Odd, "under")}`}
-        >
-          {game.under25Odd ? game.under25Odd.toFixed(2) : "—"}
-        </span>
-      ),
+      render: (game) =>
+        renderOdd(game.under25Odd, getGoalsOddTone(game.under25Odd, "under")),
     },
   };
 
@@ -1127,6 +1126,7 @@ function MobileList({
   favoriteIds,
   favoriteBusyIds,
   onToggleFavorite,
+  canViewOdds,
 }) {
   return (
     <div className="mobile-cards">
@@ -1198,37 +1198,67 @@ function MobileList({
           <div className="mobile-odds-grid">
             <div>
               <span>{t.home}</span>
-              <strong className={`odd-cell ${getOddTone(game.homeOdd)}`}>
-                {game.homeOdd ? game.homeOdd.toFixed(2) : "—"}
-              </strong>
+              {canViewOdds ? (
+                <strong className={`odd-cell ${getOddTone(game.homeOdd)}`}>
+                  {game.homeOdd ? game.homeOdd.toFixed(2) : "—"}
+                </strong>
+              ) : (
+                <strong className="odd-cell odd-locked" title={t.oddsLoginRequired} aria-label={t.oddsLoginRequired}>
+                  <LockKeyhole size={15} strokeWidth={2.2} />
+                </strong>
+              )}
             </div>
             <div>
               <span>{t.draw}</span>
-              <strong className={`odd-cell ${getOddTone(game.drawOdd)}`}>
-                {game.drawOdd ? game.drawOdd.toFixed(2) : "—"}
-              </strong>
+              {canViewOdds ? (
+                <strong className={`odd-cell ${getOddTone(game.drawOdd)}`}>
+                  {game.drawOdd ? game.drawOdd.toFixed(2) : "—"}
+                </strong>
+              ) : (
+                <strong className="odd-cell odd-locked" title={t.oddsLoginRequired} aria-label={t.oddsLoginRequired}>
+                  <LockKeyhole size={15} strokeWidth={2.2} />
+                </strong>
+              )}
             </div>
             <div>
               <span>{t.away}</span>
-              <strong className={`odd-cell ${getOddTone(game.awayOdd)}`}>
-                {game.awayOdd ? game.awayOdd.toFixed(2) : "—"}
-              </strong>
+              {canViewOdds ? (
+                <strong className={`odd-cell ${getOddTone(game.awayOdd)}`}>
+                  {game.awayOdd ? game.awayOdd.toFixed(2) : "—"}
+                </strong>
+              ) : (
+                <strong className="odd-cell odd-locked" title={t.oddsLoginRequired} aria-label={t.oddsLoginRequired}>
+                  <LockKeyhole size={15} strokeWidth={2.2} />
+                </strong>
+              )}
             </div>
             <div>
               <span>{t.over25}</span>
-              <strong
-                className={`odd-cell ${getGoalsOddTone(game.over25Odd, "over")}`}
-              >
-                {game.over25Odd ? game.over25Odd.toFixed(2) : "—"}
-              </strong>
+              {canViewOdds ? (
+                <strong
+                  className={`odd-cell ${getGoalsOddTone(game.over25Odd, "over")}`}
+                >
+                  {game.over25Odd ? game.over25Odd.toFixed(2) : "—"}
+                </strong>
+              ) : (
+                <strong className="odd-cell odd-locked" title={t.oddsLoginRequired} aria-label={t.oddsLoginRequired}>
+                  <LockKeyhole size={15} strokeWidth={2.2} />
+                </strong>
+              )}
             </div>
             <div>
               <span>{t.under25}</span>
-              <strong
-                className={`odd-cell ${getGoalsOddTone(game.under25Odd, "under")}`}
-              >
-                {game.under25Odd ? game.under25Odd.toFixed(2) : "—"}
-              </strong>
+              {canViewOdds ? (
+                <strong
+                  className={`odd-cell ${getGoalsOddTone(game.under25Odd, "under")}`}
+                >
+                  {game.under25Odd ? game.under25Odd.toFixed(2) : "—"}
+                </strong>
+              ) : (
+                <strong className="odd-cell odd-locked" title={t.oddsLoginRequired} aria-label={t.oddsLoginRequired}>
+                  <LockKeyhole size={15} strokeWidth={2.2} />
+                </strong>
+              )}
             </div>
           </div>
         </article>
@@ -2342,6 +2372,7 @@ function App() {
                   favoriteIds={favoriteIds}
                   favoriteBusyIds={favoriteBusyIds}
                   onToggleFavorite={toggleFavoriteGame}
+                  canViewOdds={Boolean(authUser)}
                 />
               </div>
               <div className="mobile-table">
@@ -2354,6 +2385,7 @@ function App() {
                   favoriteIds={favoriteIds}
                   favoriteBusyIds={favoriteBusyIds}
                   onToggleFavorite={toggleFavoriteGame}
+                  canViewOdds={Boolean(authUser)}
                 />
               </div>
             </>
