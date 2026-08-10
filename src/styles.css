@@ -4666,3 +4666,15 @@ footer {
 
   .odds-regua-track { padding-inline: 0; }
 }
+
+/* Odds visibility for visitors */
+.odd-cell.odd-locked {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+  cursor: help;
+  color: var(--text-muted);
+  background: var(--surface-3);
+  border-color: var(--border);
+}

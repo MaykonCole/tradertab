@@ -21,6 +21,65 @@ import {
   saveUserProfile,
 } from "./firebase";
 
+const HISTORY_ODD_TRIAL_LICENSE_URL =
+  "https://myradar-license-server.myradarapp.workers.dev/generate-license";
+
+const generateHistoryOddTrialLicense = async (customerEmail) => {
+  const response = await fetch(HISTORY_ODD_TRIAL_LICENSE_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      durationDays: 10,
+      customerEmail,
+      maxDevices: 1,
+      productName: "HistoryOddPro",
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`historyodd-license-${response.status}`);
+  }
+
+  return response;
+};
+
+
+const requestVerificationCode = async (email) => {
+  const response = await fetch("/api/send-verification-code", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data.challenge) {
+    const error = new Error(data.error || "verification-send-failed");
+    error.code = data.error || "verification-send-failed";
+    throw error;
+  }
+
+  return data;
+};
+
+const verifyEmailCode = async (email, code, challenge) => {
+  const response = await fetch("/api/verify-email-code", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, code, challenge }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data.verified) {
+    const error = new Error(data.error || "verification-failed");
+    error.code = data.error || "verification-failed";
+    throw error;
+  }
+
+  return true;
+};
+
 const copy = {
   pt: {
     title: "Entrar no TraderTab",
@@ -51,7 +110,15 @@ const copy = {
     underage:
       "O TraderTab é exclusivo para maiores de 18 anos. Sua conta não poderá ser criada.",
     registerHint:
-      "A conta somente será criada após validar a maioridade e o país.",
+      "A conta somente será criada após validar a maioridade, o país e o e-mail.",
+    sendCode: "Enviar código",
+    verifyCode: "Código de verificação",
+    codePlaceholder: "Digite o código de 6 dígitos",
+    codeSent: "Enviamos um código de 6 dígitos para seu e-mail. Ele expira em 10 minutos.",
+    resendCode: "Reenviar código",
+    changeEmail: "Alterar e-mail",
+    invalidCode: "Código inválido ou expirado. Confira o código ou solicite outro.",
+    emailSendFailed: "Não foi possível enviar o código agora. Tente novamente.",
   },
   en: {
     title: "Sign in to TraderTab",
@@ -82,7 +149,15 @@ const copy = {
     underage:
       "TraderTab is only available to people aged 18 or older. Your account cannot be created.",
     registerHint:
-      "The account will only be created after validating age and country.",
+      "The account will only be created after validating age, country and email.",
+    sendCode: "Send code",
+    verifyCode: "Verification code",
+    codePlaceholder: "Enter the 6-digit code",
+    codeSent: "We sent a 6-digit code to your email. It expires in 10 minutes.",
+    resendCode: "Resend code",
+    changeEmail: "Change email",
+    invalidCode: "Invalid or expired code. Check it or request a new one.",
+    emailSendFailed: "We could not send the code right now. Try again.",
   },
   es: {
     title: "Entrar en TraderTab",
@@ -113,7 +188,15 @@ const copy = {
     underage:
       "TraderTab es exclusivo para mayores de 18 años. Tu cuenta no podrá ser creada.",
     registerHint:
-      "La cuenta solo se creará después de validar la edad y el país.",
+      "La cuenta solo se creará después de validar la edad, el país y el correo.",
+    sendCode: "Enviar código",
+    verifyCode: "Código de verificación",
+    codePlaceholder: "Ingresa el código de 6 dígitos",
+    codeSent: "Enviamos un código de 6 dígitos a tu correo. Expira en 10 minutos.",
+    resendCode: "Reenviar código",
+    changeEmail: "Cambiar correo",
+    invalidCode: "Código inválido o vencido. Revísalo o solicita otro.",
+    emailSendFailed: "No fue posible enviar el código ahora. Inténtalo de nuevo.",
   },
 };
 
@@ -297,6 +380,9 @@ export default function AuthModal({
   const [favoriteClub, setFavoriteClub] = useState(profile?.favoriteClub || "");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [verificationChallenge, setVerificationChallenge] = useState("");
+  const [verificationEmail, setVerificationEmail] = useState("");
   const profileCompletionRequired = Boolean(
     user &&
       (!profile?.birthDate ||
@@ -368,7 +454,47 @@ export default function AuthModal({
     if (!nextProfile || nextProfile.underage) return;
 
     run(async () => {
-      await registerWithEmail(email.trim(), password, nextProfile);
+      const customerEmail = email.trim().toLowerCase();
+
+      // Primeira etapa: envia o código. A conta Firebase ainda NÃO é criada.
+      if (!verificationChallenge || verificationEmail !== customerEmail) {
+        const result = await requestVerificationCode(customerEmail);
+        setVerificationChallenge(result.challenge);
+        setVerificationEmail(customerEmail);
+        setVerificationCode("");
+        setMessage(t.codeSent);
+        return;
+      }
+
+      // Segunda etapa: valida o código no servidor antes de criar a conta.
+      try {
+        await verifyEmailCode(
+          customerEmail,
+          verificationCode,
+          verificationChallenge,
+        );
+      } catch (verificationError) {
+        if (verificationError?.code === "invalid-or-expired-code") {
+          setMessage(t.invalidCode);
+          return;
+        }
+        throw verificationError;
+      }
+
+      await registerWithEmail(customerEmail, password, nextProfile);
+
+      // A conta do TraderTab já foi criada neste ponto. A licença Trial é uma
+      // integração adicional e não deve invalidar o cadastro se o serviço
+      // externo estiver temporariamente indisponível.
+      try {
+        await generateHistoryOddTrialLicense(customerEmail);
+      } catch (licenseError) {
+        console.error(
+          "[TraderTab] Falha ao gerar licença Trial do HistoryOdd",
+          licenseError,
+        );
+      }
+
       onProfileSaved(nextProfile);
       onClose();
     });
@@ -527,12 +653,39 @@ export default function AuthModal({
                 <>
                   {profileFields}
                   <p className="register-profile-hint">{t.registerHint}</p>
+                  {verificationChallenge && verificationEmail === email.trim().toLowerCase() && (
+                    <label>
+                      <span>{t.verifyCode}</span>
+                      <div className="auth-input">
+                        <LockKeyhole size={18} />
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          autoComplete="one-time-code"
+                          pattern="[0-9]{6}"
+                          maxLength="6"
+                          value={verificationCode}
+                          onChange={(event) =>
+                            setVerificationCode(
+                              event.target.value.replace(/\D/g, "").slice(0, 6),
+                            )
+                          }
+                          placeholder={t.codePlaceholder}
+                          required
+                        />
+                      </div>
+                    </label>
+                  )}
                 </>
               )}
 
               {message && (
                 <p
-                  className={`auth-message ${message === t.resetSent ? "success" : "error"}`}
+                  className={`auth-message ${
+                    message === t.resetSent || message === t.codeSent
+                      ? "success"
+                      : "error"
+                  }`}
                 >
                   {message}
                 </p>
@@ -542,7 +695,14 @@ export default function AuthModal({
                 disabled={busy || !firebaseConfigured}
                 type="submit"
               >
-                {busy ? "..." : mode === "register" ? t.create : t.enter}
+                {busy
+                  ? "..."
+                  : mode === "register"
+                    ? verificationChallenge &&
+                      verificationEmail === email.trim().toLowerCase()
+                      ? t.create
+                      : t.sendCode
+                    : t.enter}
               </button>
             </form>
 
@@ -552,6 +712,9 @@ export default function AuthModal({
                 onClick={() => {
                   setMode(mode === "register" ? "login" : "register");
                   setMessage("");
+                  setVerificationCode("");
+                  setVerificationChallenge("");
+                  setVerificationEmail("");
                 }}
               >
                 {mode === "register" ? t.loginLink : t.createLink}

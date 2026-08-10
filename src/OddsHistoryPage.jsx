@@ -494,7 +494,14 @@ export default function OddsHistoryPage({ language = "pt" }) {
     setLoading(true);
     setError("");
     try {
-      const nextRecords = mergeReguaRecords(await fetchReguas());
+      const nextRecords = mergeReguaRecords(await fetchReguas()).filter(
+        (record) => {
+          const averagePaid = getAveragePaid(record);
+          // Descarta régua de teste/lixo quando todos os percentuais válidos
+          // resultam em média paga de 0%. Réguas sem percentual permanecem.
+          return !Number.isFinite(averagePaid) || Math.abs(averagePaid) > 0.0001;
+        },
+      );
       nextRecords.sort((a, b) => {
         const dateA = parseDate(a.date)?.getTime() || 0;
         const dateB = parseDate(b.date)?.getTime() || 0;
