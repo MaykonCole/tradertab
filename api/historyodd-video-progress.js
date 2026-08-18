@@ -76,8 +76,10 @@ export default async function handler(req, res) {
     const startedAt = Number(previous?.startedAt || now);
     const previousUid = previous?.authUid || null;
 
-    // Uma sessão iniciada logada continua vinculada ao mesmo usuário.
-    if (previousUid && authUser?.uid && previousUid !== authUser.uid) {
+    // A sessão de vídeo é vinculada exatamente à identidade que a iniciou.
+    // Trocar de conta ou entrar/sair exige uma nova sessão desde 0%.
+    const currentUid = authUser?.uid || null;
+    if (previous && previousUid !== currentUid) {
       return res.status(403).json({ error: "progress-user-mismatch" });
     }
 

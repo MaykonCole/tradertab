@@ -3,7 +3,6 @@ import {
   normalizeEmail,
   sameOriginRequest,
   setJsonHeaders,
-  verifyLicenseGrant,
 } from "./_emailVerification.js";
 import { getBearerToken, verifyFirebaseIdToken } from "./_firebaseAuth.js";
 import { verifyCompletionToken } from "./_historyOddVideo.js";
@@ -25,20 +24,14 @@ const resolveCustomerEmail = async (req) => {
     return { customerEmail: normalizeEmail(firebaseUser.email), source: "firebase" };
   }
 
-  // Fluxo já existente do cadastro: o grant é emitido somente após validar
-  // o código enviado ao e-mail pelo Resend.
+  // Visitante: o e-mail é informado diretamente no popup após a conclusão
+  // do vídeo. A validação de acesso à conta/e-mail será feita no HistoryOdd.
   const customerEmail = normalizeEmail(req.body?.customerEmail);
-  const licenseGrant = String(req.body?.licenseGrant || "");
-
-  if (!isValidEmail(customerEmail) || !licenseGrant) {
-    return { error: "authentication-required", status: 401 };
+  if (!isValidEmail(customerEmail)) {
+    return { error: "invalid-license-request", status: 400 };
   }
 
-  if (!verifyLicenseGrant(customerEmail, licenseGrant)) {
-    return { error: "invalid-license-grant", status: 403 };
-  }
-
-  return { customerEmail, source: "email-grant" };
+  return { customerEmail, source: "guest-email" };
 };
 
 export default async function handler(req, res) {
@@ -83,9 +76,9 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "invalid-license-request" });
     }
 
-    // Sessões concluídas enquanto o usuário estava logado ficam vinculadas
-    // ao mesmo UID. Sessões anônimas mantêm o benefício de 10 dias mesmo
-    // quando o usuário faz login depois para informar o e-mail da licença.
+    // A conclusão pertence exatamente ao contexto que assistiu ao vídeo.
+    // Logado: exige o mesmo UID. Visitante: exige o fluxo sem Firebase e
+    // utiliza apenas o e-mail digitado no popup (Trial de 10 dias).
     if (completion.authUid) {
       if (identity.source !== "firebase") {
         return res.status(403).json({ error: "video-completion-user-mismatch" });
@@ -96,6 +89,8 @@ export default async function handler(req, res) {
       if (!firebaseUser || firebaseUser.uid !== completion.authUid) {
         return res.status(403).json({ error: "video-completion-user-mismatch" });
       }
+    } else if (identity.source !== "guest-email") {
+      return res.status(403).json({ error: "video-completion-user-mismatch" });
     }
 
     const durationDays = Number(completion.entitlementDays) === 20 ? 20 : 10;
