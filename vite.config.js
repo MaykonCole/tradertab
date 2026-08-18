@@ -3,6 +3,8 @@ import react from "@vitejs/plugin-react";
 import { streamHistoryOddVideo } from "./api/_historyOddVideoStream.js";
 import historyOddVideoProgress from "./api/historyodd-video-progress.js";
 import generateHistoryOddTrial from "./api/generate-historyodd-trial.js";
+import sendVerificationCode from "./api/send-verification-code.js";
+import verifyEmailCode from "./api/verify-email-code.js";
 
 const readJsonBody = (req) =>
   new Promise((resolve, reject) => {
@@ -55,7 +57,11 @@ const localApiPlugin = () => ({
           ? historyOddVideoProgress
           : pathname === "/api/generate-historyodd-trial"
             ? generateHistoryOddTrial
-            : null;
+            : pathname === "/api/send-verification-code"
+              ? sendVerificationCode
+              : pathname === "/api/verify-email-code"
+                ? verifyEmailCode
+                : null;
 
       if (!handler) return next();
 

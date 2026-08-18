@@ -76,6 +76,16 @@ const copy = {
     trialSuccess: "Licença Trial ativada com sucesso.",
     trialAlreadyUsed: "Este e-mail já utilizou a licença gratuita.",
     trialError: "Não foi possível ativar a licença gratuita agora. Tente novamente.",
+    loggedTrialModalTitle: "Trial ativado com sucesso!",
+    loggedTrialModalText: "Agora baixe o HistoryOdd pelo botão Baixar HistoryOdd e, no aplicativo, faça login usando este mesmo e-mail da sua conta para acessar a licença Trial.",
+    understood: "Entendi",
+    guestTrialModalTitle: "Escolha o e-mail da sua licença Trial",
+    guestTrialModalText: "Você concluiu o vídeo como visitante e ganhou 10 dias de Trial. Se tivesse assistido logado no TraderTab, receberia 20 dias. Informe abaixo um e-mail válido ao qual você tenha acesso.",
+    guestEmailLabel: "E-mail para a licença",
+    guestEmailPlaceholder: "seuemail@exemplo.com",
+    guestGenerateTrial: "Gerar Licença Trial",
+    guestGeneratingTrial: "Gerando licença...",
+    guestInvalidEmail: "Informe um e-mail válido.",
     date: "Data",
     team: "Time",
     teamPlaceholder: "Buscar por time",
@@ -152,6 +162,16 @@ const copy = {
     trialSuccess: "Trial license activated successfully.",
     trialAlreadyUsed: "This email has already used the free license.",
     trialError: "We could not activate the free license right now. Try again.",
+    loggedTrialModalTitle: "Trial activated successfully!",
+    loggedTrialModalText: "Now download HistoryOdd using the Download HistoryOdd button and sign in to the app with the same email from your account to access the Trial license.",
+    understood: "Got it",
+    guestTrialModalTitle: "Choose the email for your Trial license",
+    guestTrialModalText: "You completed the video as a visitor and earned a 10-day Trial. If you had watched while signed in to TraderTab, you would receive 20 days. Enter a valid email address you can access.",
+    guestEmailLabel: "License email",
+    guestEmailPlaceholder: "you@example.com",
+    guestGenerateTrial: "Generate Trial License",
+    guestGeneratingTrial: "Generating license...",
+    guestInvalidEmail: "Enter a valid email address.",
     date: "Date",
     team: "Team",
     teamPlaceholder: "Search team",
@@ -228,6 +248,16 @@ const copy = {
     trialSuccess: "Licencia Trial activada correctamente.",
     trialAlreadyUsed: "Este correo ya utilizó la licencia gratuita.",
     trialError: "No fue posible activar la licencia gratuita ahora. Inténtalo de nuevo.",
+    loggedTrialModalTitle: "¡Trial activado correctamente!",
+    loggedTrialModalText: "Ahora descarga HistoryOdd con el botón Descargar HistoryOdd e inicia sesión en la aplicación usando el mismo correo de tu cuenta para acceder a la licencia Trial.",
+    understood: "Entendido",
+    guestTrialModalTitle: "Elige el correo de tu licencia Trial",
+    guestTrialModalText: "Completaste el video como visitante y ganaste 10 días de Trial. Si lo hubieras visto conectado a TraderTab, recibirías 20 días. Introduce un correo válido al que tengas acceso.",
+    guestEmailLabel: "Correo para la licencia",
+    guestEmailPlaceholder: "tucorreo@ejemplo.com",
+    guestGenerateTrial: "Generar Licencia Trial",
+    guestGeneratingTrial: "Generando licencia...",
+    guestInvalidEmail: "Introduce un correo válido.",
     date: "Fecha",
     team: "Equipo",
     teamPlaceholder: "Buscar equipo",
@@ -636,6 +666,10 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
   const [videoStatus, setVideoStatus] = useState("");
   const [videoValidationBusy, setVideoValidationBusy] = useState(false);
   const [videoPlaybackRate, setVideoPlaybackRate] = useState(1);
+  const [trialModal, setTrialModal] = useState("");
+  const [guestTrialEmail, setGuestTrialEmail] = useState("");
+  const [guestTrialStatus, setGuestTrialStatus] = useState("");
+  const [guestTrialBusy, setGuestTrialBusy] = useState(false);
   const videoRef = useRef(null);
   const lastCheckpointRef = useRef(0);
   const checkpointInFlightRef = useRef(false);
@@ -671,10 +705,34 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
     loadData();
   }, []);
 
+  const videoIdentityKey = authUser?.uid ? `user:${authUser.uid}` : "guest";
+  const scopedVideoStorageKey = (baseKey) => `${baseKey}:${videoIdentityKey}`;
+
   useEffect(() => {
+    // O progresso pertence à identidade que assistiu ao vídeo. Ao trocar de
+    // conta (ou entrar/sair), zera o estado em memória e carrega somente o
+    // progresso daquela identidade. Assim uma conta nunca herda os 100% de outra.
+    setVideoProgress(0);
+    setVideoCompletionToken("");
+    setVideoEntitlementDays(null);
+    setVideoProgressToken("");
+    setVideoAllowedSeekTo(2);
+    setVideoStatus("");
+    setVideoPlaybackRate(1);
+    lastCheckpointRef.current = 0;
+    checkpointInFlightRef.current = false;
+    videoValidationHealthyRef.current = true;
+
+    const video = videoRef.current;
+    if (video) {
+      video.pause();
+      video.currentTime = 0;
+      video.playbackRate = 1;
+    }
+
     try {
       const savedProgress = JSON.parse(
-        localStorage.getItem(HISTORY_ODD_PROGRESS_STORAGE) || "{}",
+        localStorage.getItem(scopedVideoStorageKey(HISTORY_ODD_PROGRESS_STORAGE)) || "{}",
       );
       if (savedProgress?.token) {
         setVideoProgressToken(savedProgress.token);
@@ -683,17 +741,17 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
       }
 
       const savedCompletion = JSON.parse(
-        localStorage.getItem(HISTORY_ODD_COMPLETION_STORAGE) || "{}",
+        localStorage.getItem(scopedVideoStorageKey(HISTORY_ODD_COMPLETION_STORAGE)) || "{}",
       );
       if (savedCompletion?.token) {
         setVideoCompletionToken(savedCompletion.token);
-        setVideoEntitlementDays(Number(savedCompletion.entitlementDays) || 10);
+        setVideoEntitlementDays(Number(savedCompletion.entitlementDays) || (authUser?.uid ? 20 : 10));
         setVideoProgress(1);
       }
     } catch {
-      // Storage indisponível ou dado antigo inválido: inicia uma nova sessão.
+      // Storage indisponível ou dado inválido: inicia uma nova sessão.
     }
-  }, []);
+  }, [videoIdentityKey]);
 
   const filteredRecords = useMemo(() => {
     const search = teamFilter.trim().toLowerCase();
@@ -761,7 +819,7 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
   const persistVideoProgress = (payload) => {
     try {
       localStorage.setItem(
-        HISTORY_ODD_PROGRESS_STORAGE,
+        scopedVideoStorageKey(HISTORY_ODD_PROGRESS_STORAGE),
         JSON.stringify({
           token: payload.progressToken,
           allowedSeekTo: payload.allowedSeekTo,
@@ -771,7 +829,7 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
 
       if (payload.completionToken) {
         localStorage.setItem(
-          HISTORY_ODD_COMPLETION_STORAGE,
+          scopedVideoStorageKey(HISTORY_ODD_COMPLETION_STORAGE),
           JSON.stringify({
             token: payload.completionToken,
             entitlementDays: payload.entitlementDays,
@@ -886,11 +944,20 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
     if (nextRate !== videoPlaybackRate) setVideoPlaybackRate(nextRate);
   };
 
+  const isValidTrialEmail = (value) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
+
+  const openGuestTrialModal = () => {
+    setGuestTrialEmail("");
+    setGuestTrialStatus("");
+    setTrialModal("guest");
+  };
+
   const requestHistoryOddTrial = async () => {
     if (!videoCompletionToken || trialBusy) return;
 
     if (!authUser || typeof authUser.getIdToken !== "function") {
-      onRequestLogin?.();
+      openGuestTrialModal();
       return;
     }
 
@@ -921,16 +988,56 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
         throw new Error(payload?.error || `trial-${response.status}`);
       }
 
-      setTrialMessage(
-        `${t.trialSuccess} ${videoEntitlementDays || 10} dias de acesso liberados.`,
-      );
-      setTrialMessageType("success");
+      setTrialMessage("");
+      setTrialMessageType("");
+      setTrialModal("logged-success");
     } catch (trialError) {
       console.error("[TraderTab] Falha ao solicitar Trial do HistoryOdd", trialError);
       setTrialMessage(t.trialError);
       setTrialMessageType("error");
     } finally {
       setTrialBusy(false);
+    }
+  };
+
+  const generateGuestHistoryOddTrial = async () => {
+    const email = guestTrialEmail.trim().toLowerCase();
+    if (!isValidTrialEmail(email)) {
+      setGuestTrialStatus(t.guestInvalidEmail);
+      return;
+    }
+    if (!videoCompletionToken || guestTrialBusy) return;
+
+    setGuestTrialBusy(true);
+    setGuestTrialStatus("");
+    try {
+      const response = await fetch("/api/generate-historyodd-trial", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          videoCompletionToken,
+          customerEmail: email,
+        }),
+      });
+      const payload = await response.json().catch(() => ({}));
+
+      if (response.status === 409 || payload?.error === "trial-already-used") {
+        setGuestTrialStatus(t.trialAlreadyUsed);
+        return;
+      }
+      if (!response.ok) {
+        throw new Error(payload?.error || `trial-${response.status}`);
+      }
+
+      setTrialModal("");
+      setGuestTrialStatus("");
+      setTrialMessage(`${t.trialSuccess} 10 dias de acesso liberados para ${email}.`);
+      setTrialMessageType("success");
+    } catch (error) {
+      console.error("[TraderTab] Falha ao gerar Trial de visitante", error);
+      setGuestTrialStatus(t.trialError);
+    } finally {
+      setGuestTrialBusy(false);
     }
   };
 
@@ -1058,7 +1165,7 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
                 : !videoCompletionToken
                   ? t.trialLocked
                   : !authUser
-                    ? t.loginToActivate
+                    ? t.trialUnlocked10
                     : (videoEntitlementDays || 10) === 20
                       ? t.trialUnlocked20
                       : t.trialUnlocked10}
@@ -1076,6 +1183,75 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
             </div>
           ) : null}
         </div>
+
+        {trialModal ? (
+          <div className="historyodd-trial-modal-backdrop" role="presentation">
+            <div
+              className="historyodd-trial-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="historyodd-trial-modal-title"
+            >
+              {trialModal === "logged-success" ? (
+                <>
+                  <div className="historyodd-trial-modal-icon success">
+                    <CheckCircle2 size={28} />
+                  </div>
+                  <h3 id="historyodd-trial-modal-title">{t.loggedTrialModalTitle}</h3>
+                  <p>{t.loggedTrialModalText}</p>
+                  <div className="historyodd-trial-modal-email">
+                    {authUser?.email || ""}
+                  </div>
+                  <button
+                    type="button"
+                    className="historyodd-trial-understood"
+                    onClick={() => setTrialModal("")}
+                  >
+                    <CheckCircle2 size={17} />
+                    {t.understood}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="historyodd-trial-modal-icon guest">
+                    <ShieldCheck size={28} />
+                  </div>
+                  <h3 id="historyodd-trial-modal-title">{t.guestTrialModalTitle}</h3>
+                  <p>{t.guestTrialModalText}</p>
+
+                  <div className="historyodd-trial-modal-form">
+                    <label htmlFor="historyodd-trial-email">{t.guestEmailLabel}</label>
+                    <input
+                      id="historyodd-trial-email"
+                      type="email"
+                      value={guestTrialEmail}
+                      placeholder={t.guestEmailPlaceholder}
+                      autoComplete="email"
+                      disabled={guestTrialBusy}
+                      onChange={(event) => {
+                        setGuestTrialEmail(event.target.value);
+                        setGuestTrialStatus("");
+                      }}
+                    />
+
+                    {guestTrialStatus ? (
+                      <div className="historyodd-trial-modal-status">{guestTrialStatus}</div>
+                    ) : null}
+
+                    <button
+                      type="button"
+                      className="historyodd-trial-modal-primary"
+                      disabled={guestTrialBusy || !isValidTrialEmail(guestTrialEmail)}
+                      onClick={generateGuestHistoryOddTrial}
+                    >
+                      {guestTrialBusy ? t.guestGeneratingTrial : t.guestGenerateTrial}
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        ) : null}
 
         <div className="historyodd-feature-grid">
           <article>
