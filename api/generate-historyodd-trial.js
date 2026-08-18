@@ -6,6 +6,7 @@ import {
   verifyLicenseGrant,
 } from "./_emailVerification.js";
 import { getBearerToken, verifyFirebaseIdToken } from "./_firebaseAuth.js";
+import { verifyCompletionToken } from "./_historyOddVideo.js";
 
 const getLicenseUrl = () => process.env.HISTORYODD_LICENSE_URL?.trim();
 const getLicenseAdminToken = () =>
@@ -68,6 +69,11 @@ export default async function handler(req, res) {
   }
 
   try {
+    const completion = verifyCompletionToken(req.body?.videoCompletionToken);
+    if (!completion) {
+      return res.status(403).json({ error: "video-completion-required" });
+    }
+
     const identity = await resolveCustomerEmail(req);
     if (identity.error) {
       return res.status(identity.status).json({ error: identity.error });
@@ -77,6 +83,23 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "invalid-license-request" });
     }
 
+    // Sessões concluídas enquanto o usuário estava logado ficam vinculadas
+    // ao mesmo UID. Sessões anônimas mantêm o benefício de 10 dias mesmo
+    // quando o usuário faz login depois para informar o e-mail da licença.
+    if (completion.authUid) {
+      if (identity.source !== "firebase") {
+        return res.status(403).json({ error: "video-completion-user-mismatch" });
+      }
+
+      const firebaseIdToken = getBearerToken(req);
+      const firebaseUser = await verifyFirebaseIdToken(firebaseIdToken);
+      if (!firebaseUser || firebaseUser.uid !== completion.authUid) {
+        return res.status(403).json({ error: "video-completion-user-mismatch" });
+      }
+    }
+
+    const durationDays = Number(completion.entitlementDays) === 20 ? 20 : 10;
+
     const upstream = await fetch(historyOddLicenseUrl, {
       method: "POST",
       headers: {
@@ -84,7 +107,7 @@ export default async function handler(req, res) {
         Authorization: `Bearer ${historyOddLicenseAdminToken}`,
       },
       body: JSON.stringify({
-        durationDays: 10,
+        durationDays,
         customerEmail: identity.customerEmail,
         maxDevices: 1,
         productName: "HistoryOddPro",

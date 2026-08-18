@@ -21,22 +21,6 @@ import {
   saveUserProfile,
 } from "./firebase";
 
-const generateHistoryOddTrialLicense = async (customerEmail, licenseGrant) => {
-  const response = await fetch("/api/generate-historyodd-trial", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ customerEmail, licenseGrant }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`historyodd-license-${response.status}`);
-  }
-
-  return response;
-};
-
 const requestVerificationCode = async (email) => {
   const response = await fetch("/api/send-verification-code", {
     method: "POST",
@@ -458,9 +442,8 @@ export default function AuthModal({
       }
 
       // Segunda etapa: valida o código no servidor antes de criar a conta.
-      let verificationResult;
       try {
-        verificationResult = await verifyEmailCode(
+        await verifyEmailCode(
           customerEmail,
           verificationCode,
           verificationChallenge,
@@ -474,21 +457,6 @@ export default function AuthModal({
       }
 
       await registerWithEmail(customerEmail, password, nextProfile);
-
-      // A conta do TraderTab já foi criada neste ponto. A licença Trial é uma
-      // integração adicional e não deve invalidar o cadastro se o serviço
-      // externo estiver temporariamente indisponível.
-      try {
-        await generateHistoryOddTrialLicense(
-          customerEmail,
-          verificationResult.licenseGrant,
-        );
-      } catch (licenseError) {
-        console.error(
-          "[TraderTab] Falha ao gerar licença Trial do HistoryOdd",
-          licenseError,
-        );
-      }
 
       onProfileSaved(nextProfile);
       onClose();

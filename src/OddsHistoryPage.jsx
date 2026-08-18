@@ -1,13 +1,21 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import historyOddIcon from "./assets/historyodd-icon.png";
 import {
   ArrowUpDown,
   CalendarDays,
+  CheckCircle2,
   ChevronDown,
+  Clock3,
+  Download,
   Filter,
+  Gauge,
+  LineChart,
+  LockKeyhole,
+  PlayCircle,
   RefreshCw,
   Search,
   ShieldCheck,
+  Sparkles,
   TrendingUp,
 } from "lucide-react";
 
@@ -17,16 +25,55 @@ const REGUA_SHEETS_URL =
 const HISTORY_ODD_DOWNLOAD_URL =
   "https://github.com/MaykonCole/HistoryOdd-Releases/releases/latest/download/HistoryOdd-win-Setup.exe";
 
+const HISTORY_ODD_PURCHASE_URL =
+  "https://pay.kirvano.com/8a79d04a-5602-43c6-83b7-bf9a2f1127c2";
+const HISTORY_ODD_VIDEO_URL = "/api/historyodd-video-stream";
+const HISTORY_ODD_PROGRESS_STORAGE = "historyodd-video-progress-v1";
+const HISTORY_ODD_COMPLETION_STORAGE = "historyodd-video-completion-v1";
+
 const copy = {
   pt: {
     eyebrow: "Histórico de mercado",
     title: "Histórico Odds",
     subtitle:
-      "Consulte as réguas salvas na planilha e visualize a evolução das odds em uma régua compacta, contínua e fácil de ler.",
+      "Leia o comportamento real das odds, identifique acelerações, correções e momentos em que o mercado começa a pagar mais rápido.",
+    salesBadge: "HISTORYODD · LEITURA PROFISSIONAL DE MERCADO",
+    salesTitleLead: "Veja o mercado se mover",
+    salesTitleAccent: "antes de tomar sua decisão.",
+    salesDescription:
+      "O HistoryOdd transforma a variação das odds em uma leitura visual e objetiva. Acompanhe o percentual pago, o ritmo do mercado, movimentos e histórico em tempo real para operar com muito mais contexto.",
+    watchTitle: "Assista ao vídeo completo e libere seu Trial",
+    watchDescriptionLogged:
+      "Você está logado: concluindo o vídeo pelo player abaixo, sua conta libera uma licença Trial de 20 dias.",
+    watchDescriptionGuest:
+      "Conclua o vídeo pelo player abaixo para liberar uma licença Trial de 10 dias. Depois, entre ou crie sua conta para ativar a licença.",
+    loggedTrial: "LOGADO · 20 DIAS DE TRIAL",
+    guestTrial: "VISITANTE · 10 DIAS DE TRIAL",
+    videoProgress: "Progresso do vídeo",
+    videoComplete: "Vídeo concluído · Trial liberado",
+    videoPreparing: "Preparando validação do vídeo...",
+    videoError: "Não foi possível validar o progresso agora. Recarregue a página e tente novamente.",
+    mustWatchHere: "Para liberar o Trial, o vídeo precisa ser assistido por este player.",
+    buyNow: "Adquirir Licença",
+    buySubtext: "Acesso imediato após a confirmação do pagamento",
+    downloadApp: "Baixar HistoryOdd",
+    trialLocked: "Assista ao vídeo até o final para liberar",
+    trialUnlocked20: "Ativar Trial de 20 dias",
+    trialUnlocked10: "Ativar Trial de 10 dias",
+    loginToActivate: "Entrar para ativar Trial de 10 dias",
+    featureRealtime: "Leitura em tempo real",
+    featureRealtimeText: "Acompanhe a odd e o percentual pago enquanto o mercado se movimenta.",
+    featureMovement: "Movimento e contexto",
+    featureMovementText: "Identifique aceleração, lateralização, correção e mudanças de ritmo.",
+    featureHistory: "Histórico objetivo",
+    featureHistoryText: "Compare períodos e entenda onde o mercado pagou mais ou menos.",
+    memberOnlyTitle: "Entre para acessar o Histórico Odds",
+    memberOnlyText: "A Landing Page e o vídeo são públicos. As réguas e o histórico completo continuam disponíveis para usuários logados.",
+    memberOnlyButton: "Entrar gratuitamente",
     downloadHistoryOdd: "Download HistoryOdd",
     requestTrial: "Licença Gratuita",
     trialRequesting: "Ativando licença...",
-    trialSuccess: "Licença gratuita de 10 dias ativada com sucesso.",
+    trialSuccess: "Licença Trial ativada com sucesso.",
     trialAlreadyUsed: "Este e-mail já utilizou a licença gratuita.",
     trialError: "Não foi possível ativar a licença gratuita agora. Tente novamente.",
     date: "Data",
@@ -65,11 +112,44 @@ const copy = {
     eyebrow: "Market history",
     title: "Odds History",
     subtitle:
-      "Browse the saved ladder records from the spreadsheet and view odds progression on a compact, continuous and readable ruler.",
+      "Read real odds behavior, spot accelerations, corrections and the moments when the market starts paying faster.",
+    salesBadge: "HISTORYODD · PROFESSIONAL MARKET READING",
+    salesTitleLead: "See the market move",
+    salesTitleAccent: "before you make your decision.",
+    salesDescription:
+      "HistoryOdd turns odds variation into an objective visual reading. Follow paid percentage, market pace, movements and real-time history with much more context.",
+    watchTitle: "Watch the full video and unlock your Trial",
+    watchDescriptionLogged:
+      "You are signed in: complete the video in the player below to unlock a 20-day Trial license for your account.",
+    watchDescriptionGuest:
+      "Complete the video in the player below to unlock a 10-day Trial. Then sign in or create your account to activate it.",
+    loggedTrial: "SIGNED IN · 20-DAY TRIAL",
+    guestTrial: "VISITOR · 10-DAY TRIAL",
+    videoProgress: "Video progress",
+    videoComplete: "Video completed · Trial unlocked",
+    videoPreparing: "Preparing video validation...",
+    videoError: "We could not validate progress right now. Reload the page and try again.",
+    mustWatchHere: "To unlock the Trial, the video must be watched in this player.",
+    buyNow: "Buy License",
+    buySubtext: "Immediate access after payment confirmation",
+    downloadApp: "Download HistoryOdd",
+    trialLocked: "Watch the video until the end to unlock",
+    trialUnlocked20: "Activate 20-day Trial",
+    trialUnlocked10: "Activate 10-day Trial",
+    loginToActivate: "Sign in to activate 10-day Trial",
+    featureRealtime: "Real-time reading",
+    featureRealtimeText: "Track odds and paid percentage while the market moves.",
+    featureMovement: "Movement and context",
+    featureMovementText: "Identify acceleration, ranging, correction and pace changes.",
+    featureHistory: "Objective history",
+    featureHistoryText: "Compare periods and understand where the market paid more or less.",
+    memberOnlyTitle: "Sign in to access Odds History",
+    memberOnlyText: "The Landing Page and video are public. Full ladders and history remain available to signed-in users.",
+    memberOnlyButton: "Sign in free",
     downloadHistoryOdd: "Download HistoryOdd",
     requestTrial: "Free License",
     trialRequesting: "Activating license...",
-    trialSuccess: "10-day free license activated successfully.",
+    trialSuccess: "Trial license activated successfully.",
     trialAlreadyUsed: "This email has already used the free license.",
     trialError: "We could not activate the free license right now. Try again.",
     date: "Date",
@@ -108,11 +188,44 @@ const copy = {
     eyebrow: "Historial de mercado",
     title: "Histórico Odds",
     subtitle:
-      "Consulta las reglas guardadas en la hoja y visualiza la evolución de las cuotas en tarjetas modernas, claras y fáciles de leer.",
+      "Lee el comportamiento real de las cuotas, detecta aceleraciones, correcciones y los momentos en que el mercado empieza a pagar más rápido.",
+    salesBadge: "HISTORYODD · LECTURA PROFESIONAL DE MERCADO",
+    salesTitleLead: "Mira cómo se mueve el mercado",
+    salesTitleAccent: "antes de tomar tu decisión.",
+    salesDescription:
+      "HistoryOdd transforma la variación de cuotas en una lectura visual y objetiva. Sigue el porcentaje pagado, el ritmo, los movimientos y el historial en tiempo real.",
+    watchTitle: "Mira el video completo y libera tu Trial",
+    watchDescriptionLogged:
+      "Estás conectado: completa el video en el reproductor para liberar una licencia Trial de 20 días.",
+    watchDescriptionGuest:
+      "Completa el video en el reproductor para liberar una licencia Trial de 10 días. Después inicia sesión o crea tu cuenta para activarla.",
+    loggedTrial: "CONECTADO · TRIAL DE 20 DÍAS",
+    guestTrial: "VISITANTE · TRIAL DE 10 DÍAS",
+    videoProgress: "Progreso del video",
+    videoComplete: "Video completado · Trial liberado",
+    videoPreparing: "Preparando validación del video...",
+    videoError: "No fue posible validar el progreso. Recarga la página e inténtalo de nuevo.",
+    mustWatchHere: "Para liberar el Trial, el video debe verse en este reproductor.",
+    buyNow: "Adquirir Licencia",
+    buySubtext: "Acceso inmediato tras confirmar el pago",
+    downloadApp: "Descargar HistoryOdd",
+    trialLocked: "Mira el video hasta el final para liberar",
+    trialUnlocked20: "Activar Trial de 20 días",
+    trialUnlocked10: "Activar Trial de 10 días",
+    loginToActivate: "Entrar para activar Trial de 10 días",
+    featureRealtime: "Lectura en tiempo real",
+    featureRealtimeText: "Sigue la cuota y el porcentaje pagado mientras se mueve el mercado.",
+    featureMovement: "Movimiento y contexto",
+    featureMovementText: "Identifica aceleración, lateralización, corrección y cambios de ritmo.",
+    featureHistory: "Historial objetivo",
+    featureHistoryText: "Compara periodos y entiende dónde el mercado pagó más o menos.",
+    memberOnlyTitle: "Entra para acceder al Histórico Odds",
+    memberOnlyText: "La Landing Page y el video son públicos. Las reglas y el historial completo siguen disponibles para usuarios conectados.",
+    memberOnlyButton: "Entrar gratis",
     downloadHistoryOdd: "Descargar HistoryOdd",
     requestTrial: "Licencia Gratuita",
     trialRequesting: "Activando licencia...",
-    trialSuccess: "Licencia gratuita de 10 días activada correctamente.",
+    trialSuccess: "Licencia Trial activada correctamente.",
     trialAlreadyUsed: "Este correo ya utilizó la licencia gratuita.",
     trialError: "No fue posible activar la licencia gratuita ahora. Inténtalo de nuevo.",
     date: "Fecha",
@@ -501,7 +614,7 @@ async function fetchReguas() {
   return records.map(normalizeReguaRow);
 }
 
-export default function OddsHistoryPage({ language = "pt", authUser = null }) {
+export default function OddsHistoryPage({ language = "pt", authUser = null, onRequestLogin = null }) {
   const t = copy[language] || copy.pt;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -515,6 +628,17 @@ export default function OddsHistoryPage({ language = "pt", authUser = null }) {
   const [trialBusy, setTrialBusy] = useState(false);
   const [trialMessage, setTrialMessage] = useState("");
   const [trialMessageType, setTrialMessageType] = useState("");
+  const [videoProgress, setVideoProgress] = useState(0);
+  const [videoCompletionToken, setVideoCompletionToken] = useState("");
+  const [videoEntitlementDays, setVideoEntitlementDays] = useState(null);
+  const [videoProgressToken, setVideoProgressToken] = useState("");
+  const [videoAllowedSeekTo, setVideoAllowedSeekTo] = useState(2);
+  const [videoStatus, setVideoStatus] = useState("");
+  const [videoValidationBusy, setVideoValidationBusy] = useState(false);
+  const videoRef = useRef(null);
+  const lastCheckpointRef = useRef(0);
+  const checkpointInFlightRef = useRef(false);
+  const videoValidationHealthyRef = useRef(true);
 
   const loadData = async () => {
     setLoading(true);
@@ -544,6 +668,30 @@ export default function OddsHistoryPage({ language = "pt", authUser = null }) {
 
   useEffect(() => {
     loadData();
+  }, []);
+
+  useEffect(() => {
+    try {
+      const savedProgress = JSON.parse(
+        localStorage.getItem(HISTORY_ODD_PROGRESS_STORAGE) || "{}",
+      );
+      if (savedProgress?.token) {
+        setVideoProgressToken(savedProgress.token);
+        setVideoAllowedSeekTo(Number(savedProgress.allowedSeekTo) || 2);
+        setVideoProgress(Number(savedProgress.progress) || 0);
+      }
+
+      const savedCompletion = JSON.parse(
+        localStorage.getItem(HISTORY_ODD_COMPLETION_STORAGE) || "{}",
+      );
+      if (savedCompletion?.token) {
+        setVideoCompletionToken(savedCompletion.token);
+        setVideoEntitlementDays(Number(savedCompletion.entitlementDays) || 10);
+        setVideoProgress(1);
+      }
+    } catch {
+      // Storage indisponível ou dado antigo inválido: inicia uma nova sessão.
+    }
   }, []);
 
   const filteredRecords = useMemo(() => {
@@ -609,9 +757,123 @@ export default function OddsHistoryPage({ language = "pt", authUser = null }) {
     });
   };
 
+  const persistVideoProgress = (payload) => {
+    try {
+      localStorage.setItem(
+        HISTORY_ODD_PROGRESS_STORAGE,
+        JSON.stringify({
+          token: payload.progressToken,
+          allowedSeekTo: payload.allowedSeekTo,
+          progress: payload.watchedRatio,
+        }),
+      );
+
+      if (payload.completionToken) {
+        localStorage.setItem(
+          HISTORY_ODD_COMPLETION_STORAGE,
+          JSON.stringify({
+            token: payload.completionToken,
+            entitlementDays: payload.entitlementDays,
+          }),
+        );
+      }
+    } catch {
+      // O player continua funcional mesmo quando storage estiver bloqueado.
+    }
+  };
+
+  const sendVideoCheckpoint = async ({ ended = false, force = false } = {}) => {
+    const video = videoRef.current;
+    if (!video || !Number.isFinite(video.duration) || video.duration <= 0) return;
+    if (checkpointInFlightRef.current) {
+      if (ended) {
+        window.setTimeout(
+          () => sendVideoCheckpoint({ ended: true, force: true }),
+          450,
+        );
+      }
+      return;
+    }
+
+    const now = Date.now();
+    if (!force && !ended && now - lastCheckpointRef.current < 3500) return;
+
+    checkpointInFlightRef.current = true;
+    setVideoValidationBusy(true);
+    setVideoStatus("");
+
+    try {
+      const headers = { "Content-Type": "application/json" };
+      if (authUser && typeof authUser.getIdToken === "function") {
+        const idToken = await authUser.getIdToken();
+        headers.Authorization = `Bearer ${idToken}`;
+      }
+
+      const response = await fetch("/api/historyodd-video-progress", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          currentTime: video.currentTime,
+          duration: video.duration,
+          ended,
+          progressToken: videoProgressToken || undefined,
+        }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload?.error || `video-progress-${response.status}`);
+      }
+
+      videoValidationHealthyRef.current = true;
+      lastCheckpointRef.current = now;
+      setVideoProgressToken(payload.progressToken || "");
+      setVideoAllowedSeekTo(Number(payload.allowedSeekTo) || 2);
+      setVideoProgress(Math.max(0, Math.min(1, Number(payload.watchedRatio) || 0)));
+      persistVideoProgress(payload);
+
+      if (payload.completed && payload.completionToken) {
+        setVideoCompletionToken(payload.completionToken);
+        setVideoEntitlementDays(Number(payload.entitlementDays) || 10);
+        setVideoProgress(1);
+        setVideoStatus(t.videoComplete);
+      }
+    } catch (videoError) {
+      videoValidationHealthyRef.current = false;
+      console.error("[TraderTab] Falha ao validar vídeo do HistoryOdd", videoError);
+      setVideoStatus(t.videoError);
+    } finally {
+      checkpointInFlightRef.current = false;
+      setVideoValidationBusy(false);
+    }
+  };
+
+  const handleVideoSeeking = () => {
+    const video = videoRef.current;
+    if (!video || videoCompletionToken) return;
+
+    // Se a API de validação estiver indisponível, não force o currentTime
+    // para trás. O Trial continua bloqueado, mas o vídeo segue reproduzindo
+    // normalmente em vez de piscar/ficar preso em um trecho.
+    if (!videoProgressToken || !videoValidationHealthyRef.current) return;
+
+    if (video.currentTime > videoAllowedSeekTo + 0.75) {
+      video.currentTime = Math.max(0, videoAllowedSeekTo - 0.25);
+    }
+  };
+
+  const handleVideoRateChange = () => {
+    const video = videoRef.current;
+    if (video && video.playbackRate !== 1) video.playbackRate = 1;
+  };
 
   const requestHistoryOddTrial = async () => {
-    if (!authUser || typeof authUser.getIdToken !== "function" || trialBusy) return;
+    if (!videoCompletionToken || trialBusy) return;
+
+    if (!authUser || typeof authUser.getIdToken !== "function") {
+      onRequestLogin?.();
+      return;
+    }
 
     setTrialBusy(true);
     setTrialMessage("");
@@ -625,7 +887,7 @@ export default function OddsHistoryPage({ language = "pt", authUser = null }) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${idToken}`,
         },
-        body: JSON.stringify({}),
+        body: JSON.stringify({ videoCompletionToken }),
       });
 
       const payload = await response.json().catch(() => ({}));
@@ -640,7 +902,9 @@ export default function OddsHistoryPage({ language = "pt", authUser = null }) {
         throw new Error(payload?.error || `trial-${response.status}`);
       }
 
-      setTrialMessage(t.trialSuccess);
+      setTrialMessage(
+        `${t.trialSuccess} ${videoEntitlementDays || 10} dias de acesso liberados.`,
+      );
       setTrialMessageType("success");
     } catch (trialError) {
       console.error("[TraderTab] Falha ao solicitar Trial do HistoryOdd", trialError);
@@ -661,48 +925,163 @@ export default function OddsHistoryPage({ language = "pt", authUser = null }) {
 
   return (
     <main className="page odds-history-page">
-      <section className="odds-history-hero">
-        <div>
-          <span className="odds-history-eyebrow">
-            <TrendingUp size={16} />
-            {t.eyebrow}
+      <section className="historyodd-sales-hero">
+        <div className="historyodd-sales-glow historyodd-sales-glow-one" aria-hidden="true" />
+        <div className="historyodd-sales-glow historyodd-sales-glow-two" aria-hidden="true" />
+
+        <div className="historyodd-sales-intro">
+          <span className="historyodd-sales-badge">
+            <Sparkles size={15} />
+            {t.salesBadge}
           </span>
-          <h1>{t.title}</h1>
-          <p>{t.subtitle}</p>
-          <div className="odds-history-download">
-            <img
-              src={historyOddIcon}
-              alt="HistoryOdd"
-              className="odds-history-download-icon"
-            />
-            <div className="odds-history-actions">
-              <a
-                className="odds-history-download-button"
-                href={HISTORY_ODD_DOWNLOAD_URL}
-                aria-label={t.downloadHistoryOdd}
-              >
-                {t.downloadHistoryOdd}
-              </a>
-              <button
-                type="button"
-                className="odds-history-trial-button"
-                onClick={requestHistoryOddTrial}
-                disabled={trialBusy}
-                aria-label={t.requestTrial}
-              >
-                <ShieldCheck size={17} />
-                {trialBusy ? t.trialRequesting : t.requestTrial}
-              </button>
-            </div>
+          <h1>
+            <span>{t.salesTitleLead}</span>{" "}
+            <strong>{t.salesTitleAccent}</strong>
+          </h1>
+          <p>{t.salesDescription}</p>
+
+          <div className="historyodd-sales-proof">
+            <span><CheckCircle2 size={16} /> Odds e percentual pago em tempo real</span>
+            <span><CheckCircle2 size={16} /> Leitura visual do ritmo do mercado</span>
+            <span><CheckCircle2 size={16} /> Histórico para comparar períodos</span>
           </div>
+        </div>
+
+        <div className="historyodd-video-shell">
+          <div className="historyodd-video-heading">
+            <div>
+              <span className={`historyodd-trial-pill ${authUser ? "logged" : "guest"}`}>
+                <Clock3 size={15} />
+                {authUser ? t.loggedTrial : t.guestTrial}
+              </span>
+              <h2>{t.watchTitle}</h2>
+              <p>{authUser ? t.watchDescriptionLogged : t.watchDescriptionGuest}</p>
+            </div>
+            <img src={historyOddIcon} alt="HistoryOdd" className="historyodd-sales-logo" />
+          </div>
+
+          <div className="historyodd-video-frame">
+            <video
+              ref={videoRef}
+              controls
+              playsInline
+              preload="metadata"
+              controlsList="nodownload noplaybackrate"
+              disablePictureInPicture
+              onTimeUpdate={() => sendVideoCheckpoint()}
+              onPlay={() => sendVideoCheckpoint({ force: true })}
+              onEnded={() => sendVideoCheckpoint({ ended: true, force: true })}
+              onSeeking={handleVideoSeeking}
+              onRateChange={handleVideoRateChange}
+            >
+              <source src={HISTORY_ODD_VIDEO_URL} type="video/mp4" />
+            </video>
+            {!videoProgressToken && videoValidationBusy ? (
+              <div className="historyodd-video-overlay">
+                <PlayCircle size={26} />
+                {t.videoPreparing}
+              </div>
+            ) : null}
+          </div>
+
+          <div className="historyodd-video-progress">
+            <div className="historyodd-progress-label">
+              <span>{videoCompletionToken ? t.videoComplete : t.videoProgress}</span>
+              <strong>{Math.round(videoProgress * 100)}%</strong>
+            </div>
+            <div className="historyodd-progress-track" aria-hidden="true">
+              <span style={{ width: `${Math.round(videoProgress * 100)}%` }} />
+            </div>
+            <div className="historyodd-video-note">
+              <LockKeyhole size={14} />
+              <span>{t.mustWatchHere}</span>
+            </div>
+            {videoStatus ? <div className="historyodd-video-status">{videoStatus}</div> : null}
+          </div>
+
+          <div className="historyodd-sales-actions">
+            <a
+              className="historyodd-buy-button"
+              href={HISTORY_ODD_PURCHASE_URL}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <ShieldCheck size={18} />
+              <span>
+                <strong>{t.buyNow}</strong>
+                <small>{t.buySubtext}</small>
+              </span>
+            </a>
+
+            <button
+              type="button"
+              className={`historyodd-trial-cta ${videoCompletionToken ? "unlocked" : "locked"}`}
+              onClick={requestHistoryOddTrial}
+              disabled={!videoCompletionToken || trialBusy}
+            >
+              {videoCompletionToken ? <ShieldCheck size={18} /> : <LockKeyhole size={18} />}
+              {trialBusy
+                ? t.trialRequesting
+                : !videoCompletionToken
+                  ? t.trialLocked
+                  : !authUser
+                    ? t.loginToActivate
+                    : (videoEntitlementDays || 10) === 20
+                      ? t.trialUnlocked20
+                      : t.trialUnlocked10}
+            </button>
+
+            <a className="historyodd-download-link" href={HISTORY_ODD_DOWNLOAD_URL}>
+              <Download size={17} />
+              {t.downloadApp}
+            </a>
+          </div>
+
           {trialMessage ? (
             <div className={`odds-history-trial-message ${trialMessageType}`} role="status">
               {trialMessage}
             </div>
           ) : null}
         </div>
+
+        <div className="historyodd-feature-grid">
+          <article>
+            <span><Gauge size={20} /></span>
+            <div>
+              <strong>{t.featureRealtime}</strong>
+              <p>{t.featureRealtimeText}</p>
+            </div>
+          </article>
+          <article>
+            <span><TrendingUp size={20} /></span>
+            <div>
+              <strong>{t.featureMovement}</strong>
+              <p>{t.featureMovementText}</p>
+            </div>
+          </article>
+          <article>
+            <span><LineChart size={20} /></span>
+            <div>
+              <strong>{t.featureHistory}</strong>
+              <p>{t.featureHistoryText}</p>
+            </div>
+          </article>
+        </div>
       </section>
 
+      {!authUser ? (
+        <section className="historyodd-member-gate">
+          <div className="historyodd-member-gate-icon"><LockKeyhole size={24} /></div>
+          <div>
+            <strong>{t.memberOnlyTitle}</strong>
+            <p>{t.memberOnlyText}</p>
+          </div>
+          <button type="button" className="primary-button" onClick={() => onRequestLogin?.()}>
+            {t.memberOnlyButton}
+          </button>
+        </section>
+      ) : (
+        <>
       <section className="odds-history-filters">
         <div className="odds-filter-group">
           <label htmlFor="odds-history-date">
@@ -891,6 +1270,8 @@ export default function OddsHistoryPage({ language = "pt", authUser = null }) {
             );
           })}
         </section>
+      )}
+        </>
       )}
     </main>
   );
