@@ -11,6 +11,7 @@ const CHECKPOINT_TOLERANCE_SECONDS = 15;
 const MIN_COMPLETION_RATIO = 0.95;
 const END_TOLERANCE_SECONDS = 3;
 const MAX_DURATION_SECONDS = 4 * 60 * 60;
+const ALLOWED_PLAYBACK_RATES = [1, 1.25, 1.5];
 
 const toFiniteNumber = (value) => {
   const number = Number(value);
@@ -39,6 +40,12 @@ export default async function handler(req, res) {
     const currentTime = toFiniteNumber(req.body?.currentTime);
     const duration = toFiniteNumber(req.body?.duration);
     const ended = req.body?.ended === true;
+    const requestedPlaybackRate = req.body?.playbackRate == null
+      ? 1
+      : toFiniteNumber(req.body.playbackRate);
+    const playbackRate = ALLOWED_PLAYBACK_RATES.includes(requestedPlaybackRate)
+      ? requestedPlaybackRate
+      : null;
     const now = Date.now();
 
     if (
@@ -47,7 +54,8 @@ export default async function handler(req, res) {
       duration <= 0 ||
       duration > MAX_DURATION_SECONDS ||
       currentTime < 0 ||
-      currentTime > duration + END_TOLERANCE_SECONDS
+      currentTime > duration + END_TOLERANCE_SECONDS ||
+      playbackRate === null
     ) {
       return res.status(400).json({ error: "invalid-video-progress" });
     }
@@ -78,7 +86,7 @@ export default async function handler(req, res) {
     const elapsedServerSeconds = Math.max(0, (now - previousUpdatedAt) / 1000);
     const maxSequentialAdvance = Math.min(
       CHECKPOINT_TOLERANCE_SECONDS,
-      Math.max(2.5, elapsedServerSeconds + 2.5),
+      Math.max(2.5, elapsedServerSeconds * playbackRate + 2.5),
     );
     const isSequentialAdvance =
       delta >= -0.75 && delta <= maxSequentialAdvance;

@@ -5301,3 +5301,70 @@ footer {
     width: 100%;
   }
 }
+
+.historyodd-video-speed {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 12px;
+  background: rgba(5,5,5,.74);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 22px rgba(0,0,0,.22);
+}
+
+.historyodd-video-speed > span {
+  padding: 0 4px;
+  color: rgba(255,255,255,.72);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.historyodd-video-speed button {
+  min-width: 42px;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 8px;
+  background: rgba(255,255,255,.07);
+  color: rgba(255,255,255,.78);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 850;
+  cursor: pointer;
+  transition: transform .15s ease, background .15s ease, border-color .15s ease, color .15s ease;
+}
+
+.historyodd-video-speed button:hover {
+  transform: translateY(-1px);
+  background: rgba(255,255,255,.13);
+  color: #fff;
+}
+
+.historyodd-video-speed button.active {
+  border-color: rgba(169,112,255,.72);
+  background: rgba(139,61,255,.34);
+  color: #fff;
+}
+
+@media (max-width: 620px) {
+  .historyodd-video-speed {
+    top: 8px;
+    right: 8px;
+  }
+
+  .historyodd-video-speed > span {
+    display: none;
+  }
+
+  .historyodd-video-speed button {
+    min-width: 38px;
+    height: 28px;
+    padding: 0 6px;
+  }
+}

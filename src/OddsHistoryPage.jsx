@@ -635,6 +635,7 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
   const [videoAllowedSeekTo, setVideoAllowedSeekTo] = useState(2);
   const [videoStatus, setVideoStatus] = useState("");
   const [videoValidationBusy, setVideoValidationBusy] = useState(false);
+  const [videoPlaybackRate, setVideoPlaybackRate] = useState(1);
   const videoRef = useRef(null);
   const lastCheckpointRef = useRef(0);
   const checkpointInFlightRef = useRef(false);
@@ -817,6 +818,7 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
           duration: video.duration,
           ended,
           progressToken: videoProgressToken || undefined,
+          playbackRate: videoPlaybackRate,
         }),
       });
 
@@ -862,9 +864,26 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
     }
   };
 
+  const setHistoryOddPlaybackRate = (rate) => {
+    const nextRate = Number(rate);
+    if (![1, 1.25, 1.5].includes(nextRate)) return;
+
+    const video = videoRef.current;
+    if (video) video.playbackRate = nextRate;
+    setVideoPlaybackRate(nextRate);
+  };
+
   const handleVideoRateChange = () => {
     const video = videoRef.current;
-    if (video && video.playbackRate !== 1) video.playbackRate = 1;
+    if (!video) return;
+
+    const nextRate = Number(video.playbackRate);
+    if (![1, 1.25, 1.5].includes(nextRate)) {
+      video.playbackRate = videoPlaybackRate;
+      return;
+    }
+
+    if (nextRate !== videoPlaybackRate) setVideoPlaybackRate(nextRate);
   };
 
   const requestHistoryOddTrial = async () => {
@@ -976,6 +995,20 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
             >
               <source src={HISTORY_ODD_VIDEO_URL} type="video/mp4" />
             </video>
+            <div className="historyodd-video-speed" aria-label="Velocidade do vídeo">
+              <span>Velocidade</span>
+              {[1, 1.25, 1.5].map((rate) => (
+                <button
+                  key={rate}
+                  type="button"
+                  className={videoPlaybackRate === rate ? "active" : ""}
+                  onClick={() => setHistoryOddPlaybackRate(rate)}
+                  aria-pressed={videoPlaybackRate === rate}
+                >
+                  {rate}x
+                </button>
+              ))}
+            </div>
             {!videoProgressToken && videoValidationBusy ? (
               <div className="historyodd-video-overlay">
                 <PlayCircle size={26} />
