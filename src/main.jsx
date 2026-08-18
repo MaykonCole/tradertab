@@ -1858,16 +1858,14 @@ function App() {
             <TrendingUp size={18} />
             <span>{t.leader}</span>
           </button>
-          {authUser && (
-            <button
-              type="button"
-              className={`topbar-shortcut ${currentPath === "/historyodd" ? "active" : ""}`}
-              onClick={() => navigateTo("/historyOdd")}
-            >
-              <LayoutGrid size={18} />
-              <span>{t.oddsHistory}</span>
-            </button>
-          )}
+          <button
+            type="button"
+            className={`topbar-shortcut ${currentPath === "/historyodd" ? "active" : ""}`}
+            onClick={() => navigateTo("/historyOdd")}
+          >
+            <LayoutGrid size={18} />
+            <span>{t.oddsHistory}</span>
+          </button>
           {authUser && hasMemberAccess && (
             <>
               <button
@@ -1993,11 +1991,15 @@ function App() {
     );
   }
 
-  if (currentPath === "/historyodd" && authUser) {
+  if (currentPath === "/historyodd") {
     return (
       <div className="app-shell">
         {renderTopbar()}
-        <OddsHistoryPage language={lang} authUser={authUser} />
+        <OddsHistoryPage
+          language={lang}
+          authUser={authUser}
+          onRequestLogin={() => setAuthModalOpen(true)}
+        />
         {renderFooter()}
         {renderGlobalOverlays()}
       </div>

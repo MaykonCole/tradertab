@@ -1,4 +1,4 @@
-const FIREBASE_API_KEY =
+const getFirebaseApiKey = () =>
   process.env.FIREBASE_API_KEY?.trim() ||
   process.env.VITE_FIREBASE_API_KEY?.trim();
 
@@ -9,14 +9,15 @@ export const getBearerToken = (req) => {
 };
 
 export const verifyFirebaseIdToken = async (idToken) => {
-  if (!FIREBASE_API_KEY) {
+  const firebaseApiKey = getFirebaseApiKey();
+  if (!firebaseApiKey) {
     throw new Error("firebase-api-key-not-configured");
   }
 
   if (!idToken) return null;
 
   const response = await fetch(
-    `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${encodeURIComponent(FIREBASE_API_KEY)}`,
+    `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${encodeURIComponent(firebaseApiKey)}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
