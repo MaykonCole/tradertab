@@ -11,7 +11,7 @@ const CHECKPOINT_TOLERANCE_SECONDS = 15;
 const MIN_COMPLETION_RATIO = 0.95;
 const END_TOLERANCE_SECONDS = 3;
 const MAX_DURATION_SECONDS = 4 * 60 * 60;
-const ALLOWED_PLAYBACK_RATES = [1, 1.25, 1.5];
+const ALLOWED_PLAYBACK_RATES = [1, 1.25, 1.5, 2];
 
 const toFiniteNumber = (value) => {
   const number = Number(value);

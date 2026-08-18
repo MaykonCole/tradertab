@@ -866,7 +866,7 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
 
   const setHistoryOddPlaybackRate = (rate) => {
     const nextRate = Number(rate);
-    if (![1, 1.25, 1.5].includes(nextRate)) return;
+    if (![1, 1.25, 1.5, 2].includes(nextRate)) return;
 
     const video = videoRef.current;
     if (video) video.playbackRate = nextRate;
@@ -878,7 +878,7 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
     if (!video) return;
 
     const nextRate = Number(video.playbackRate);
-    if (![1, 1.25, 1.5].includes(nextRate)) {
+    if (![1, 1.25, 1.5, 2].includes(nextRate)) {
       video.playbackRate = videoPlaybackRate;
       return;
     }
@@ -996,18 +996,18 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
               <source src={HISTORY_ODD_VIDEO_URL} type="video/mp4" />
             </video>
             <div className="historyodd-video-speed" aria-label="Velocidade do vídeo">
-              <span>Velocidade</span>
-              {[1, 1.25, 1.5].map((rate) => (
-                <button
-                  key={rate}
-                  type="button"
-                  className={videoPlaybackRate === rate ? "active" : ""}
-                  onClick={() => setHistoryOddPlaybackRate(rate)}
-                  aria-pressed={videoPlaybackRate === rate}
-                >
-                  {rate}x
-                </button>
-              ))}
+              <label htmlFor="historyodd-video-speed-select">Velocidade</label>
+              <select
+                id="historyodd-video-speed-select"
+                value={videoPlaybackRate}
+                onChange={(event) => setHistoryOddPlaybackRate(event.target.value)}
+                aria-label="Selecionar velocidade do vídeo"
+              >
+                <option value={1}>1x</option>
+                <option value={1.25}>1.25x</option>
+                <option value={1.5}>1.5x</option>
+                <option value={2}>2x</option>
+              </select>
             </div>
             {!videoProgressToken && videoValidationBusy ? (
               <div className="historyodd-video-overlay">
