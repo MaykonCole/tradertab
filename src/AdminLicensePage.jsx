@@ -4,7 +4,6 @@ import {
   KeyRound, LayoutDashboard, Loader2, MonitorSmartphone, Plus, RefreshCw, RotateCcw,
   Search, Server, Settings, ShieldCheck, Trash2, UserRound, X, XCircle
 } from 'lucide-react'
-import './admin-license.css'
 
 
 function cn(...values){ return values.filter(Boolean).join(' ') }
@@ -30,8 +29,19 @@ function useApi(baseUrl, token){
   return useMemo(()=>{
     const base = baseUrl.replace(/\/$/,'')
     async function request(path, options={}){
-      const headers = { ...(options.body ? {'Content-Type':'application/json'} : {}), ...(options.admin !== false && token ? {Authorization:`Bearer ${token}`} : {}), ...options.headers }
-      const response = await fetch(`${base}${path}`, {...options, headers})
+      const headers = {
+        'X-License-Server-Url': base,
+        ...(options.body ? {'Content-Type':'application/json'} : {}),
+        ...(options.admin !== false && token ? {'X-Admin-Token': token} : {}),
+        ...options.headers,
+      }
+      const query = new URLSearchParams({ path })
+      const response = await fetch(`/api/license-admin-proxy?${query.toString()}`, {
+        ...options,
+        headers,
+        cache: 'no-store',
+        credentials: 'same-origin',
+      })
       let data = null
       try { data = await response.json() } catch { data = {error:`HTTP ${response.status}`} }
       if(!response.ok) throw new ApiError(data?.error || `HTTP ${response.status}`, response.status, data)
@@ -110,7 +120,7 @@ export default function AdminLicensePage(){
         e.status===401
           ? 'ADMIN_TOKEN inválido ou não autorizado.'
           : isNetworkError
-            ? 'Não foi possível acessar o Worker. Verifique CORS/ALLOWED_ORIGINS e se a URL do License Server está correta.'
+            ? 'Não foi possível acessar o Worker pelo proxy seguro do TraderTab. Verifique a URL do License Server.'
             : `Falha ao conectar: ${e.message}`,
         'error'
       )
