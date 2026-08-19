@@ -35,6 +35,7 @@ import {
 import PrivacyPolicy from "./PrivacyPolicy";
 import LeaderPage from "./LeaderPage";
 import OddsHistoryPage from "./OddsHistoryPage";
+import AdminLicensePage from "./AdminLicensePage";
 import {
   loadFavoritePreferences,
   loadColumnOrder,
@@ -1979,6 +1980,10 @@ function App() {
     </footer>
   );
 
+
+  if (currentPath === "/admin") {
+    return <AdminLicensePage />;
+  }
 
   if (currentPath === "/ladder") {
     return (
