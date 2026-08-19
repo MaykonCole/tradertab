@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
   ArrowDown,
@@ -50,6 +50,8 @@ import "./styles.css";
 import logoPt from "./assets/logo-pt.png";
 import logoEs from "./assets/logo-es.png";
 import logoEn from "./assets/logo-en.png";
+
+const AdminLicensePage = lazy(() => import("./AdminLicensePage.jsx"));
 
 const languageOptions = [
   { key: "pt", label: "Português", short: "PT", flag: "🇧🇷" },
@@ -2409,4 +2411,16 @@ function App() {
   );
 }
 
-createRoot(document.getElementById("root")).render(<App />);
+function RootRouter() {
+  if (window.location.pathname.toLowerCase() === "/admin") {
+    return (
+      <Suspense fallback={<div style={{ minHeight: "100vh", display: "grid", placeItems: "center", background: "#09090b", color: "#e4e4e7" }}>Carregando painel administrativo…</div>}>
+        <AdminLicensePage />
+      </Suspense>
+    );
+  }
+
+  return <App />;
+}
+
+createRoot(document.getElementById("root")).render(<RootRouter />);
