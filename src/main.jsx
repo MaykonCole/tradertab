@@ -48,6 +48,7 @@ import {
   saveColumnOrder,
 } from "./firebase";
 import "./styles.css";
+import "./admin-license.css";
 import logoPt from "./assets/logo-pt.png";
 import logoEs from "./assets/logo-es.png";
 import logoEn from "./assets/logo-en.png";
