@@ -11,7 +11,8 @@ const copy = {
     stake: "Stake",
     liability: "Responsabilidade",
     amount: "Valor",
-    showPercent: "Mostrar resultado em percentual sobre o valor exposto",
+    showPercent: "Percentual sobre valor exposto",
+    showStakePercent: "Percentual sobre valor da stake",
     clear: "Limpar simulação",
     selectionWins: "Seleção vence",
     selectionLoses: "Seleção perde",
@@ -22,6 +23,8 @@ const copy = {
     result: "P/L",
     back: "Back",
     lay: "Lay",
+    ticksPercent: "Ticks %",
+    oneTick: "1 Tick",
     editHint: "Defina o valor e clique em uma odd",
     stakeLabel: "Stake",
     liabilityLabel: "Responsabilidade",
@@ -38,7 +41,8 @@ const copy = {
     stake: "Stake",
     liability: "Liability",
     amount: "Amount",
-    showPercent: "Show outcome as a percentage of exposed value",
+    showPercent: "Percentage of exposed value",
+    showStakePercent: "Percentage of stake value",
     clear: "Clear simulation",
     selectionWins: "Selection wins",
     selectionLoses: "Selection loses",
@@ -49,6 +53,8 @@ const copy = {
     result: "P/L",
     back: "Back",
     lay: "Lay",
+    ticksPercent: "Ticks %",
+    oneTick: "1 Tick",
     editHint: "Set an amount and click an odd",
     stakeLabel: "Stake",
     liabilityLabel: "Liability",
@@ -65,7 +71,8 @@ const copy = {
     stake: "Stake",
     liability: "Responsabilidad",
     amount: "Valor",
-    showPercent: "Mostrar resultado en porcentaje sobre el valor expuesto",
+    showPercent: "Porcentaje sobre el valor expuesto",
+    showStakePercent: "Porcentaje sobre el valor de la stake",
     clear: "Limpiar simulación",
     selectionWins: "La selección gana",
     selectionLoses: "La selección pierde",
@@ -76,6 +83,8 @@ const copy = {
     result: "P/L",
     back: "Back",
     lay: "Lay",
+    ticksPercent: "Ticks %",
+    oneTick: "1 Tick",
     editHint: "Define el valor y haz clic en una cuota",
     stakeLabel: "Stake",
     liabilityLabel: "Responsabilidad",
@@ -103,36 +112,88 @@ function createOdds() {
 }
 
 const ODDS = createOdds();
-const STORAGE_KEY = "tradertab-leader-settings-v4";
-const LEGACY_STORAGE_KEY = "tradertab-leader-settings-v3";
-const DEFAULT_COLUMNS = ["lay", "odds", "back", "result"];
+const STORAGE_KEY = "tradertab-leader-settings-v7";
+const LEGACY_STORAGE_KEY = "tradertab-leader-settings-v6";
+const DEFAULT_COLUMNS = ["ticks", "lay", "back", "result"];
 
-const columnWidth = (column) => column === "result" ? "100px" : column === "odds" ? "58px" : "78px";
+const columnWidth = (column) => {
+  if (column === "result") return "100px";
+  if (column === "ticks") return "70px";
+  return "78px";
+};
 
 function loadSettings() {
   try {
     const currentRaw = localStorage.getItem(STORAGE_KEY);
-    const legacyRaw = localStorage.getItem(LEGACY_STORAGE_KEY);
+    const legacyRaw = localStorage.getItem(LEGACY_STORAGE_KEY) || localStorage.getItem("tradertab-leader-settings-v4");
     const stored = JSON.parse(currentRaw || legacyRaw || "{}");
-    const validColumns = Array.isArray(stored.columns)
-      && stored.columns.length === DEFAULT_COLUMNS.length
-      && DEFAULT_COLUMNS.every((column) => stored.columns.includes(column));
+
+    const migrateColumns = (columns) => {
+      if (!Array.isArray(columns) || !columns.length) return DEFAULT_COLUMNS;
+      const migrated = columns
+        .filter((column) => DEFAULT_COLUMNS.includes(column))
+        .filter((column, index, list) => list.indexOf(column) === index);
+      DEFAULT_COLUMNS.forEach((column) => {
+        if (!migrated.includes(column)) migrated.push(column);
+      });
+      return migrated;
+    };
+
+    const columns = migrateColumns(stored.columns);
+    const validColumns = columns.length === DEFAULT_COLUMNS.length
+      && DEFAULT_COLUMNS.every((column) => columns.includes(column));
+
     return {
       commission: typeof stored.commission === "string" ? stored.commission : "0",
       mode: stored.mode === "liability" ? "liability" : "stake",
       amount: typeof stored.amount === "string" ? stored.amount : "100",
-      showPercent: Boolean(stored.showPercent),
-      columns: validColumns
-        ? (currentRaw ? stored.columns : [...stored.columns.filter((column) => column !== "result"), "result"])
-        : DEFAULT_COLUMNS,
+      percentMode: stored.percentMode === "stake" ? "stake" : (stored.percentMode === "exposure" || stored.showPercent ? "exposure" : "none"),
+      columns: validColumns ? columns : DEFAULT_COLUMNS,
     };
   } catch {
-    return { commission: "0", mode: "stake", amount: "100", showPercent: false, columns: DEFAULT_COLUMNS };
+    return { commission: "0", mode: "stake", amount: "100", percentMode: "none", columns: DEFAULT_COLUMNS };
   }
 }
 const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 const money = (value) => currency.format(Math.abs(value) < 0.005 ? 0 : value);
 const oddText = (value) => value < 10 ? value.toFixed(2).replace(".", ",") : value.toFixed(value % 1 ? 1 : 0).replace(".", ",");
+
+
+const TICK_PERCENT_RANGES = [
+  { min: 1.01, max: 1.1, value: 0.87 },
+  { min: 1.1, max: 1.2, value: 0.80 },
+  { min: 1.2, max: 1.3, value: 0.74 },
+  { min: 1.3, max: 1.4, value: 0.68 },
+  { min: 1.4, max: 1.5, value: 0.64 },
+  { min: 1.5, max: 1.6, value: 0.60 },
+  { min: 1.6, max: 1.7, value: 0.56 },
+  { min: 1.7, max: 1.8, value: 0.53 },
+  { min: 1.8, max: 1.9, value: 0.50 },
+  { min: 1.9, max: 2.0, value: 0.48 },
+  { min: 2.0, max: 2.2, value: 0.87 },
+  { min: 2.2, max: 2.4, value: 0.80 },
+  { min: 2.4, max: 2.6, value: 0.74 },
+  { min: 2.6, max: 2.8, value: 0.68 },
+  { min: 2.8, max: 3.0, value: 0.64 },
+  { min: 3.0, max: 3.5, value: 1.38 },
+  { min: 3.5, max: 4.0, value: 1.20 },
+  { min: 4.0, max: 5.0, value: 1.94 },
+  { min: 5.0, max: 6.0, value: 1.61 },
+  { min: 6.0, max: 8.0, value: 2.44 },
+  { min: 8.0, max: 10.0, value: 1.94 },
+  { min: 10.0, max: 15.0, value: 3.28 },
+];
+
+function getTickPercent(odds) {
+  if (odds > 15) return null;
+  const match = TICK_PERCENT_RANGES.find(({ min, max }) => odds >= min && (odds < max || Math.abs(odds - max) < 1e-9));
+  return match?.value ?? null;
+}
+
+function tickPercentText(odds) {
+  const value = getTickPercent(odds);
+  return value == null ? "—" : `${value.toFixed(2).replace(".", ",")}%`;
+}
 
 export default function LeaderPage({ language = "pt" }) {
   const t = copy[language] || copy.pt;
@@ -140,7 +201,7 @@ export default function LeaderPage({ language = "pt" }) {
   const [commission, setCommission] = useState(initialSettings.commission);
   const [mode, setMode] = useState(initialSettings.mode);
   const [amount, setAmount] = useState(initialSettings.amount);
-  const [showPercent, setShowPercent] = useState(initialSettings.showPercent);
+  const [percentMode, setPercentMode] = useState(initialSettings.percentMode);
   const [columns, setColumns] = useState(initialSettings.columns);
   const [draggedColumn, setDraggedColumn] = useState(null);
   const [entries, setEntries] = useState([]);
@@ -152,8 +213,8 @@ export default function LeaderPage({ language = "pt" }) {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ commission, mode, amount, showPercent, columns }));
-  }, [commission, mode, amount, showPercent, columns]);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ commission, mode, amount, percentMode, columns }));
+  }, [commission, mode, amount, percentMode, columns]);
 
   const moveColumn = (targetColumn) => {
     if (!draggedColumn || draggedColumn === targetColumn) return;
@@ -180,8 +241,10 @@ export default function LeaderPage({ language = "pt" }) {
     let win = 0;
     let lose = 0;
     let exposed = 0;
+    let stake = 0;
     entries.forEach((entry) => {
       exposed += entry.side === "back" ? entry.stake : entry.liability;
+      stake += entry.stake;
       if (entry.side === "back") {
         win += entry.stake * (entry.odds - 1);
         lose -= entry.stake;
@@ -190,7 +253,7 @@ export default function LeaderPage({ language = "pt" }) {
         lose += entry.stake;
       }
     });
-    return { win, lose, exposed };
+    return { win, lose, exposed, stake };
   }, [entries]);
 
   const commissionRate = Math.min(100, Math.max(0, Number(String(commission).replace(",", ".")) || 0)) / 100;
@@ -207,8 +270,9 @@ export default function LeaderPage({ language = "pt" }) {
   };
 
   const resultText = (value) => {
-    if (!showPercent) return money(value);
-    const percent = totals.exposed > 0 ? (value / totals.exposed) * 100 : 0;
+    if (percentMode === "none") return money(value);
+    const base = percentMode === "stake" ? totals.stake : totals.exposed;
+    const percent = base > 0 ? (value / base) * 100 : 0;
     return `${percent > 0 ? "+" : ""}${percent.toFixed(2).replace(".", ",")}%`;
   };
 
@@ -243,7 +307,7 @@ export default function LeaderPage({ language = "pt" }) {
               >
                 {column === "result" && <strong>{t.result}</strong>}
                 {column === "lay" && <><strong>{t.lay}</strong><small>{t.liabilityLabel}</small></>}
-                {column === "odds" && <strong>{t.odds}</strong>}
+                {column === "ticks" && <><strong>{t.ticksPercent}</strong><small>{t.oneTick}</small></>}
                 {column === "back" && <><strong>{t.back}</strong><small>{t.stakeLabel}</small></>}
               </div>
             ))}
@@ -255,7 +319,7 @@ export default function LeaderPage({ language = "pt" }) {
               const cells = {
                 result: <strong className={`leader-row-result ${resultClass}`}>{resultText(rowResult)}</strong>,
                 lay: <button type="button" className="leader-price lay" onClick={() => addEntry("lay", odds)} aria-label={`${t.lay} ${oddText(odds)}`}><span>{oddText(odds)}</span><small>{t.lay}</small></button>,
-                odds: <strong className="leader-odd">{oddText(odds)}</strong>,
+                ticks: <strong className={`leader-tick-percent ${getTickPercent(odds) == null ? "muted" : ""}`}>{tickPercentText(odds)}</strong>,
                 back: <button type="button" className="leader-price back" onClick={() => addEntry("back", odds)} aria-label={`${t.back} ${oddText(odds)}`}><span>{oddText(odds)}</span><small>{t.back}</small></button>,
               };
               return (
@@ -275,7 +339,10 @@ export default function LeaderPage({ language = "pt" }) {
               <label><span>{t.mode}</span><div className="leader-select"><select value={mode} onChange={(e) => setMode(e.target.value)}><option value="stake">{t.stake}</option><option value="liability">{t.liability}</option></select><ChevronDown size={16} /></div></label>
               <label className="leader-amount"><span>{t.amount}</span><input type="number" min="0.01" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} /></label>
             </div>
-            <label className="leader-check"><input type="checkbox" checked={showPercent} onChange={(e) => setShowPercent(e.target.checked)} /><span><Percent size={16} />{t.showPercent}</span></label>
+            <div className="leader-percent-checks">
+              <label className="leader-check"><input type="checkbox" checked={percentMode === "exposure"} onChange={(e) => setPercentMode(e.target.checked ? "exposure" : "none")} /><span><Percent size={16} />{t.showPercent}</span></label>
+              <label className="leader-check"><input type="checkbox" checked={percentMode === "stake"} onChange={(e) => setPercentMode(e.target.checked ? "stake" : "none")} /><span><Percent size={16} />{t.showStakePercent}</span></label>
+            </div>
           </section>
 
           <section className="leader-extremes-card" aria-label="Resultados nas odds extremas">
