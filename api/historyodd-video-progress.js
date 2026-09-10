@@ -113,7 +113,7 @@ export default async function handler(req, res) {
     const completed = ended && nearEnd && watchedRatio >= MIN_COMPLETION_RATIO;
 
     const authUid = previousUid || authUser?.uid || null;
-    const entitlementDays = authUid ? 20 : 10;
+    const entitlementDays = authUid ? 14 : 7;
 
     const progressToken = createProgressToken({
       sessionId,

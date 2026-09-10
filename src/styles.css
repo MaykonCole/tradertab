@@ -4147,9 +4147,9 @@ footer {
 .leader-column-head:hover { background: var(--surface-3); }
 .leader-column-head.dragging { opacity: .45; }
 .leader-column-head.lay { color: #f0aeb9; }
+.leader-column-head.ticks { color: #f7a43c; }
 .leader-column-head.back { color: #9ed3ee; }
-.leader-column-head.result,
-.leader-column-head.odds { color: var(--text-soft); }
+.leader-column-head.result { color: var(--text-soft); }
 .leader-column-head strong { font-size: 12px; line-height: 1.1; }
 .leader-column-head small { color: var(--text-muted); font-size: 8px; line-height: 1.1; margin-top: 2px; }
 .leader-ladder-head { padding: 7px 7px; }
@@ -4171,29 +4171,44 @@ footer {
   .leader-ladder-row { grid-template-columns: var(--leader-columns); gap: 3px; }
   .leader-row-result { font-size: 9px; }
 }
-.leader-ladder-head > .leader-column-head.result,
-.leader-ladder-head > .leader-column-head.odds { color: var(--text-soft); }
+.leader-ladder-head > .leader-column-head.result { color: var(--text-soft); }
 .leader-ladder-head > .leader-column-head.lay { color: #f0aeb9; }
+.leader-ladder-head > .leader-column-head.ticks { color: #f7a43c; }
 .leader-ladder-head > .leader-column-head.back { color: #9ed3ee; }
 
 
-/* Leader v4: narrower price cards, larger Odd/P-L and P/L last by default */
-.leader-layout { grid-template-columns: 344px minmax(0, 1fr); }
-.leader-ladder-card { width: 344px; max-width: 100%; }
+/* Leader v7: compact ladder without redundant Odd column */
+.leader-layout { grid-template-columns: 360px minmax(0, 1fr); }
+.leader-ladder-card { width: 360px; max-width: 100%; }
 .leader-ladder-head,
 .leader-ladder-row { justify-content: center; }
 .leader-price span { font-size: 13px; font-weight: 950; }
 .leader-odd { font-size: 15px; font-weight: 950; }
 .leader-row-result { font-size: 13px; font-weight: 900; }
+.leader-tick-percent {
+  display: grid;
+  place-items: center;
+  padding: 0 4px;
+  border-radius: 6px;
+  background: var(--surface-2);
+  color: #f7a43c;
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+.leader-tick-percent.muted {
+  color: var(--text-muted);
+}
 @media (max-width: 980px) {
   .leader-layout { grid-template-columns: 1fr; }
-  .leader-ladder-card { width: 344px; justify-self: center; }
+  .leader-ladder-card { width: 360px; justify-self: center; }
 }
 @media (max-width: 390px) {
   .leader-ladder-card { width: 100%; }
   .leader-price span { font-size: 12px; }
   .leader-odd { font-size: 14px; }
   .leader-row-result { font-size: 11px; }
+  .leader-tick-percent { font-size: 10px; }
 }
 
 /* Quick results at the two ladder extremes */
@@ -5541,4 +5556,60 @@ footer {
   .historyodd-trial-modal-actions {
     grid-template-columns: 1fr;
   }
+}
+
+/* HistoryOdd trial/login notice + Instagram */
+.historyodd-top-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.historyodd-login-trial-notice,
+.historyodd-instagram-link {
+  min-height: 34px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.historyodd-login-trial-notice {
+  color: #f2bd38;
+  border: 1px solid rgba(214, 163, 30, 0.28);
+  background: rgba(214, 163, 30, 0.09);
+}
+
+.historyodd-instagram-link {
+  color: var(--text);
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface-3) 72%, transparent);
+  text-decoration: none;
+  transition: transform .16s ease, border-color .16s ease, background .16s ease;
+}
+
+.historyodd-instagram-link:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, #d62976 58%, var(--border));
+  background: color-mix(in srgb, #d62976 10%, var(--surface-3));
+}
+
+/* Ladder: mutually exclusive percentage bases */
+.leader-percent-checks {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  margin-top: 17px;
+}
+
+.leader-percent-checks .leader-check {
+  margin-top: 0;
 }

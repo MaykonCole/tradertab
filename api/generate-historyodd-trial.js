@@ -78,7 +78,7 @@ export default async function handler(req, res) {
 
     // A conclusão pertence exatamente ao contexto que assistiu ao vídeo.
     // Logado: exige o mesmo UID. Visitante: exige o fluxo sem Firebase e
-    // utiliza apenas o e-mail digitado no popup (Trial de 10 dias).
+    // utiliza apenas o e-mail digitado no popup (Trial de 7 dias).
     if (completion.authUid) {
       if (identity.source !== "firebase") {
         return res.status(403).json({ error: "video-completion-user-mismatch" });
@@ -93,7 +93,7 @@ export default async function handler(req, res) {
       return res.status(403).json({ error: "video-completion-user-mismatch" });
     }
 
-    const durationDays = Number(completion.entitlementDays) === 20 ? 20 : 10;
+    const durationDays = Number(completion.entitlementDays) === 14 ? 14 : 7;
 
     const upstream = await fetch(historyOddLicenseUrl, {
       method: "POST",
