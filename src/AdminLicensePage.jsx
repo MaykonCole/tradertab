@@ -124,6 +124,11 @@ function useApi(baseUrl, token) {
           method: "POST",
           body: JSON.stringify({ licenseKey }),
         }),
+      updateDuration: (body) =>
+        request("/admin/licenses/duration", {
+          method: "POST",
+          body: JSON.stringify(body),
+        }),
       resetTrial: (body) =>
         request("/admin/trial-device/reset", {
           method: "POST",
@@ -739,6 +744,14 @@ function LicenseDrawer({
   onResetTrial,
 }) {
   const [busy, setBusy] = useState("");
+  const [durationDays, setDurationDays] = useState("");
+  const [editingDuration, setEditingDuration] = useState(false);
+
+  useEffect(() => {
+    setDurationDays(license?.durationDays ? String(license.durationDays) : "");
+    setEditingDuration(false);
+  }, [license?.key, license?.durationDays]);
+
   if (!license) return null;
   const action = async (name, fn, success) => {
     if (busy) return;
@@ -780,6 +793,36 @@ function LicenseDrawer({
       "Licença resetada e reativada sem alterar a validade.",
     );
   };
+  const saveDuration = async () => {
+    const days = Number.parseInt(durationDays, 10);
+    if (!Number.isInteger(days) || days <= 0) {
+      notify("Informe uma duração válida em dias.", "error");
+      return;
+    }
+
+    const email = String(license.customerEmail || "").trim();
+    const product = String(license.product?.name || "").trim();
+    if (!email || !product) {
+      notify("A licença precisa ter e-mail e produto para alterar a duração.", "error");
+      return;
+    }
+
+    setBusy("duration");
+    try {
+      await api.updateDuration({
+        email,
+        product,
+        durationDays: days,
+      });
+      notify(`Duração alterada para ${days} dias.`);
+      setEditingDuration(false);
+      await refresh(true);
+    } catch (e) {
+      notify(e.message, "error");
+    } finally {
+      setBusy("");
+    }
+  };
   return (
     <div
       className="drawer-backdrop"
@@ -811,7 +854,66 @@ function LicenseDrawer({
         <div className="detail-grid">
           <Info label="Produto" value={license.product?.name} />
           <Info label="Plano" value={license.product?.plan} />
-          <Info label="Duração" value={`${license.durationDays} dias`} />
+          <div className="info duration-info">
+            <span>Duração</span>
+            {!editingDuration ? (
+              <button
+                type="button"
+                className="duration-value"
+                disabled={!!busy}
+                onClick={() => setEditingDuration(true)}
+                title="Clique para alterar a duração"
+              >
+                <b>{license.durationDays} dias</b>
+                <Settings size={13} />
+              </button>
+            ) : (
+              <div className="duration-editor">
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={durationDays}
+                  autoFocus
+                  disabled={busy === "duration"}
+                  onChange={(e) => setDurationDays(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") saveDuration();
+                    if (e.key === "Escape") {
+                      setDurationDays(String(license.durationDays || ""));
+                      setEditingDuration(false);
+                    }
+                  }}
+                  aria-label="Nova duração da licença em dias"
+                />
+                <button
+                  type="button"
+                  className="duration-save"
+                  onClick={saveDuration}
+                  disabled={busy === "duration"}
+                  title="Salvar duração"
+                >
+                  {busy === "duration" ? (
+                    <Loader2 className="spin" size={14} />
+                  ) : (
+                    <Check size={14} />
+                  )}
+                </button>
+                <button
+                  type="button"
+                  className="duration-cancel"
+                  onClick={() => {
+                    setDurationDays(String(license.durationDays || ""));
+                    setEditingDuration(false);
+                  }}
+                  disabled={busy === "duration"}
+                  title="Cancelar"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            )}
+          </div>
           <Info
             label="Dispositivos"
             value={`${license.registeredDevices}/${license.maxDevices}`}
