@@ -5,6 +5,7 @@ const ALLOWED_PATHS = new Set([
   '/admin/licenses/revoke',
   '/admin/licenses/reset',
   '/admin/licenses/reset-devices',
+  '/admin/licenses/duration',
   '/admin/trial-device/reset',
   '/admin/kirvano/catalog-check',
 ]);
