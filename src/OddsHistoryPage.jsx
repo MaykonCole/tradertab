@@ -46,11 +46,11 @@ const copy = {
       "O HistoryOdd transforma a variação das odds em uma leitura visual e objetiva. Acompanhe o percentual pago, o ritmo do mercado, movimentos e histórico em tempo real para operar com muito mais contexto.",
     watchTitle: "Assista ao vídeo completo e libere seu Trial",
     watchDescriptionLogged:
-      "Você está logado: concluindo o vídeo pelo player abaixo, sua conta libera uma licença Trial de 14 dias.",
+      "Você está logado: concluindo o vídeo pelo player abaixo, sua conta libera uma licença Trial de 7 dias.",
     watchDescriptionGuest:
-      "Conclua o vídeo pelo player abaixo para liberar uma licença Trial de 7 dias. Depois, entre ou crie sua conta para ativar a licença.",
-    loggedTrial: "LOGADO · 14 DIAS DE TRIAL",
-    guestTrial: "VISITANTE · 7 DIAS DE TRIAL",
+      "Conclua o vídeo pelo player abaixo para liberar uma licença Trial de 3 dias como visitante.",
+    loggedTrial: "LOGADO · 7 DIAS DE TRIAL",
+    guestTrial: "VISITANTE · 3 DIAS DE TRIAL",
     videoProgress: "Progresso do vídeo",
     videoComplete: "Vídeo concluído · Trial liberado",
     videoPreparing: "Preparando validação do vídeo...",
@@ -60,9 +60,9 @@ const copy = {
     buySubtext: "Acesso imediato após a confirmação do pagamento",
     downloadApp: "Baixar HistoryOdd",
     trialLocked: "Assista ao vídeo até o final para liberar",
-    trialUnlocked14: "Ativar Trial de 14 dias",
     trialUnlocked7: "Ativar Trial de 7 dias",
-    loginToActivate: "Entrar para ativar Trial de 7 dias",
+    trialUnlocked3: "Ativar Trial de 3 dias",
+    loginToActivate: "Ativar Trial de 3 dias",
     featureRealtime: "Leitura em tempo real",
     featureRealtimeText: "Acompanhe a odd e o percentual pago enquanto o mercado se movimenta.",
     featureMovement: "Movimento e contexto",
@@ -82,7 +82,7 @@ const copy = {
     loggedTrialModalText: "Agora baixe o HistoryOdd pelo botão Baixar HistoryOdd e, no aplicativo, faça login usando este mesmo e-mail da sua conta para acessar a licença Trial.",
     understood: "Entendi",
     guestTrialModalTitle: "Escolha o e-mail da sua licença Trial",
-    guestTrialModalText: "Você concluiu o vídeo como visitante e ganhou 7 dias de Trial. Se tivesse assistido logado no TraderTab, receberia 14 dias. Informe abaixo um e-mail válido ao qual você tenha acesso.",
+    guestTrialModalText: "Você concluiu o vídeo como visitante e ganhou 3 dias de Trial. Se tivesse assistido logado no TraderTab, receberia 7 dias. Informe abaixo um e-mail válido ao qual você tenha acesso.",
     guestEmailLabel: "E-mail para a licença",
     guestEmailPlaceholder: "seuemail@exemplo.com",
     guestGenerateTrial: "Gerar Licença Trial",
@@ -132,11 +132,11 @@ const copy = {
       "HistoryOdd turns odds variation into an objective visual reading. Follow paid percentage, market pace, movements and real-time history with much more context.",
     watchTitle: "Watch the full video and unlock your Trial",
     watchDescriptionLogged:
-      "You are signed in: complete the video in the player below to unlock a 14-day Trial license for your account.",
+      "You are signed in: complete the video in the player below to unlock a 7-day Trial license for your account.",
     watchDescriptionGuest:
-      "Complete the video in the player below to unlock a 7-day Trial. Then sign in or create your account to activate it.",
-    loggedTrial: "SIGNED IN · 14-DAY TRIAL",
-    guestTrial: "VISITOR · 7-DAY TRIAL",
+      "Complete the video in the player below to unlock a 3-day Trial as a visitor.",
+    loggedTrial: "SIGNED IN · 7-DAY TRIAL",
+    guestTrial: "VISITOR · 3-DAY TRIAL",
     videoProgress: "Video progress",
     videoComplete: "Video completed · Trial unlocked",
     videoPreparing: "Preparing video validation...",
@@ -146,9 +146,9 @@ const copy = {
     buySubtext: "Immediate access after payment confirmation",
     downloadApp: "Download HistoryOdd",
     trialLocked: "Watch the video until the end to unlock",
-    trialUnlocked14: "Activate 14-day Trial",
     trialUnlocked7: "Activate 7-day Trial",
-    loginToActivate: "Sign in to activate 7-day Trial",
+    trialUnlocked3: "Activate 3-day Trial",
+    loginToActivate: "Activate 3-day Trial",
     featureRealtime: "Real-time reading",
     featureRealtimeText: "Track odds and paid percentage while the market moves.",
     featureMovement: "Movement and context",
@@ -168,7 +168,7 @@ const copy = {
     loggedTrialModalText: "Now download HistoryOdd using the Download HistoryOdd button and sign in to the app with the same email from your account to access the Trial license.",
     understood: "Got it",
     guestTrialModalTitle: "Choose the email for your Trial license",
-    guestTrialModalText: "You completed the video as a visitor and earned a 7-day Trial. If you had watched while signed in to TraderTab, you would receive 14 days. Enter a valid email address you can access.",
+    guestTrialModalText: "You completed the video as a visitor and earned a 3-day Trial. If you had watched while signed in to TraderTab, you would receive 7 days. Enter a valid email address you can access.",
     guestEmailLabel: "License email",
     guestEmailPlaceholder: "you@example.com",
     guestGenerateTrial: "Generate Trial License",
@@ -218,11 +218,11 @@ const copy = {
       "HistoryOdd transforma la variación de cuotas en una lectura visual y objetiva. Sigue el porcentaje pagado, el ritmo, los movimientos y el historial en tiempo real.",
     watchTitle: "Mira el video completo y libera tu Trial",
     watchDescriptionLogged:
-      "Estás conectado: completa el video en el reproductor para liberar una licencia Trial de 14 días.",
+      "Estás conectado: completa el video en el reproductor para liberar una licencia Trial de 7 días.",
     watchDescriptionGuest:
-      "Completa el video en el reproductor para liberar una licencia Trial de 7 días. Después inicia sesión o crea tu cuenta para activarla.",
-    loggedTrial: "CONECTADO · TRIAL DE 14 DÍAS",
-    guestTrial: "VISITANTE · TRIAL DE 7 DÍAS",
+      "Completa el video en el reproductor para liberar una licencia Trial de 3 días como visitante.",
+    loggedTrial: "CONECTADO · TRIAL DE 7 DÍAS",
+    guestTrial: "VISITANTE · TRIAL DE 3 DÍAS",
     videoProgress: "Progreso del video",
     videoComplete: "Video completado · Trial liberado",
     videoPreparing: "Preparando validación del video...",
@@ -232,9 +232,9 @@ const copy = {
     buySubtext: "Acceso inmediato tras confirmar el pago",
     downloadApp: "Descargar HistoryOdd",
     trialLocked: "Mira el video hasta el final para liberar",
-    trialUnlocked14: "Activar Trial de 14 días",
     trialUnlocked7: "Activar Trial de 7 días",
-    loginToActivate: "Entrar para activar Trial de 7 días",
+    trialUnlocked3: "Activar Trial de 3 días",
+    loginToActivate: "Activar Trial de 3 días",
     featureRealtime: "Lectura en tiempo real",
     featureRealtimeText: "Sigue la cuota y el porcentaje pagado mientras se mueve el mercado.",
     featureMovement: "Movimiento y contexto",
@@ -254,7 +254,7 @@ const copy = {
     loggedTrialModalText: "Ahora descarga HistoryOdd con el botón Descargar HistoryOdd e inicia sesión en la aplicación usando el mismo correo de tu cuenta para acceder a la licencia Trial.",
     understood: "Entendido",
     guestTrialModalTitle: "Elige el correo de tu licencia Trial",
-    guestTrialModalText: "Completaste el video como visitante y ganaste 7 días de Trial. Si lo hubieras visto conectado a TraderTab, recibirías 14 días. Introduce un correo válido al que tengas acceso.",
+    guestTrialModalText: "Completaste el video como visitante y ganaste 3 días de Trial. Si lo hubieras visto conectado a TraderTab, recibirías 7 días. Introduce un correo válido al que tengas acceso.",
     guestEmailLabel: "Correo para la licencia",
     guestEmailPlaceholder: "tucorreo@ejemplo.com",
     guestGenerateTrial: "Generar Licencia Trial",
@@ -747,7 +747,7 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
       );
       if (savedCompletion?.token) {
         setVideoCompletionToken(savedCompletion.token);
-        setVideoEntitlementDays(Number(savedCompletion.entitlementDays) || (authUser?.uid ? 14 : 7));
+        setVideoEntitlementDays(authUser?.uid ? 7 : 3);
         setVideoProgress(1);
       }
     } catch {
@@ -896,7 +896,7 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
 
       if (payload.completed && payload.completionToken) {
         setVideoCompletionToken(payload.completionToken);
-        setVideoEntitlementDays(Number(payload.entitlementDays) || 7);
+        setVideoEntitlementDays(Number(payload.entitlementDays) || (authUser?.uid ? 7 : 3));
         setVideoProgress(1);
         setVideoStatus(t.videoComplete);
       }
@@ -1033,7 +1033,7 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
 
       setTrialModal("");
       setGuestTrialStatus("");
-      setTrialMessage(`${t.trialSuccess} 7 dias de acesso liberados para ${email}.`);
+      setTrialMessage(`${t.trialSuccess} 3 dias de acesso liberados para ${email}.`);
       setTrialMessageType("success");
     } catch (error) {
       console.error("[TraderTab] Falha ao gerar Trial de visitante", error);
@@ -1066,10 +1066,10 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
             <span className="historyodd-login-trial-notice">
               <LockKeyhole size={15} />
               {language === "en"
-                ? "Sign in to TraderTab before watching the video to unlock the 14-day Trial."
+                ? "Sign in to TraderTab before watching the video to unlock the 7-day Trial."
                 : language === "es"
-                  ? "Inicia sesión en TraderTab antes de ver el video para liberar el Trial de 14 días."
-                  : "Para ter acesso ao Trial de 14 dias, esteja logado no TraderTab antes de assistir ao vídeo."}
+                  ? "Inicia sesión en TraderTab antes de ver el video para liberar el Trial de 7 días."
+                  : "Para ter acesso ao Trial de 7 dias, esteja logado no TraderTab antes de assistir ao vídeo."}
             </span>
             <a className="historyodd-instagram-link" href={HISTORY_ODD_INSTAGRAM_URL} target="_blank" rel="noreferrer">
               <Instagram size={16} />
@@ -1181,10 +1181,10 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
                 : !videoCompletionToken
                   ? t.trialLocked
                   : !authUser
-                    ? t.trialUnlocked7
-                    : (videoEntitlementDays || 7) === 14
-                      ? t.trialUnlocked14
-                      : t.trialUnlocked7}
+                    ? t.trialUnlocked3
+                    : (videoEntitlementDays || 7) === 7
+                      ? t.trialUnlocked7
+                      : t.trialUnlocked3}
             </button>
 
             <a className="historyodd-download-link" href={HISTORY_ODD_DOWNLOAD_URL}>
