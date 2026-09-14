@@ -1,3 +1,4 @@
+import { localizePtPT } from "./ptPt";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Calculator, ChevronDown, Percent, RotateCcw, Trash2, TrendingUp } from "lucide-react";
 
@@ -93,6 +94,8 @@ const copy = {
     valueAt101: "Valor en cuota 1,01",
   },
 };
+
+copy["pt-PT"] = localizePtPT(copy.pt);
 
 function createOdds() {
   const ranges = [

@@ -1,3 +1,4 @@
+import { localizePtPT } from "./ptPt";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import historyOddIcon from "./assets/historyodd-icon.png";
 import {
@@ -294,6 +295,8 @@ const copy = {
   },
 };
 
+copy["pt-PT"] = localizePtPT(copy.pt);
+
 const SHEET_MINUTES = [45, 50, 55, 60, 65, 70, 75, 80, 85, 90];
 
 const getField = (row, ...keys) => {
@@ -340,7 +343,7 @@ const formatDate = (value, language) => {
   const date = parseDate(value);
   if (!date) return String(value ?? "");
   const locale =
-    language === "en" ? "en-US" : language === "es" ? "es-ES" : "pt-BR";
+    language === "en" ? "en-US" : language === "es" ? "es-ES" : language === "pt-PT" ? "pt-PT" : "pt-BR";
   return new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     month: "2-digit",
@@ -351,7 +354,7 @@ const formatDate = (value, language) => {
 const formatDateTime = (value, language) => {
   if (!value) return "";
   const locale =
-    language === "en" ? "en-US" : language === "es" ? "es-ES" : "pt-BR";
+    language === "en" ? "en-US" : language === "es" ? "es-ES" : language === "pt-PT" ? "pt-PT" : "pt-BR";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return String(value);
   return new Intl.DateTimeFormat(locale, {
@@ -1069,7 +1072,9 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
                 ? "Sign in to TraderTab before watching the video to unlock the 7-day Trial."
                 : language === "es"
                   ? "Inicia sesión en TraderTab antes de ver el video para liberar el Trial de 7 días."
-                  : "Para ter acesso ao Trial de 7 dias, esteja logado no TraderTab antes de assistir ao vídeo."}
+                  : language === "pt-PT"
+                    ? "Para ter acesso ao período experimental de 7 dias, inicie sessão no TraderTab antes de ver o vídeo."
+                    : "Para ter acesso ao Trial de 7 dias, esteja logado no TraderTab antes de assistir ao vídeo."}
             </span>
             <a className="historyodd-instagram-link" href={HISTORY_ODD_INSTAGRAM_URL} target="_blank" rel="noreferrer">
               <Instagram size={16} />

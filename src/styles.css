@@ -2,23 +2,23 @@
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  --bg: #08131d;
-  --bg-2: #0b1723;
-  --surface: #132132;
-  --surface-2: #17283b;
-  --surface-3: #21344a;
+  --bg: #09070f;
+  --bg-2: #120d1d;
+  --surface: #171223;
+  --surface-2: #20172f;
+  --surface-3: #2a1f3a;
   --text: #f5f7fa;
-  --text-soft: #a8b7c4;
-  --text-muted: #7c8fa2;
+  --text-soft: #c7bdd8;
+  --text-muted: #968aa9;
   --border: rgba(255,255,255,.09);
-  --green-top: #173d33;
-  --green-top-2: #215245;
-  --green-accent: #39d29b;
-  --green-accent-soft: rgba(57,210,155,.14);
-  --blue-accent: #78a5ff;
-  --blue-soft: rgba(120,165,255,.14);
+  --green-top: #34145f;
+  --green-top-2: #1c5f4a;
+  --green-accent: #24e0a2;
+  --green-accent-soft: rgba(36,224,162,.14);
+  --blue-accent: #a66cff;
+  --blue-soft: rgba(166,108,255,.14);
   --warning: #ffc768;
-  --shadow: 0 18px 46px rgba(0,0,0,.24);
+  --shadow: 0 18px 46px rgba(0,0,0,.34);
 }
 :root[data-theme='light'] {
   --bg: #eef2f6;
@@ -30,12 +30,12 @@
   --text-soft: #54697a;
   --text-muted: #7b8d9a;
   --border: rgba(19,35,49,.1);
-  --green-top: #dceee7;
-  --green-top-2: #e8f5ef;
-  --green-accent: #188b62;
-  --green-accent-soft: rgba(24,139,98,.12);
-  --blue-accent: #3d6fc8;
-  --blue-soft: rgba(61,111,200,.12);
+  --green-top: #eee6fa;
+  --green-top-2: #e4f7ef;
+  --green-accent: #11996c;
+  --green-accent-soft: rgba(17,153,108,.12);
+  --blue-accent: #7c3aed;
+  --blue-soft: rgba(124,58,237,.12);
   --shadow: 0 14px 34px rgba(20,41,63,.08);
 }
 * { box-sizing: border-box; }
@@ -80,7 +80,7 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   width: 50px;
   height: 50px;
   border-radius: 14px;
-  background: linear-gradient(180deg, #ff9c66 0%, #ff7140 100%);
+  background: linear-gradient(135deg, #24e0a2 0%, #7c3aed 100%);
   display: grid;
   place-items: center;
   color: white;
@@ -132,7 +132,7 @@ button:focus-visible, input:focus-visible, select:focus-visible {
 .account-avatar {
   display: grid;
   place-items: center;
-  background: linear-gradient(180deg, #ff9c66, #ff7140);
+  background: linear-gradient(135deg, #24e0a2, #7c3aed);
   color: #fff;
   font-weight: 900;
 }
@@ -246,13 +246,13 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   box-shadow: var(--shadow);
 }
 .dashboard-head {
-  background: linear-gradient(180deg, var(--green-top) 0%, #1e473c 100%);
+  background: linear-gradient(135deg, #34145f 0%, #183e37 100%);
   border-radius: 20px;
   overflow: hidden;
   margin-bottom: 16px;
 }
 :root[data-theme='light'] .dashboard-head {
-  background: linear-gradient(180deg, #d8efe7 0%, #e9f6f1 100%);
+  background: linear-gradient(135deg, #efe8fb 0%, #e4f7ef 100%);
 }
 .dashboard-head-top {
   display: flex;
@@ -1224,7 +1224,7 @@ footer {
   display: grid;
   place-items: center;
   border-radius: 10px;
-  background: linear-gradient(180deg, #ff9c66, #ff7140);
+  background: linear-gradient(135deg, #24e0a2, #7c3aed);
   color: #fff;
   font-size: 12px;
   font-weight: 900;
@@ -5612,4 +5612,90 @@ footer {
 
 .leader-percent-checks .leader-check {
   margin-top: 0;
+}
+
+
+/* TraderTab 2026 — purple + trader green visual system */
+body {
+  background:
+    radial-gradient(circle at 12% -10%, rgba(124,58,237,.20), transparent 32%),
+    radial-gradient(circle at 90% 5%, rgba(36,224,162,.10), transparent 26%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+}
+.topbar {
+  background:
+    linear-gradient(100deg, rgba(20,10,35,.96) 0%, rgba(49,19,88,.96) 48%, rgba(16,79,61,.96) 100%);
+  border-bottom-color: rgba(166,108,255,.22);
+  box-shadow: 0 12px 34px rgba(0,0,0,.34), 0 1px 0 rgba(36,224,162,.08) inset;
+  backdrop-filter: blur(16px);
+}
+.brand-logo-image {
+  width: 228px;
+  max-width: min(42vw, 228px);
+  margin: -48px 0;
+  filter: drop-shadow(0 7px 18px rgba(0,0,0,.24));
+}
+.login-button,
+.locked-access > button,
+.refresh-button.primary,
+button.primary {
+  background: linear-gradient(135deg, #24e0a2 0%, #35c996 100%);
+  color: #071a14;
+  box-shadow: 0 9px 24px rgba(36,224,162,.16);
+}
+.icon-button:hover,
+.language-menu:hover,
+.account-button:hover {
+  border-color: rgba(166,108,255,.32);
+  background: linear-gradient(180deg, rgba(124,58,237,.12), rgba(36,224,162,.06));
+}
+.filters-section,
+.summary-card,
+.list-section,
+.table-shell,
+.mobile-game-card,
+.empty-state {
+  border-color: rgba(166,108,255,.14);
+}
+.dashboard-head {
+  position: relative;
+  border-color: rgba(166,108,255,.22);
+  background:
+    radial-gradient(circle at 85% 20%, rgba(36,224,162,.17), transparent 34%),
+    linear-gradient(120deg, #3f176f 0%, #2e1950 48%, #144f3d 100%);
+}
+.dashboard-head::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.025), transparent);
+}
+.search-box:focus-within,
+.select-field div:focus-within,
+.language-menu:focus-within {
+  border-color: rgba(36,224,162,.50);
+  box-shadow: 0 0 0 3px rgba(36,224,162,.08);
+}
+.active,
+.tab-button.active,
+.nav-tab.active {
+  --active-ring: rgba(36,224,162,.18);
+}
+:root[data-theme='light'] body {
+  background:
+    radial-gradient(circle at 10% 0%, rgba(124,58,237,.09), transparent 28%),
+    radial-gradient(circle at 90% 0%, rgba(17,153,108,.08), transparent 28%),
+    linear-gradient(180deg, var(--bg), var(--bg-2));
+}
+:root[data-theme='light'] .topbar {
+  background: linear-gradient(100deg, rgba(245,240,253,.98), rgba(232,247,240,.98));
+  border-bottom-color: rgba(124,58,237,.13);
+}
+@media (max-width: 700px) {
+  .brand-logo-image {
+    width: 176px;
+    max-width: 45vw;
+    margin: -36px 0;
+  }
 }
