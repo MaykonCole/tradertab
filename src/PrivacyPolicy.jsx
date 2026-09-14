@@ -1,3 +1,4 @@
+import { localizePtPT } from "./ptPt";
 import React from "react";
 import { Mail, ShieldCheck } from "lucide-react";
 
@@ -111,6 +112,8 @@ const content = {
     contactText: "Correo para asuntos de privacidad:",
   },
 };
+
+content["pt-PT"] = localizePtPT(content.pt);
 
 export default function PrivacyPolicy({ language }) {
   const t = content[language] || content.pt;

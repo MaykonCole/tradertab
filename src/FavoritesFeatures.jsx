@@ -1,3 +1,4 @@
+import { localizePtPT } from "./ptPt";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   CalendarDays,
@@ -171,6 +172,8 @@ const copy = {
   },
 };
 
+copy["pt-PT"] = localizePtPT(copy.pt);
+
 const normalize = (value) =>
   String(value || "")
     .normalize("NFD")
@@ -327,7 +330,7 @@ const isTodayOrFutureGame = (game) => {
   return date.getTime() >= todayStart.getTime();
 };
 
-const locale = { pt: "pt-BR", en: "en-US", es: "es-ES" };
+const locale = { pt: "pt-BR", "pt-PT": "pt-PT", en: "en-US", es: "es-ES" };
 
 const formatDate = (value, language) => {
   const date = parseDate(value);

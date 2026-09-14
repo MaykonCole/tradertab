@@ -52,9 +52,12 @@ import "./admin-license.css";
 import logoPt from "./assets/logo-pt.png";
 import logoEs from "./assets/logo-es.png";
 import logoEn from "./assets/logo-en.png";
+import logoPtPt from "./assets/logo-pt-pt.png";
+import { localizePtPT } from "./ptPt";
 
 const languageOptions = [
-  { key: "pt", label: "Português", short: "PT", flag: "🇧🇷" },
+  { key: "pt", label: "Português (Brasil)", short: "PT-BR", flag: "🇧🇷" },
+  { key: "pt-PT", label: "Português (Portugal)", short: "PT-PT", flag: "🇵🇹" },
   { key: "en", label: "English", short: "EN", flag: "🇺🇸" },
   { key: "es", label: "Español", short: "ES", flag: "🇪🇸" },
 ];
@@ -416,6 +419,27 @@ const translations = {
     oddsLoginRequired: "Debes iniciar sesión para ver las cuotas.",
     copyright: "© 2026 TraderTab. Todos los derechos reservados.",
   },
+};
+
+translations["pt-PT"] = {
+  ...localizePtPT(translations.pt),
+  brandTag: "Leitura profissional pré-jogo",
+  pageTitle: "TraderTab Match Center",
+  subtitle: "Interface limpa com navegação por separadores, filtros rápidos e uma lista de jogos pronta para análise.",
+  search: "Pesquisar equipa, competição ou país",
+  timeRange: "Hora",
+  cup: "Taça",
+  noGamesText: "Ajuste os filtros ou faça uma nova pesquisa.",
+  account: "A minha conta",
+  myFavorites: "Os meus filtros",
+  myGames: "Os meus jogos",
+  addFavoriteGame: "Adicionar aos meus jogos",
+  removeFavoriteGame: "Remover dos meus jogos",
+  completeProfile: "Completar registo",
+  profileRequiredTitle: "Complete o seu registo para desbloquear as funcionalidades",
+  profileRequiredText: "A data de nascimento e o país são obrigatórios. O clube favorito é opcional.",
+  responsibleWarning: "18+ Apostar não é investir. Jogue de forma responsável.",
+  copyright: "© 2026 TraderTab. Todos os direitos reservados.",
 };
 
 const GOOGLE_SHEETS_URL =
@@ -900,6 +924,7 @@ const classTone = {
 function Logo({ onClick, language }) {
   const logoByLanguage = {
     pt: logoPt,
+    "pt-PT": logoPtPt,
     en: logoEn,
     es: logoEs,
   };
@@ -942,6 +967,7 @@ function Segmented({ value, onChange, options, ariaLabel }) {
 
 const localeByLanguage = {
   pt: "pt-BR",
+  "pt-PT": "pt-PT",
   en: "en-US",
   es: "es-ES",
 };
@@ -2316,7 +2342,7 @@ function App() {
       {renderTopbar()}
 
       <main className="page">
-        {lang === "pt" && (
+        {(lang === "pt" || lang === "pt-PT") && (
           <aside className="responsible-warning" role="note">
             {t.responsibleWarning}
           </aside>

@@ -1,3 +1,4 @@
+import { localizePtPT } from "./ptPt";
 import React, { useEffect, useState } from "react";
 import { Cookie, ShieldCheck, SlidersHorizontal, X } from "lucide-react";
 import {
@@ -64,6 +65,8 @@ const copy = {
     privacy: "Política de Privacidad",
   },
 };
+
+copy["pt-PT"] = localizePtPT(copy.pt);
 
 const loadPreferences = () => {
   try {

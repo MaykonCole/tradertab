@@ -1,3 +1,4 @@
+import { localizePtPT } from "./ptPt";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Eye,
@@ -175,6 +176,8 @@ const copy = {
   },
 };
 
+copy["pt-PT"] = localizePtPT(copy.pt);
+
 const calculateAge = (birthDate) => {
   if (!birthDate) return null;
 
@@ -247,7 +250,7 @@ const friendlyError = (error, language) => {
       default: "No fue posible completar la solicitud. Inténtalo de nuevo.",
     },
   };
-  const current = messages[language] || messages.pt;
+  const current = language === "pt-PT" ? localizePtPT(messages.pt) : (messages[language] || messages.pt);
   if (error?.message === "firebase-not-configured")
     return (copy[language] || copy.pt).config;
   const code = error?.code || "";
@@ -300,7 +303,7 @@ function ProfileFields({
           </div>
           {age !== null && (
             <small className={`calculated-age ${age < 18 ? "underage" : ""}`}>
-              {language === "pt"
+              {(language === "pt" || language === "pt-PT")
                 ? `${age} anos`
                 : language === "es"
                   ? `${age} años`
@@ -694,7 +697,11 @@ export default function AuthModal({
                       : setMessage(
                           language === "pt"
                             ? "Informe seu e-mail primeiro."
-                            : "Enter your email first.",
+                            : language === "pt-PT"
+                              ? "Introduza primeiro o seu email."
+                              : language === "es"
+                                ? "Introduce primero tu correo."
+                                : "Enter your email first.",
                         )
                   }
                 >

@@ -34,6 +34,7 @@ ZA ZM ZW
 
 const localeByLanguage = {
   pt: "pt-BR",
+  "pt-PT": "pt-PT",
   en: "en-US",
   es: "es-ES",
 };
@@ -154,7 +155,7 @@ export default function CountrySelect({
                 </button>
               ))
             ) : (
-              <p>Nenhum país encontrado</p>
+              <p>{language === "pt-PT" ? "Nenhum país encontrado" : language === "en" ? "No country found" : language === "es" ? "No se encontró ningún país" : "Nenhum país encontrado"}</p>
             )}
           </div>
         )}

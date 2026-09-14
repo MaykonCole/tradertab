@@ -1,4 +1,5 @@
 import worldCup2026Data from './worldCup2026Data.json';
+import { localizePtPT } from './ptPt';
 
 const formatDisplayDate = (isoDate) => {
   if (!isoDate) return '';
@@ -57,6 +58,7 @@ export const matchRows = worldCup2026Data.matches.map((match) => {
     goalMinutes: goals.map((goal) => goal.minuteLabel || String(goal.minute)).filter(Boolean),
     teams: {
       pt: buildMatchTitle(match, 'pt'),
+      'pt-PT': buildMatchTitle(match, 'pt'),
       en: buildMatchTitle(match, 'en'),
       es: buildMatchTitle(match, 'es')
     }
@@ -91,6 +93,7 @@ export const getDashboardData = (round = 'all') => {
       goalMinutes: goals.map((goal) => goal.minuteLabel || String(goal.minute)).filter(Boolean),
       teams: {
         pt: buildMatchTitle(match, 'pt'),
+        'pt-PT': buildMatchTitle(match, 'pt'),
         en: buildMatchTitle(match, 'en'),
         es: buildMatchTitle(match, 'es')
       }
@@ -356,3 +359,7 @@ export const translations = {
     ]
   }
 };
+
+translations['pt-PT'] = localizePtPT(translations.pt);
+translations['pt-PT'].languageName = 'Português (Portugal)';
+translations['pt-PT'].locale = 'pt-PT';
