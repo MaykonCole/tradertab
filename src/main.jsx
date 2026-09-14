@@ -102,6 +102,8 @@ const translations = {
     homeFavorite: "Favorito casa",
     awayFavorite: "Favorito fora",
     strongFavorite: "Super Favorito",
+    lay: "Lay",
+    back: "Back",
     league: "Liga",
     cup: "Copa",
     international: "Internacional",
@@ -221,6 +223,8 @@ const translations = {
     homeFavorite: "Home favorite",
     awayFavorite: "Away favorite",
     strongFavorite: "Super Favorite",
+    lay: "Lay",
+    back: "Back",
     league: "League",
     cup: "Cup",
     international: "International",
@@ -336,6 +340,8 @@ const translations = {
     homeFavorite: "Favorito local",
     awayFavorite: "Favorito visitante",
     strongFavorite: "Súper Favorito",
+    lay: "Lay",
+    back: "Back",
     league: "Liga",
     cup: "Copa",
     international: "Internacional",
@@ -414,6 +420,69 @@ const translations = {
 
 const GOOGLE_SHEETS_URL =
   "https://script.google.com/macros/s/AKfycbxuSAtXNbMuc_4t5Xas4d7ONzywWT5PUx1x1TNuu0WWXyGLci_aExuG__xAK1CDiwEE/exec";
+
+// Cache local da listagem para que navegar/recarregar rotas como /lay, /back,
+// /balanced não volte ao servidor a cada acesso. O cache é considerado
+// atual durante a mesma hora; na virada da hora fazemos uma nova sincronização.
+const GAMES_CACHE_STORAGE_KEY = "tradertab-games-cache-v1";
+
+const readGamesCache = () => {
+  try {
+    const cached = JSON.parse(localStorage.getItem(GAMES_CACHE_STORAGE_KEY) || "null");
+    if (!cached || !Array.isArray(cached.games) || !Number.isFinite(Number(cached.fetchedAt))) {
+      return null;
+    }
+    // Recalcula os metadados estratégicos também para itens já salvos no navegador.
+    // Isso mantém a ordenação correta mesmo quando o cache foi criado por uma
+    // versão anterior do front-end, sem exigir uma nova chamada ao servidor.
+    const games = cached.games.map((game) => {
+      const strategy = analyzeGameStrategy({
+        homeOdd: Number(game.homeOdd) || 0,
+        awayOdd: Number(game.awayOdd) || 0,
+        homePosition: game.homePosition ?? null,
+        awayPosition: game.awayPosition ?? null,
+        homeForm: Array.isArray(game.homeForm) ? game.homeForm : [],
+        awayForm: Array.isArray(game.awayForm) ? game.awayForm : [],
+      });
+
+      return {
+        ...game,
+        classification: strategy?.classification || null,
+        favoriteSide: strategy?.favoriteSide || null,
+        favoriteOdd: strategy?.favoriteOdd || 0,
+        favoritePosition: strategy?.favoritePosition ?? null,
+        favoriteRacePoints: strategy?.favoriteRacePoints ?? 0,
+        strategyCriteriaMatched: strategy?.criteriaMatched || 0,
+      };
+    });
+
+    return { games, fetchedAt: Number(cached.fetchedAt) };
+  } catch {
+    return null;
+  }
+};
+
+const writeGamesCache = (games, fetchedAt) => {
+  try {
+    localStorage.setItem(
+      GAMES_CACHE_STORAGE_KEY,
+      JSON.stringify({ games, fetchedAt }),
+    );
+  } catch (error) {
+    console.warn("[TraderTab] Não foi possível salvar o cache local dos jogos", error);
+  }
+};
+
+const isCacheFromCurrentHour = (fetchedAt) => {
+  const cachedDate = new Date(fetchedAt);
+  const now = new Date();
+  return (
+    cachedDate.getFullYear() === now.getFullYear() &&
+    cachedDate.getMonth() === now.getMonth() &&
+    cachedDate.getDate() === now.getDate() &&
+    cachedDate.getHours() === now.getHours()
+  );
+};
 
 const countryFlags = {
   Brasil: "🇧🇷",
@@ -619,6 +688,92 @@ const normalizeForm = (value) => {
     .slice(0, 8);
 };
 
+const MIN_RACE_MATCHES = 3;
+const TOP_POSITION_LIMIT = 6;
+
+const getRaceMetrics = (results = []) => {
+  const valid = Array.isArray(results) ? results.filter((item) => ["V", "E", "D"].includes(item)) : [];
+  const wins = valid.filter((item) => item === "V").length;
+  const draws = valid.filter((item) => item === "E").length;
+  const losses = valid.filter((item) => item === "D").length;
+  const games = valid.length;
+  const points = wins * 3 + draws;
+  return {
+    games,
+    wins,
+    draws,
+    losses,
+    points,
+    pointsPerGame: games ? points / games : 0,
+    positive: games >= MIN_RACE_MATCHES && wins > losses,
+  };
+};
+
+const analyzeGameStrategy = ({
+  homeOdd,
+  awayOdd,
+  homePosition,
+  awayPosition,
+  homeForm,
+  awayForm,
+}) => {
+  const homeIsFavorite = homeOdd > 0 && (awayOdd <= 0 || homeOdd < awayOdd);
+  const awayIsFavorite = awayOdd > 0 && (homeOdd <= 0 || awayOdd < homeOdd);
+  if (!homeIsFavorite && !awayIsFavorite) return null;
+
+  const favoriteSide = homeIsFavorite ? "home" : "away";
+  const favoriteOdd = homeIsFavorite ? homeOdd : awayOdd;
+  // Favorito é o lado com a menor odd entre Casa e Fora, sem limitar a odd a 2.00.
+  if (!favoriteOdd) return null;
+
+  const favoritePosition = homeIsFavorite ? homePosition : awayPosition;
+  const opponentPosition = homeIsFavorite ? awayPosition : homePosition;
+  const favoriteRace = getRaceMetrics(homeIsFavorite ? homeForm : awayForm);
+
+  // O favorito precisa ter histórico mínimo de Race para entrar em qualquer classificação.
+  if (favoriteRace.games < MIN_RACE_MATCHES) return null;
+
+  const hasPositiveRace = favoriteRace.positive;
+  const hasStrongPosition =
+    favoritePosition !== null &&
+    opponentPosition !== null &&
+    favoritePosition >= 1 &&
+    favoritePosition <= TOP_POSITION_LIMIT &&
+    favoritePosition < opponentPosition;
+
+  if (hasPositiveRace || hasStrongPosition) {
+    const criteriaMatched = Number(hasPositiveRace) + Number(hasStrongPosition);
+    const favoriteOddTone = getOddTone(favoriteOdd);
+
+    // A antiga classificação "Jogos do Dia" foi separada pela faixa visual da odd:
+    // azul claro = Lay, azul escuro = Back e amarelo = Parelho/Balanced.
+    // Odds vermelhas não entram nessas três classificações.
+    const strategyClassification =
+      favoriteOddTone === "odd-blue-light"
+        ? "lay"
+        : favoriteOddTone === "odd-blue-dark"
+          ? "back"
+          : favoriteOddTone === "odd-yellow-light"
+            ? "balanced"
+            : null;
+
+    if (!strategyClassification) return null;
+
+    return {
+      classification: strategyClassification,
+      favoriteSide,
+      favoriteOdd,
+      favoritePosition,
+      favoriteRacePoints: favoriteRace.points,
+      criteriaMatched,
+      hasPositiveRace,
+      hasStrongPosition,
+    };
+  }
+
+  return null;
+};
+
 function FormRace({ results }) {
   if (!results?.length) return null;
   return (
@@ -656,6 +811,27 @@ const normalizeGame = (row, index) => {
   const home = String(getField(row, "Casa", "homeTeam", "home", "Home")).trim();
   const away = String(getField(row, "Fora", "awayTeam", "away", "Away")).trim();
   const date = String(getField(row, "Data", "date", "Date")).trim();
+  const homePosition = parsePosition(
+    getField(row, "Posição Casa", "Posicao Casa", "homePosition", "HomePosition"),
+  );
+  const awayPosition = parsePosition(
+    getField(row, "Posição Fora", "Posicao Fora", "awayPosition", "AwayPosition"),
+  );
+  const homeForm = normalizeForm(
+    getField(row, "Forma Casa", "Race Casa", "homeForm", "HomeForm"),
+  );
+  const awayForm = normalizeForm(
+    getField(row, "Forma Fora", "Race Fora", "awayForm", "AwayForm"),
+  );
+  const strategy = analyzeGameStrategy({
+    homeOdd,
+    awayOdd,
+    homePosition,
+    awayPosition,
+    homeForm,
+    awayForm,
+  });
+
   return {
     id: String(getField(row, "ID", "id", "externalId") || `sheet-${index}`),
     date,
@@ -669,28 +845,21 @@ const normalizeGame = (row, index) => {
     gender: normalizeGender(competition, home, away),
     home,
     away,
-    homePosition: parsePosition(
-      getField(row, "Posição Casa", "Posicao Casa", "homePosition", "HomePosition"),
-    ),
-    awayPosition: parsePosition(
-      getField(row, "Posição Fora", "Posicao Fora", "awayPosition", "AwayPosition"),
-    ),
-    homeForm: normalizeForm(
-      getField(row, "Forma Casa", "Race Casa", "homeForm", "HomeForm"),
-    ),
-    awayForm: normalizeForm(
-      getField(row, "Forma Fora", "Race Fora", "awayForm", "AwayForm"),
-    ),
+    homePosition,
+    awayPosition,
+    homeForm,
+    awayForm,
     homeOdd,
     drawOdd,
     awayOdd,
     over25Odd,
     under25Odd,
-    classification: normalizeClassification(
-      getField(row, "Classificação", "Classificacao", "classification"),
-      homeOdd,
-      awayOdd,
-    ),
+    classification: strategy?.classification || null,
+    favoriteSide: strategy?.favoriteSide || null,
+    favoriteOdd: strategy?.favoriteOdd || 0,
+    favoritePosition: strategy?.favoritePosition ?? null,
+    favoriteRacePoints: strategy?.favoriteRacePoints ?? 0,
+    strategyCriteriaMatched: strategy?.criteriaMatched || 0,
     score: Math.round(
       Math.max(
         65,
@@ -700,11 +869,32 @@ const normalizeGame = (row, index) => {
   };
 };
 
+
+const getRouteFilterPreset = (path = window.location.pathname) => {
+  const normalizedPath = String(path || "/").toLowerCase();
+
+  if (normalizedPath === "/lay") {
+    return { day: "today", classification: "lay" };
+  }
+
+  if (normalizedPath === "/back") {
+    return { day: "today", classification: "back" };
+  }
+
+  if (normalizedPath === "/balanced") {
+    return { day: "today", classification: "balanced" };
+  }
+
+  return { day: "all", classification: "all" };
+};
+
 const classTone = {
   balanced: "neutral",
   homeFavorite: "positive",
   awayFavorite: "info",
   strongFavorite: "accent",
+  lay: "positive",
+  back: "info",
 };
 
 function Logo({ onClick, language }) {
@@ -1276,17 +1466,18 @@ function App() {
   const [theme, setTheme] = useState(
     () => localStorage.getItem("tradertab-theme") || "dark",
   );
+  const initialRouteFilters = getRouteFilterPreset();
   const [query, setQuery] = useState("");
-  const [day, setDay] = useState("all");
+  const [day, setDay] = useState(initialRouteFilters.day);
   const [timePeriod, setTimePeriod] = useState("all");
   const [raceFilter, setRaceFilter] = useState("all");
   const [type, setType] = useState("all");
   const [gender, setGender] = useState("all");
-  const [classification, setClassification] = useState("all");
+  const [classification, setClassification] = useState(initialRouteFilters.classification);
   const [country, setCountry] = useState("all");
   const [sortConfig, setSortConfig] = useState({
-    key: "time",
-    direction: "asc",
+    key: "strategy",
+    direction: "desc",
   });
   const [maxHomeOdd, setMaxHomeOdd] = useState("");
   const [maxAwayOdd, setMaxAwayOdd] = useState("");
@@ -1336,9 +1527,23 @@ function App() {
       Number(userProfile?.age) >= 18,
   );
 
-  const loadGames = async () => {
-    setLoading(true);
+  const loadGames = async ({ force = false, background = false } = {}) => {
+    const cached = readGamesCache();
+    const canUseFreshCache =
+      !force && cached && isCacheFromCurrentHour(cached.fetchedAt);
+
+    if (cached) {
+      setGames(cached.games);
+      setLastUpdated(new Date(cached.fetchedAt));
+      setLoading(false);
+      setLoadError("");
+
+      if (canUseFreshCache) return;
+    }
+
+    if (!cached && !background) setLoading(true);
     setLoadError("");
+
     try {
       const separator = GOOGLE_SHEETS_URL.includes("?") ? "&" : "?";
       const response = await fetch(
@@ -1358,31 +1563,36 @@ function App() {
         : Array.isArray(payload)
           ? payload
           : [];
-      setGames(
-        rows
-          .map(normalizeGame)
-          .filter(
-            (game) =>
-              game.home &&
-              game.away &&
-              /^([01]\d|2[0-3]):[0-5]\d$/.test(game.time),
-          ),
-      );
-      setLastUpdated(new Date());
+      const normalizedGames = rows
+        .map(normalizeGame)
+        .filter(
+          (game) =>
+            game.home &&
+            game.away &&
+            /^([01]\d|2[0-3]):[0-5]\d$/.test(game.time),
+        );
+      const fetchedAt = Date.now();
+
+      setGames(normalizedGames);
+      setLastUpdated(new Date(fetchedAt));
+      writeGamesCache(normalizedGames, fetchedAt);
     } catch (error) {
       console.error("[TraderTab] Falha ao ler Google Sheets", error);
-      if (
-        error?.message === "server-unavailable" ||
-        Number(error?.status) >= 500
-      ) {
-        setLoadError("serverUnavailable");
-      } else if (
-        error?.message === "server-invalid-response" ||
-        error instanceof SyntaxError
-      ) {
-        setLoadError("serverInvalidResponse");
-      } else {
-        setLoadError("connectionError");
+
+      if (!cached) {
+        if (
+          error?.message === "server-unavailable" ||
+          Number(error?.status) >= 500
+        ) {
+          setLoadError("serverUnavailable");
+        } else if (
+          error?.message === "server-invalid-response" ||
+          error instanceof SyntaxError
+        ) {
+          setLoadError("serverInvalidResponse");
+        } else {
+          setLoadError("connectionError");
+        }
       }
     } finally {
       setLoading(false);
@@ -1401,7 +1611,7 @@ function App() {
 
       hourlyTimeoutId = window.setTimeout(async () => {
         if (cancelled) return;
-        await loadGames();
+        await loadGames({ force: true, background: true });
         if (!cancelled) scheduleNextFullHour();
       }, delay);
     };
@@ -1606,6 +1816,7 @@ function App() {
       const searchable =
         `${game.home} ${game.away} ${game.competition} ${game.country}`.toLowerCase();
       return (
+        Boolean(game.classification) &&
         (!normalized || searchable.includes(normalized)) &&
         (day === "all" || game.day === day) &&
         (timePeriod === "all" || game.timePeriod === timePeriod) &&
@@ -1662,6 +1873,36 @@ function App() {
     return [...result].sort((a, b) => {
       let comparison = 0;
       switch (sortConfig.key) {
+        case "strategy": {
+          const dailyStrategyClasses = new Set(["lay", "back", "balanced"]);
+          const classificationRank = (game) =>
+            dailyStrategyClasses.has(game.classification) ? 1 : 0;
+
+          // A ordenação estratégica é fixa e não depende da direção das colunas:
+          // 1) Lay, Back e Parelho: melhor posição do favorito primeiro (1º, 2º, 3º...).
+          //    Na mesma posição, favorito da Casa vem antes do favorito de Fora.
+          //    Persistindo o empate, quem somou mais pontos na Race vem primeiro.
+          const rankDiff = classificationRank(b) - classificationRank(a);
+          if (rankDiff !== 0) return rankDiff;
+
+          if (dailyStrategyClasses.has(a.classification) && dailyStrategyClasses.has(b.classification)) {
+            const positionA = a.favoritePosition ?? Number.MAX_SAFE_INTEGER;
+            const positionB = b.favoritePosition ?? Number.MAX_SAFE_INTEGER;
+            if (positionA !== positionB) return positionA - positionB;
+
+            const sideRank = (game) => (game.favoriteSide === "home" ? 0 : 1);
+            const sideDiff = sideRank(a) - sideRank(b);
+            if (sideDiff !== 0) return sideDiff;
+
+            const racePointsA = a.favoriteRacePoints ?? 0;
+            const racePointsB = b.favoriteRacePoints ?? 0;
+            if (racePointsA !== racePointsB) return racePointsB - racePointsA;
+
+            return timeValue(a) - timeValue(b);
+          }
+
+          return timeValue(a) - timeValue(b);
+        }
         case "time":
           comparison = timeValue(a) - timeValue(b);
           break;
@@ -1790,15 +2031,16 @@ function App() {
   ]);
 
   const resetFilters = () => {
+    const routeFilters = getRouteFilterPreset(currentPath);
     setQuery("");
-    setDay("all");
+    setDay(routeFilters.day);
     setTimePeriod("all");
     setRaceFilter("all");
     setType("all");
     setGender("all");
-    setClassification("all");
+    setClassification(routeFilters.classification);
     setCountry("all");
-    setSortConfig({ key: "time", direction: "asc" });
+    setSortConfig({ key: "strategy", direction: "desc" });
     setMaxHomeOdd("");
     setMaxAwayOdd("");
     setMinOver25Odd("");
@@ -1808,8 +2050,17 @@ function App() {
   };
 
   useEffect(() => {
+    const routeFilters = getRouteFilterPreset(currentPath);
+    setDay(routeFilters.day);
+    setClassification(routeFilters.classification);
+    if (["/lay", "/back", "/balanced"].includes(currentPath)) {
+      setSortConfig({ key: "strategy", direction: "desc" });
+    }
+  }, [currentPath]);
+
+  useEffect(() => {
     if (authReady && !hasMemberAccess) resetFilters();
-  }, [authReady, hasMemberAccess]);
+  }, [authReady, hasMemberAccess, currentPath]);
 
   const handleSort = (key) => {
     setSortConfig((current) => ({
@@ -2192,10 +2443,9 @@ function App() {
                     onChange={(event) => setClassification(event.target.value)}
                   >
                     <option value="all">{t.all}</option>
+                    <option value="lay">{t.lay}</option>
+                    <option value="back">{t.back}</option>
                     <option value="balanced">{t.balanced}</option>
-                    <option value="homeFavorite">{t.homeFavorite}</option>
-                    <option value="awayFavorite">{t.awayFavorite}</option>
-                    <option value="strongFavorite">{t.strongFavorite}</option>
                   </select>
                   <ChevronDown size={15} />
                 </div>
