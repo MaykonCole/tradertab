@@ -476,6 +476,8 @@ const readGamesCache = () => {
         favoriteOdd: strategy?.favoriteOdd || 0,
         favoritePosition: strategy?.favoritePosition ?? null,
         favoriteRacePoints: strategy?.favoriteRacePoints ?? 0,
+        opponentRacePoints: strategy?.opponentRacePoints ?? 0,
+        racePointsDifference: strategy?.racePointsDifference ?? 0,
         strategyCriteriaMatched: strategy?.criteriaMatched || 0,
       };
     });
@@ -753,6 +755,8 @@ const analyzeGameStrategy = ({
   const favoritePosition = homeIsFavorite ? homePosition : awayPosition;
   const opponentPosition = homeIsFavorite ? awayPosition : homePosition;
   const favoriteRace = getRaceMetrics(homeIsFavorite ? homeForm : awayForm);
+  const opponentRace = getRaceMetrics(homeIsFavorite ? awayForm : homeForm);
+  const racePointsDifference = favoriteRace.points - opponentRace.points;
 
   // O favorito precisa ter histórico mínimo de Race para entrar em qualquer classificação.
   if (favoriteRace.games < MIN_RACE_MATCHES) return null;
@@ -789,6 +793,8 @@ const analyzeGameStrategy = ({
       favoriteOdd,
       favoritePosition,
       favoriteRacePoints: favoriteRace.points,
+      opponentRacePoints: opponentRace.points,
+      racePointsDifference,
       criteriaMatched,
       hasPositiveRace,
       hasStrongPosition,
@@ -883,6 +889,8 @@ const normalizeGame = (row, index) => {
     favoriteOdd: strategy?.favoriteOdd || 0,
     favoritePosition: strategy?.favoritePosition ?? null,
     favoriteRacePoints: strategy?.favoriteRacePoints ?? 0,
+    opponentRacePoints: strategy?.opponentRacePoints ?? 0,
+    racePointsDifference: strategy?.racePointsDifference ?? 0,
     strategyCriteriaMatched: strategy?.criteriaMatched || 0,
     score: Math.round(
       Math.max(
@@ -1904,14 +1912,30 @@ function App() {
           const classificationRank = (game) =>
             dailyStrategyClasses.has(game.classification) ? 1 : 0;
 
-          // A ordenação estratégica é fixa e não depende da direção das colunas:
-          // 1) Lay, Back e Parelho: melhor posição do favorito primeiro (1º, 2º, 3º...).
-          //    Na mesma posição, favorito da Casa vem antes do favorito de Fora.
-          //    Persistindo o empate, quem somou mais pontos na Race vem primeiro.
+          // A ordenação estratégica é fixa e não depende da direção das colunas.
+          // No Lay, a prioridade é a vantagem de pontos na Race do favorito sobre o adversário.
+          // Somente quando essa diferença empata, a posição do favorito entra como desempate.
           const rankDiff = classificationRank(b) - classificationRank(a);
           if (rankDiff !== 0) return rankDiff;
 
           if (dailyStrategyClasses.has(a.classification) && dailyStrategyClasses.has(b.classification)) {
+            if (a.classification === "lay" && b.classification === "lay") {
+              const raceDifferenceA = a.racePointsDifference ?? 0;
+              const raceDifferenceB = b.racePointsDifference ?? 0;
+              if (raceDifferenceA !== raceDifferenceB) return raceDifferenceB - raceDifferenceA;
+
+              const positionA = a.favoritePosition ?? Number.MAX_SAFE_INTEGER;
+              const positionB = b.favoritePosition ?? Number.MAX_SAFE_INTEGER;
+              if (positionA !== positionB) return positionA - positionB;
+
+              const sideRank = (game) => (game.favoriteSide === "home" ? 0 : 1);
+              const sideDiff = sideRank(a) - sideRank(b);
+              if (sideDiff !== 0) return sideDiff;
+
+              return timeValue(a) - timeValue(b);
+            }
+
+            // Back e Parelho mantêm o critério anterior.
             const positionA = a.favoritePosition ?? Number.MAX_SAFE_INTEGER;
             const positionB = b.favoritePosition ?? Number.MAX_SAFE_INTEGER;
             if (positionA !== positionB) return positionA - positionB;
