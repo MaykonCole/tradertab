@@ -5,7 +5,7 @@ import { Mail, ShieldCheck } from "lucide-react";
 const content = {
   pt: {
     title: "Política de Privacidade",
-    updated: "Última atualização: 23 de julho de 2026",
+    updated: "Última atualização: 15 de setembro de 2026",
     intro:
       "Esta política explica, de forma simples, quais dados o TraderTab utiliza e para quais finalidades.",
     collectedTitle: "Dados coletados",
@@ -15,6 +15,7 @@ const content = {
       "Preferências: idioma, tema, consentimento de cookies, ordem das colunas, times, ligas e ranges favoritos.",
       "Jogos favoritos: dados da partida marcada pelo usuário, como data, horário, competição, times, posições e odds.",
       "Medição opcional: páginas visitadas, dispositivo, localização aproximada e interações com recursos, somente quando o usuário autoriza o Google Analytics.",
+      "Publicidade: quando o AdSense estiver ativo, o Google e seus parceiros de publicidade poderão usar cookies, identificadores e sinais de consentimento para medir e veicular anúncios conforme as configurações aplicáveis.",
     ],
     purposeTitle: "Finalidades",
     purposes: [
@@ -26,13 +27,13 @@ const content = {
     ],
     providersTitle: "Serviços utilizados",
     providers:
-      "Utilizamos Firebase Authentication e Cloud Firestore para conta, perfil e preferências; Google Analytics para medição opcional; e Vercel para hospedagem do site.",
+      "Utilizamos Firebase Authentication e Cloud Firestore para conta, perfil e preferências; Google Analytics para medição opcional; Google AdSense para publicidade quando ativado; e Vercel para hospedagem do site.",
     passwordsTitle: "Senhas",
     passwords:
       "O TraderTab não armazena senhas. O cadastro, a validação, a recuperação e a sessão são processados pelo Firebase Authentication.",
     cookiesTitle: "Cookies e medição",
     cookies:
-      "Cookies e armazenamentos necessários mantêm login e preferências. O Google Analytics só é ativado após autorização. A escolha pode ser alterada pelo link Preferências de cookies no rodapé.",
+      "Cookies e armazenamentos necessários mantêm login e preferências. O Google Analytics só é ativado após autorização. Quando o AdSense estiver ativo, o consentimento de publicidade aplicável será gerenciado por uma plataforma de gestão de consentimento compatível com os requisitos do Google. As preferências disponíveis podem ser revistas pelo rodapé.",
     rightsTitle: "Solicitações sobre dados",
     rights:
       "Você pode solicitar acesso, correção ou exclusão de dados da sua conta pelo contato abaixo. Podemos pedir confirmação da identidade antes de atender à solicitação.",
@@ -41,7 +42,7 @@ const content = {
   },
   en: {
     title: "Privacy Policy",
-    updated: "Last updated: July 23, 2026",
+    updated: "Last updated: September 15, 2026",
     intro:
       "This policy explains, in simple terms, which data TraderTab uses and why.",
     collectedTitle: "Data collected",
@@ -51,6 +52,7 @@ const content = {
       "Preferences: language, theme, cookie consent, column order, teams, leagues and favorite ranges.",
       "Favorite matches: match data starred by the user, such as date, time, competition, teams, positions and odds.",
       "Optional measurement: visited pages, device, approximate location and feature interactions, only when Google Analytics is authorized.",
+      "Advertising: when AdSense is enabled, Google and its advertising partners may use cookies, identifiers and consent signals to measure and serve ads according to the applicable settings.",
     ],
     purposeTitle: "Purposes",
     purposes: [
@@ -62,13 +64,13 @@ const content = {
     ],
     providersTitle: "Services used",
     providers:
-      "We use Firebase Authentication and Cloud Firestore for accounts, profiles and preferences; Google Analytics for optional measurement; and Vercel to host the website.",
+      "We use Firebase Authentication and Cloud Firestore for accounts, profiles and preferences; Google Analytics for optional measurement; Google AdSense for advertising when enabled; and Vercel to host the website.",
     passwordsTitle: "Passwords",
     passwords:
       "TraderTab does not store passwords. Registration, validation, recovery and sessions are processed by Firebase Authentication.",
     cookiesTitle: "Cookies and measurement",
     cookies:
-      "Essential cookies and storage keep login and preferences working. Google Analytics is enabled only after authorization. The choice can be changed through Cookie preferences in the footer.",
+      "Essential cookies and storage keep login and preferences working. Google Analytics is enabled only after authorization. When AdSense is enabled, applicable advertising consent is managed through a consent management platform compatible with Google requirements. Available preferences can be reviewed from the footer.",
     rightsTitle: "Data requests",
     rights:
       "You may request access, correction or deletion of account data using the contact below. We may request identity confirmation before completing a request.",
@@ -77,7 +79,7 @@ const content = {
   },
   es: {
     title: "Política de Privacidad",
-    updated: "Última actualización: 23 de julio de 2026",
+    updated: "Última actualización: 15 de septiembre de 2026",
     intro:
       "Esta política explica de forma sencilla qué datos utiliza TraderTab y para qué.",
     collectedTitle: "Datos recopilados",
@@ -87,6 +89,7 @@ const content = {
       "Preferencias: idioma, tema, consentimiento de cookies, orden de columnas, equipos, ligas y rangos favoritos.",
       "Partidos favoritos: datos del partido marcado, como fecha, horario, competición, equipos, posiciones y cuotas.",
       "Medición opcional: páginas visitadas, dispositivo, ubicación aproximada e interacciones, solo cuando se autoriza Google Analytics.",
+      "Publicidad: cuando AdSense esté activo, Google y sus socios publicitarios podrán usar cookies, identificadores y señales de consentimiento para medir y mostrar anuncios según la configuración aplicable.",
     ],
     purposeTitle: "Finalidades",
     purposes: [
@@ -104,7 +107,7 @@ const content = {
       "TraderTab no almacena contraseñas. El registro, validación, recuperación y sesión son procesados por Firebase Authentication.",
     cookiesTitle: "Cookies y medición",
     cookies:
-      "Las cookies y almacenamientos necesarios mantienen el acceso y las preferencias. Google Analytics solo se activa tras autorización. La elección puede cambiarse desde el pie de página.",
+      "Las cookies y almacenamientos necesarios mantienen el acceso y las preferencias. Google Analytics solo se activa tras autorización. Cuando AdSense esté activo, el consentimiento publicitario aplicable se gestionará mediante una plataforma de gestión de consentimiento compatible con los requisitos de Google. Las preferencias disponibles pueden revisarse desde el pie de página.",
     rightsTitle: "Solicitudes de datos",
     rights:
       "Puedes solicitar acceso, corrección o eliminación de datos usando el contacto siguiente. Podemos pedir confirmación de identidad.",

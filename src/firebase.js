@@ -23,6 +23,7 @@ import {
   getDoc,
   getFirestore,
   onSnapshot,
+  runTransaction,
   serverTimestamp,
   setDoc,
 } from "firebase/firestore";
@@ -522,4 +523,101 @@ export const removeFavoriteGame = async (userId, gameId) => {
 
   await deleteDoc(doc(db, "users", userId, "favoriteGames", documentId));
   trackEvent("favorite_game_removed");
+};
+
+
+// ===== Conteúdos / Blog: leituras e avaliações =====
+const normalizeArticleStats = (data = {}) => ({
+  views: Number.isFinite(Number(data.views)) ? Number(data.views) : 0,
+  ratingTotal: Number.isFinite(Number(data.ratingTotal)) ? Number(data.ratingTotal) : 0,
+  ratingCount: Number.isFinite(Number(data.ratingCount)) ? Number(data.ratingCount) : 0,
+});
+
+export const observeBlogStats = (callback, onError) => {
+  if (!db) {
+    callback({});
+    return () => {};
+  }
+
+  return onSnapshot(
+    collection(db, "blogArticles"),
+    (snapshot) => {
+      const stats = {};
+      snapshot.forEach((item) => {
+        stats[item.id] = normalizeArticleStats(item.data());
+      });
+      callback(stats);
+    },
+    (error) => {
+      console.warn("[TraderTab] Falha ao carregar estatísticas dos conteúdos.", error);
+      onError?.(error);
+    },
+  );
+};
+
+export const incrementBlogView = async (slug) => {
+  if (!db || !slug) return null;
+
+  const articleRef = doc(db, "blogArticles", slug);
+  return runTransaction(db, async (transaction) => {
+    const snapshot = await transaction.get(articleRef);
+    const current = snapshot.exists() ? normalizeArticleStats(snapshot.data()) : normalizeArticleStats();
+    const next = {
+      views: current.views + 1,
+      ratingTotal: current.ratingTotal,
+      ratingCount: current.ratingCount,
+      updatedAt: serverTimestamp(),
+    };
+    transaction.set(articleRef, next, { merge: true });
+    return next;
+  });
+};
+
+export const loadArticleRating = async (userId, slug) => {
+  if (!db || !userId || !slug) return 0;
+  const snapshot = await getDoc(doc(db, "users", userId, "articleRatings", slug));
+  const value = Number(snapshot.data()?.rating || 0);
+  return value >= 1 && value <= 5 ? value : 0;
+};
+
+export const saveArticleRating = async (userId, slug, rating) => {
+  if (!db) throw new Error("firebase-not-configured");
+  if (!userId || !slug) throw new Error("invalid-article-rating");
+
+  const nextRating = Number(rating);
+  if (!Number.isInteger(nextRating) || nextRating < 1 || nextRating > 5) {
+    throw new Error("invalid-article-rating");
+  }
+
+  const articleRef = doc(db, "blogArticles", slug);
+  const ratingRef = doc(db, "users", userId, "articleRatings", slug);
+
+  return runTransaction(db, async (transaction) => {
+    const [articleSnapshot, ratingSnapshot] = await Promise.all([
+      transaction.get(articleRef),
+      transaction.get(ratingRef),
+    ]);
+
+    const current = articleSnapshot.exists()
+      ? normalizeArticleStats(articleSnapshot.data())
+      : normalizeArticleStats();
+    const previousRating = ratingSnapshot.exists() ? Number(ratingSnapshot.data()?.rating || 0) : 0;
+    const hadRating = previousRating >= 1 && previousRating <= 5;
+
+    const nextStats = {
+      views: current.views,
+      ratingTotal: Math.max(0, current.ratingTotal - (hadRating ? previousRating : 0) + nextRating),
+      ratingCount: current.ratingCount + (hadRating ? 0 : 1),
+      updatedAt: serverTimestamp(),
+    };
+
+    transaction.set(
+      ratingRef,
+      { rating: nextRating, updatedAt: serverTimestamp() },
+      { merge: true },
+    );
+    transaction.set(articleRef, nextStats, { merge: true });
+
+    return nextStats;
+  });
 };

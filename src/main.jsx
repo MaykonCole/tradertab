@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
   ArrowDown,
+  BookOpen,
   ArrowUp,
   CalendarDays,
   ChevronsUpDown,
@@ -33,6 +34,9 @@ import {
   matchesFavoritePreferences,
 } from "./FavoritesFeatures";
 import PrivacyPolicy from "./PrivacyPolicy";
+import LegalPage from "./LegalPages";
+import AdSenseLoader from "./AdSense";
+import BlogPage from "./BlogPage";
 import LeaderPage from "./LeaderPage";
 import OddsHistoryPage from "./OddsHistoryPage";
 import AdminLicensePage from "./AdminLicensePage";
@@ -132,6 +136,10 @@ const translations = {
     responsibleWarning:
       "18+ Ministério da Fazenda adverte: Aposta não é investimento.",
     privacyPolicy: "Política de Privacidade",
+    about: "Sobre",
+    terms: "Termos de Uso",
+    responsibleGambling: "Jogo Responsável",
+    blog: "Conteúdos",
     privacyShortcut: "Privacidade",
     cookiePreferences: "Preferências de cookies",
     privacyContact: "Contato de privacidade",
@@ -251,6 +259,10 @@ const translations = {
     footer:
       "TraderTab organizes pre-match data in a clear, professional and intuitive experience.",
     privacyPolicy: "Privacy Policy",
+    about: "About",
+    terms: "Terms of Use",
+    responsibleGambling: "Responsible Gambling",
+    blog: "Guides",
     privacyShortcut: "Privacy",
     cookiePreferences: "Cookie preferences",
     privacyContact: "Privacy contact",
@@ -368,6 +380,10 @@ const translations = {
     footer:
       "TraderTab organiza datos prepartido en una experiencia clara, profesional e intuitiva.",
     privacyPolicy: "Política de Privacidad",
+    about: "Acerca de",
+    terms: "Términos de Uso",
+    responsibleGambling: "Juego Responsable",
+    blog: "Contenidos",
     privacyShortcut: "Privacidad",
     cookiePreferences: "Preferencias de cookies",
     privacyContact: "Contacto de privacidad",
@@ -439,6 +455,7 @@ translations["pt-PT"] = {
   profileRequiredTitle: "Complete o seu registo para desbloquear as funcionalidades",
   profileRequiredText: "A data de nascimento e o país são obrigatórios. O clube favorito é opcional.",
   responsibleWarning: "18+ Apostar não é investir. Jogue de forma responsável.",
+  blog: "Conteúdos",
   copyright: "© 2026 TraderTab. Todos os direitos reservados.",
 };
 
@@ -2169,6 +2186,14 @@ function App() {
             <LayoutGrid size={18} />
             <span>{t.oddsHistory}</span>
           </button>
+          <button
+            type="button"
+            className={`topbar-shortcut ${currentPath === "/blog" || currentPath.startsWith("/blog/") ? "active" : ""}`}
+            onClick={() => navigateTo("/blog")}
+          >
+            <BookOpen size={18} />
+            <span>{t.blog || "Conteúdos"}</span>
+          </button>
           {authUser && hasMemberAccess && (
             <>
               <button
@@ -2260,6 +2285,7 @@ function App() {
           onProfileSaved={(nextProfile) => setUserProfile((current) => ({ ...current, ...nextProfile }))}
         />
       )}
+      <AdSenseLoader />
       <CookieConsent
         language={lang}
         settingsOpen={cookieSettingsOpen}
@@ -2271,8 +2297,12 @@ function App() {
   const renderFooter = () => (
     <footer className="app-footer">
       <p>{t.footer}</p>
-      <nav aria-label="Privacidade">
-        <a href="/#privacidade">{t.privacyPolicy}</a>
+      <nav aria-label="Informações e privacidade">
+        <a href="/blog">{t.blog || "Conteúdos"}</a>
+        <a href="/about">{t.about || "Sobre"}</a>
+        <a href="/privacy">{t.privacyPolicy}</a>
+        <a href="/terms">{t.terms || "Termos"}</a>
+        <a href="/responsible-gambling">{t.responsibleGambling || "Jogo Responsável"}</a>
         <button type="button" onClick={() => setCookieSettingsOpen(true)}>
           {t.cookiePreferences}
         </button>
@@ -2313,11 +2343,40 @@ function App() {
     );
   }
 
-  if (currentHash === "#privacidade") {
+  if (currentPath === "/blog" || currentPath.startsWith("/blog/")) {
+    const blogSlug = currentPath.startsWith("/blog/") ? currentPath.slice(6) : "";
+    return (
+      <div className="app-shell">
+        {renderTopbar()}
+        <BlogPage
+          language={lang}
+          slug={blogSlug}
+          authUser={authUser}
+          onRequestLogin={() => setAuthModalOpen(true)}
+        />
+        {renderFooter()}
+        {renderGlobalOverlays()}
+      </div>
+    );
+  }
+
+  if (currentPath === "/privacy" || currentHash === "#privacidade") {
     return (
       <div className="app-shell">
         {renderTopbar()}
         <PrivacyPolicy language={lang} />
+        {renderFooter()}
+        {renderGlobalOverlays()}
+      </div>
+    );
+  }
+
+  if (["/about", "/terms", "/responsible-gambling"].includes(currentPath)) {
+    const page = currentPath === "/about" ? "about" : currentPath === "/terms" ? "terms" : "responsible";
+    return (
+      <div className="app-shell">
+        {renderTopbar()}
+        <LegalPage language={lang} page={page} />
         {renderFooter()}
         {renderGlobalOverlays()}
       </div>

@@ -2,6 +2,72 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    function blogRatingPath(slug) {
+      return /databases/$(database)/documents/users/$(request.auth.uid)/articleRatings/$(slug);
+    }
+
+    function validBlogStats() {
+      return request.resource.data.keys().hasOnly(['views', 'ratingTotal', 'ratingCount', 'updatedAt'])
+        && request.resource.data.views is int
+        && request.resource.data.views >= 0
+        && request.resource.data.ratingTotal is int
+        && request.resource.data.ratingTotal >= 0
+        && request.resource.data.ratingCount is int
+        && request.resource.data.ratingCount >= 0
+        && request.resource.data.ratingTotal <= request.resource.data.ratingCount * 5;
+    }
+
+    function isViewIncrement() {
+      return validBlogStats()
+        && request.resource.data.views == resource.data.views + 1
+        && request.resource.data.ratingTotal == resource.data.ratingTotal
+        && request.resource.data.ratingCount == resource.data.ratingCount;
+    }
+
+    function previousRating(slug) {
+      return exists(blogRatingPath(slug)) ? get(blogRatingPath(slug)).data.rating : 0;
+    }
+
+    function hadPreviousRating(slug) {
+      return exists(blogRatingPath(slug));
+    }
+
+    function nextRating(slug) {
+      return getAfter(blogRatingPath(slug)).data.rating;
+    }
+
+    function isRatingAggregateUpdate(slug) {
+      return request.auth != null
+        && validBlogStats()
+        && nextRating(slug) is int
+        && nextRating(slug) >= 1
+        && nextRating(slug) <= 5
+        && request.resource.data.views == resource.data.views
+        && request.resource.data.ratingTotal == resource.data.ratingTotal - previousRating(slug) + nextRating(slug)
+        && request.resource.data.ratingCount == resource.data.ratingCount + (hadPreviousRating(slug) ? 0 : 1);
+    }
+
+    match /blogArticles/{slug} {
+      allow read: if true;
+
+      allow create: if validBlogStats() && (
+        (request.resource.data.views == 1
+          && request.resource.data.ratingTotal == 0
+          && request.resource.data.ratingCount == 0)
+        ||
+        (request.auth != null
+          && request.resource.data.views == 0
+          && nextRating(slug) is int
+          && nextRating(slug) >= 1
+          && nextRating(slug) <= 5
+          && request.resource.data.ratingTotal == nextRating(slug)
+          && request.resource.data.ratingCount == 1)
+      );
+
+      allow update: if isViewIncrement() || isRatingAggregateUpdate(slug);
+      allow delete: if false;
+    }
+
     match /users/{userId} {
       allow create, read, update, delete:
         if request.auth != null && request.auth.uid == userId;
@@ -9,6 +75,17 @@ service cloud.firestore {
       match /favoriteGames/{gameId} {
         allow create, read, update, delete:
           if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /articleRatings/{slug} {
+        allow read: if request.auth != null && request.auth.uid == userId;
+        allow create, update: if request.auth != null
+          && request.auth.uid == userId
+          && request.resource.data.keys().hasOnly(['rating', 'updatedAt'])
+          && request.resource.data.rating is int
+          && request.resource.data.rating >= 1
+          && request.resource.data.rating <= 5;
+        allow delete: if false;
       }
     }
   }

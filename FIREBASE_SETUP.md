@@ -114,3 +114,14 @@ Valide estes cenários:
 
 Comece no plano gratuito Spark. Antes de divulgar amplamente, ative verificação
 de e-mail, App Check e alertas de orçamento/uso no console do Google.
+
+## Conteúdos: leituras e avaliações
+
+A área `/blog` usa o Cloud Firestore para armazenar:
+
+- `blogArticles/{slug}`: total de leituras, soma das notas e quantidade de avaliações.
+- `users/{uid}/articleRatings/{slug}`: nota individual (1 a 5) do usuário autenticado.
+
+Depois de publicar esta versão, publique também o arquivo `firestore.rules` atualizado no Firebase. Sem essas regras, o contador e as avaliações podem retornar `permission-denied`.
+
+A leitura de um artigo é contabilizada uma vez por artigo durante a mesma sessão do navegador, evitando que simples recargas consecutivas inflem o contador. As avaliações exigem login e cada usuário mantém apenas uma nota por artigo, podendo alterá-la depois.
