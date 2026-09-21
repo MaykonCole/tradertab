@@ -1,5 +1,5 @@
 import { localizePtPT } from "./ptPt";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import historyOddIcon from "./assets/historyodd-icon.png";
 import {
   ArrowUpDown,
@@ -12,7 +12,6 @@ import {
   Gauge,
   LineChart,
   LockKeyhole,
-  PlayCircle,
   RefreshCw,
   Search,
   ShieldCheck,
@@ -30,19 +29,8 @@ const HISTORY_ODD_DOWNLOAD_URL =
 const HISTORY_ODD_PURCHASE_URL =
   "https://pay.kirvano.com/8a79d04a-5602-43c6-83b7-bf9a2f1127c2";
 const HISTORY_ODD_INSTAGRAM_URL = "https://www.instagram.com/history_odd/";
-const HISTORY_ODD_VIDEO_FILE_ID = "1UNRWlQ-uTyyPMGbFFBBYvSpzx249pt-C";
-const HISTORY_ODD_VIDEO_DIRECT_URL =
-  `https://drive.usercontent.google.com/download?id=${HISTORY_ODD_VIDEO_FILE_ID}&export=download&authuser=0&confirm=t`;
-
-// IMPORTANTE: o vídeo é carregado diretamente da origem/CDN configurada no navegador.
-// Ele NÃO passa por uma Vercel Function, evitando Fast Origin Transfer de arquivos grandes.
-// Em produção, prefira configurar VITE_HISTORYODD_VIDEO_URL com uma URL pública de CDN
-// (Cloudflare R2, Bunny, S3/CloudFront etc.). O Google Drive fica como fallback direto.
-const HISTORY_ODD_VIDEO_URL =
-  String(import.meta.env.VITE_HISTORYODD_VIDEO_URL || "").trim() ||
-  HISTORY_ODD_VIDEO_DIRECT_URL;
-const HISTORY_ODD_PROGRESS_STORAGE = "historyodd-video-progress-v1";
-const HISTORY_ODD_COMPLETION_STORAGE = "historyodd-video-completion-v1";
+const HISTORY_ODD_YOUTUBE_URL =
+  "https://www.youtube.com/embed/tkFjmj77r9k?rel=0&modestbranding=1";
 
 const copy = {
   pt: {
@@ -55,11 +43,11 @@ const copy = {
     salesTitleAccent: "antes de tomar sua decisão.",
     salesDescription:
       "O HistoryOdd transforma a variação das odds em uma leitura visual e objetiva. Acompanhe o percentual pago, o ritmo do mercado, movimentos e histórico em tempo real para operar com muito mais contexto.",
-    watchTitle: "Assista ao vídeo completo e libere seu Trial",
+    watchTitle: "Conheça o HistoryOdd no vídeo",
     watchDescriptionLogged:
-      "Você está logado: concluindo o vídeo pelo player abaixo, sua conta libera uma licença Trial de 7 dias.",
+      "Você está logado. Assista ao vídeo e, quando quiser testar, ative abaixo sua licença Trial de 7 dias.",
     watchDescriptionGuest:
-      "Conclua o vídeo pelo player abaixo para liberar uma licença Trial de 3 dias como visitante.",
+      "Assista ao vídeo e, quando quiser testar, ative abaixo uma licença Trial de 3 dias como visitante.",
     loggedTrial: "LOGADO · 7 DIAS DE TRIAL",
     guestTrial: "VISITANTE · 3 DIAS DE TRIAL",
     videoProgress: "Progresso do vídeo",
@@ -93,7 +81,7 @@ const copy = {
     loggedTrialModalText: "Agora baixe o HistoryOdd pelo botão Baixar HistoryOdd e, no aplicativo, faça login usando este mesmo e-mail da sua conta para acessar a licença Trial.",
     understood: "Entendi",
     guestTrialModalTitle: "Escolha o e-mail da sua licença Trial",
-    guestTrialModalText: "Você concluiu o vídeo como visitante e ganhou 3 dias de Trial. Se tivesse assistido logado no TraderTab, receberia 7 dias. Informe abaixo um e-mail válido ao qual você tenha acesso.",
+    guestTrialModalText: "Como visitante, você pode ativar 3 dias de Trial. Se estiver logado no TraderTab, o Trial é de 7 dias. Informe abaixo um e-mail válido ao qual você tenha acesso.",
     guestEmailLabel: "E-mail para a licença",
     guestEmailPlaceholder: "seuemail@exemplo.com",
     guestGenerateTrial: "Gerar Licença Trial",
@@ -141,11 +129,11 @@ const copy = {
     salesTitleAccent: "before you make your decision.",
     salesDescription:
       "HistoryOdd turns odds variation into an objective visual reading. Follow paid percentage, market pace, movements and real-time history with much more context.",
-    watchTitle: "Watch the full video and unlock your Trial",
+    watchTitle: "Discover HistoryOdd in the video",
     watchDescriptionLogged:
-      "You are signed in: complete the video in the player below to unlock a 7-day Trial license for your account.",
+      "You are signed in. Watch the video and activate your 7-day Trial below whenever you are ready.",
     watchDescriptionGuest:
-      "Complete the video in the player below to unlock a 3-day Trial as a visitor.",
+      "Watch the video and activate a 3-day Trial below whenever you are ready.",
     loggedTrial: "SIGNED IN · 7-DAY TRIAL",
     guestTrial: "VISITOR · 3-DAY TRIAL",
     videoProgress: "Video progress",
@@ -179,7 +167,7 @@ const copy = {
     loggedTrialModalText: "Now download HistoryOdd using the Download HistoryOdd button and sign in to the app with the same email from your account to access the Trial license.",
     understood: "Got it",
     guestTrialModalTitle: "Choose the email for your Trial license",
-    guestTrialModalText: "You completed the video as a visitor and earned a 3-day Trial. If you had watched while signed in to TraderTab, you would receive 7 days. Enter a valid email address you can access.",
+    guestTrialModalText: "As a visitor, you can activate a 3-day Trial. Signed-in TraderTab users receive 7 days. Enter a valid email address you can access.",
     guestEmailLabel: "License email",
     guestEmailPlaceholder: "you@example.com",
     guestGenerateTrial: "Generate Trial License",
@@ -227,11 +215,11 @@ const copy = {
     salesTitleAccent: "antes de tomar tu decisión.",
     salesDescription:
       "HistoryOdd transforma la variación de cuotas en una lectura visual y objetiva. Sigue el porcentaje pagado, el ritmo, los movimientos y el historial en tiempo real.",
-    watchTitle: "Mira el video completo y libera tu Trial",
+    watchTitle: "Conoce HistoryOdd en el video",
     watchDescriptionLogged:
-      "Estás conectado: completa el video en el reproductor para liberar una licencia Trial de 7 días.",
+      "Estás conectado. Mira el video y activa abajo tu Trial de 7 días cuando quieras probarlo.",
     watchDescriptionGuest:
-      "Completa el video en el reproductor para liberar una licencia Trial de 3 días como visitante.",
+      "Mira el video y activa abajo un Trial de 3 días cuando quieras probarlo.",
     loggedTrial: "CONECTADO · TRIAL DE 7 DÍAS",
     guestTrial: "VISITANTE · TRIAL DE 3 DÍAS",
     videoProgress: "Progreso del video",
@@ -265,7 +253,7 @@ const copy = {
     loggedTrialModalText: "Ahora descarga HistoryOdd con el botón Descargar HistoryOdd e inicia sesión en la aplicación usando el mismo correo de tu cuenta para acceder a la licencia Trial.",
     understood: "Entendido",
     guestTrialModalTitle: "Elige el correo de tu licencia Trial",
-    guestTrialModalText: "Completaste el video como visitante y ganaste 3 días de Trial. Si lo hubieras visto conectado a TraderTab, recibirías 7 días. Introduce un correo válido al que tengas acceso.",
+    guestTrialModalText: "Como visitante puedes activar 3 días de Trial. Los usuarios conectados a TraderTab reciben 7 días. Introduce un correo válido al que tengas acceso.",
     guestEmailLabel: "Correo para la licencia",
     guestEmailPlaceholder: "tucorreo@ejemplo.com",
     guestGenerateTrial: "Generar Licencia Trial",
@@ -673,22 +661,10 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
   const [trialBusy, setTrialBusy] = useState(false);
   const [trialMessage, setTrialMessage] = useState("");
   const [trialMessageType, setTrialMessageType] = useState("");
-  const [videoProgress, setVideoProgress] = useState(0);
-  const [videoCompletionToken, setVideoCompletionToken] = useState("");
-  const [videoEntitlementDays, setVideoEntitlementDays] = useState(null);
-  const [videoProgressToken, setVideoProgressToken] = useState("");
-  const [videoAllowedSeekTo, setVideoAllowedSeekTo] = useState(2);
-  const [videoStatus, setVideoStatus] = useState("");
-  const [videoValidationBusy, setVideoValidationBusy] = useState(false);
-  const [videoPlaybackRate, setVideoPlaybackRate] = useState(1);
   const [trialModal, setTrialModal] = useState("");
   const [guestTrialEmail, setGuestTrialEmail] = useState("");
   const [guestTrialStatus, setGuestTrialStatus] = useState("");
   const [guestTrialBusy, setGuestTrialBusy] = useState(false);
-  const videoRef = useRef(null);
-  const lastCheckpointRef = useRef(0);
-  const checkpointInFlightRef = useRef(false);
-  const videoValidationHealthyRef = useRef(true);
 
   const loadData = async () => {
     setLoading(true);
@@ -719,54 +695,6 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
   useEffect(() => {
     loadData();
   }, []);
-
-  const videoIdentityKey = authUser?.uid ? `user:${authUser.uid}` : "guest";
-  const scopedVideoStorageKey = (baseKey) => `${baseKey}:${videoIdentityKey}`;
-
-  useEffect(() => {
-    // O progresso pertence à identidade que assistiu ao vídeo. Ao trocar de
-    // conta (ou entrar/sair), zera o estado em memória e carrega somente o
-    // progresso daquela identidade. Assim uma conta nunca herda os 100% de outra.
-    setVideoProgress(0);
-    setVideoCompletionToken("");
-    setVideoEntitlementDays(null);
-    setVideoProgressToken("");
-    setVideoAllowedSeekTo(2);
-    setVideoStatus("");
-    setVideoPlaybackRate(1);
-    lastCheckpointRef.current = 0;
-    checkpointInFlightRef.current = false;
-    videoValidationHealthyRef.current = true;
-
-    const video = videoRef.current;
-    if (video) {
-      video.pause();
-      video.currentTime = 0;
-      video.playbackRate = 1;
-    }
-
-    try {
-      const savedProgress = JSON.parse(
-        localStorage.getItem(scopedVideoStorageKey(HISTORY_ODD_PROGRESS_STORAGE)) || "{}",
-      );
-      if (savedProgress?.token) {
-        setVideoProgressToken(savedProgress.token);
-        setVideoAllowedSeekTo(Number(savedProgress.allowedSeekTo) || 2);
-        setVideoProgress(Number(savedProgress.progress) || 0);
-      }
-
-      const savedCompletion = JSON.parse(
-        localStorage.getItem(scopedVideoStorageKey(HISTORY_ODD_COMPLETION_STORAGE)) || "{}",
-      );
-      if (savedCompletion?.token) {
-        setVideoCompletionToken(savedCompletion.token);
-        setVideoEntitlementDays(authUser?.uid ? 7 : 3);
-        setVideoProgress(1);
-      }
-    } catch {
-      // Storage indisponível ou dado inválido: inicia uma nova sessão.
-    }
-  }, [videoIdentityKey]);
 
   const filteredRecords = useMemo(() => {
     const search = teamFilter.trim().toLowerCase();
@@ -831,138 +759,6 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
     });
   };
 
-  const persistVideoProgress = (payload) => {
-    try {
-      localStorage.setItem(
-        scopedVideoStorageKey(HISTORY_ODD_PROGRESS_STORAGE),
-        JSON.stringify({
-          token: payload.progressToken,
-          allowedSeekTo: payload.allowedSeekTo,
-          progress: payload.watchedRatio,
-        }),
-      );
-
-      if (payload.completionToken) {
-        localStorage.setItem(
-          scopedVideoStorageKey(HISTORY_ODD_COMPLETION_STORAGE),
-          JSON.stringify({
-            token: payload.completionToken,
-            entitlementDays: payload.entitlementDays,
-          }),
-        );
-      }
-    } catch {
-      // O player continua funcional mesmo quando storage estiver bloqueado.
-    }
-  };
-
-  const sendVideoCheckpoint = async ({ ended = false, force = false } = {}) => {
-    const video = videoRef.current;
-    if (!video || !Number.isFinite(video.duration) || video.duration <= 0) return;
-    if (checkpointInFlightRef.current) {
-      if (ended) {
-        window.setTimeout(
-          () => sendVideoCheckpoint({ ended: true, force: true }),
-          450,
-        );
-      }
-      return;
-    }
-
-    const now = Date.now();
-    // Reduz invocações da Function sem enfraquecer a validação anti-skip.
-    // O intervalo é adaptativo: ~10s de vídeo por checkpoint em qualquer velocidade.
-    // 1x=10s, 1.25x=8s, 1.5x≈6.7s e 2x=5s.
-    const checkpointIntervalMs = Math.max(4500, Math.floor(10000 / videoPlaybackRate));
-    if (!force && !ended && now - lastCheckpointRef.current < checkpointIntervalMs) return;
-
-    checkpointInFlightRef.current = true;
-    setVideoValidationBusy(true);
-    setVideoStatus("");
-
-    try {
-      const headers = { "Content-Type": "application/json" };
-      if (authUser && typeof authUser.getIdToken === "function") {
-        const idToken = await authUser.getIdToken();
-        headers.Authorization = `Bearer ${idToken}`;
-      }
-
-      const response = await fetch("/api/historyodd-video-progress", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          currentTime: video.currentTime,
-          duration: video.duration,
-          ended,
-          progressToken: videoProgressToken || undefined,
-          playbackRate: videoPlaybackRate,
-        }),
-      });
-
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        throw new Error(payload?.error || `video-progress-${response.status}`);
-      }
-
-      videoValidationHealthyRef.current = true;
-      lastCheckpointRef.current = now;
-      setVideoProgressToken(payload.progressToken || "");
-      setVideoAllowedSeekTo(Number(payload.allowedSeekTo) || 2);
-      setVideoProgress(Math.max(0, Math.min(1, Number(payload.watchedRatio) || 0)));
-      persistVideoProgress(payload);
-
-      if (payload.completed && payload.completionToken) {
-        setVideoCompletionToken(payload.completionToken);
-        setVideoEntitlementDays(Number(payload.entitlementDays) || (authUser?.uid ? 7 : 3));
-        setVideoProgress(1);
-        setVideoStatus(t.videoComplete);
-      }
-    } catch (videoError) {
-      videoValidationHealthyRef.current = false;
-      console.error("[TraderTab] Falha ao validar vídeo do HistoryOdd", videoError);
-      setVideoStatus(t.videoError);
-    } finally {
-      checkpointInFlightRef.current = false;
-      setVideoValidationBusy(false);
-    }
-  };
-
-  const handleVideoSeeking = () => {
-    const video = videoRef.current;
-    if (!video || videoCompletionToken) return;
-
-    // Se a API de validação estiver indisponível, não force o currentTime
-    // para trás. O Trial continua bloqueado, mas o vídeo segue reproduzindo
-    // normalmente em vez de piscar/ficar preso em um trecho.
-    if (!videoProgressToken || !videoValidationHealthyRef.current) return;
-
-    if (video.currentTime > videoAllowedSeekTo + 0.75) {
-      video.currentTime = Math.max(0, videoAllowedSeekTo - 0.25);
-    }
-  };
-
-  const setHistoryOddPlaybackRate = (rate) => {
-    const nextRate = Number(rate);
-    if (![1, 1.25, 1.5, 2].includes(nextRate)) return;
-
-    const video = videoRef.current;
-    if (video) video.playbackRate = nextRate;
-    setVideoPlaybackRate(nextRate);
-  };
-
-  const handleVideoRateChange = () => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const nextRate = Number(video.playbackRate);
-    if (![1, 1.25, 1.5, 2].includes(nextRate)) {
-      video.playbackRate = videoPlaybackRate;
-      return;
-    }
-
-    if (nextRate !== videoPlaybackRate) setVideoPlaybackRate(nextRate);
-  };
-
   const isValidTrialEmail = (value) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
 
@@ -973,7 +769,7 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
   };
 
   const requestHistoryOddTrial = async () => {
-    if (!videoCompletionToken || trialBusy) return;
+    if (trialBusy) return;
 
     if (!authUser || typeof authUser.getIdToken !== "function") {
       openGuestTrialModal();
@@ -992,7 +788,7 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
           "Content-Type": "application/json",
           Authorization: `Bearer ${idToken}`,
         },
-        body: JSON.stringify({ videoCompletionToken }),
+        body: JSON.stringify({}),
       });
 
       const payload = await response.json().catch(() => ({}));
@@ -1025,7 +821,7 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
       setGuestTrialStatus(t.guestInvalidEmail);
       return;
     }
-    if (!videoCompletionToken || guestTrialBusy) return;
+    if (guestTrialBusy) return;
 
     setGuestTrialBusy(true);
     setGuestTrialStatus("");
@@ -1034,7 +830,6 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          videoCompletionToken,
           customerEmail: email,
         }),
       });
@@ -1083,12 +878,12 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
             <span className="historyodd-login-trial-notice">
               <LockKeyhole size={15} />
               {language === "en"
-                ? "Sign in to TraderTab before watching the video to unlock the 7-day Trial."
+                ? "Signed-in TraderTab users can activate a 7-day Trial; visitors can activate 3 days."
                 : language === "es"
-                  ? "Inicia sesión en TraderTab antes de ver el video para liberar el Trial de 7 días."
+                  ? "Los usuarios conectados a TraderTab pueden activar 7 días de Trial; los visitantes, 3 días."
                   : language === "pt-PT"
-                    ? "Para ter acesso ao período experimental de 7 dias, inicie sessão no TraderTab antes de ver o vídeo."
-                    : "Para ter acesso ao Trial de 7 dias, esteja logado no TraderTab antes de assistir ao vídeo."}
+                    ? "Utilizadores com sessão iniciada no TraderTab podem ativar 7 dias de Trial; visitantes, 3 dias."
+                    : "Usuários logados no TraderTab podem ativar 7 dias de Trial; visitantes, 3 dias."}
             </span>
             <a className="historyodd-instagram-link" href={HISTORY_ODD_INSTAGRAM_URL} target="_blank" rel="noreferrer">
               <Instagram size={16} />
@@ -1122,56 +917,14 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
           </div>
 
           <div className="historyodd-video-frame">
-            <video
-              ref={videoRef}
-              controls
-              playsInline
-              preload="metadata"
-              controlsList="nodownload noplaybackrate"
-              disablePictureInPicture
-              onTimeUpdate={() => sendVideoCheckpoint()}
-              onPlay={() => sendVideoCheckpoint({ force: true })}
-              onEnded={() => sendVideoCheckpoint({ ended: true, force: true })}
-              onSeeking={handleVideoSeeking}
-              onRateChange={handleVideoRateChange}
-            >
-              <source src={HISTORY_ODD_VIDEO_URL} type="video/mp4" />
-            </video>
-            <div className="historyodd-video-speed" aria-label="Velocidade do vídeo">
-              <label htmlFor="historyodd-video-speed-select">Velocidade</label>
-              <select
-                id="historyodd-video-speed-select"
-                value={videoPlaybackRate}
-                onChange={(event) => setHistoryOddPlaybackRate(event.target.value)}
-                aria-label="Selecionar velocidade do vídeo"
-              >
-                <option value={1}>1x</option>
-                <option value={1.25}>1.25x</option>
-                <option value={1.5}>1.5x</option>
-                <option value={2}>2x</option>
-              </select>
-            </div>
-            {!videoProgressToken && videoValidationBusy ? (
-              <div className="historyodd-video-overlay">
-                <PlayCircle size={26} />
-                {t.videoPreparing}
-              </div>
-            ) : null}
-          </div>
-
-          <div className="historyodd-video-progress">
-            <div className="historyodd-progress-label">
-              <span>{videoCompletionToken ? t.videoComplete : t.videoProgress}</span>
-              <strong>{Math.round(videoProgress * 100)}%</strong>
-            </div>
-            <div className="historyodd-progress-track" aria-hidden="true">
-              <span style={{ width: `${Math.round(videoProgress * 100)}%` }} />
-            </div>
-            <div className="historyodd-video-note">
-              <LockKeyhole size={14} />
-              <span>{t.mustWatchHere}</span>
-            </div>
-            {videoStatus ? <div className="historyodd-video-status">{videoStatus}</div> : null}
+            <iframe
+              src={HISTORY_ODD_YOUTUBE_URL}
+              title="HistoryOdd"
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
           </div>
 
           <div className="historyodd-sales-actions">
@@ -1190,20 +943,16 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
 
             <button
               type="button"
-              className={`historyodd-trial-cta ${videoCompletionToken ? "unlocked" : "locked"}`}
+              className="historyodd-trial-cta unlocked"
               onClick={requestHistoryOddTrial}
-              disabled={!videoCompletionToken || trialBusy}
+              disabled={trialBusy}
             >
-              {videoCompletionToken ? <ShieldCheck size={18} /> : <LockKeyhole size={18} />}
+              <ShieldCheck size={18} />
               {trialBusy
                 ? t.trialRequesting
-                : !videoCompletionToken
-                  ? t.trialLocked
-                  : !authUser
-                    ? t.trialUnlocked3
-                    : (videoEntitlementDays || 7) === 7
-                      ? t.trialUnlocked7
-                      : t.trialUnlocked3}
+                : authUser
+                  ? t.trialUnlocked7
+                  : t.trialUnlocked3}
             </button>
 
             <a className="historyodd-download-link" href={HISTORY_ODD_DOWNLOAD_URL}>

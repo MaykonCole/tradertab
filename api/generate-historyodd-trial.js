@@ -5,7 +5,6 @@ import {
   setJsonHeaders,
 } from "./_emailVerification.js";
 import { getBearerToken, verifyFirebaseIdToken } from "./_firebaseAuth.js";
-import { verifyCompletionToken } from "./_historyOddVideo.js";
 
 const getLicenseUrl = () => process.env.HISTORYODD_LICENSE_URL?.trim();
 const getLicenseAdminToken = () =>
@@ -24,8 +23,8 @@ const resolveCustomerEmail = async (req) => {
     return { customerEmail: normalizeEmail(firebaseUser.email), source: "firebase" };
   }
 
-  // Visitante: o e-mail é informado diretamente no popup após a conclusão
-  // do vídeo. A validação de acesso à conta/e-mail será feita no HistoryOdd.
+  // Visitante: o e-mail é informado diretamente no popup.
+  // A validação de acesso à conta/e-mail será feita no HistoryOdd.
   const customerEmail = normalizeEmail(req.body?.customerEmail);
   if (!isValidEmail(customerEmail)) {
     return { error: "invalid-license-request", status: 400 };
@@ -62,11 +61,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    const completion = verifyCompletionToken(req.body?.videoCompletionToken);
-    if (!completion) {
-      return res.status(403).json({ error: "video-completion-required" });
-    }
-
     const identity = await resolveCustomerEmail(req);
     if (identity.error) {
       return res.status(identity.status).json({ error: identity.error });
@@ -76,24 +70,9 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "invalid-license-request" });
     }
 
-    // A conclusão pertence exatamente ao contexto que assistiu ao vídeo.
-    // Logado: exige o mesmo UID. Visitante: exige o fluxo sem Firebase e
-    // utiliza apenas o e-mail digitado no popup (Trial de 3 dias).
-    if (completion.authUid) {
-      if (identity.source !== "firebase") {
-        return res.status(403).json({ error: "video-completion-user-mismatch" });
-      }
-
-      const firebaseIdToken = getBearerToken(req);
-      const firebaseUser = await verifyFirebaseIdToken(firebaseIdToken);
-      if (!firebaseUser || firebaseUser.uid !== completion.authUid) {
-        return res.status(403).json({ error: "video-completion-user-mismatch" });
-      }
-    } else if (identity.source !== "guest-email") {
-      return res.status(403).json({ error: "video-completion-user-mismatch" });
-    }
-
-    const durationDays = completion.authUid ? 7 : 3;
+    // Regra simples: usuário autenticado recebe 7 dias; visitante recebe 3 dias.
+    // O serviço de licença continua responsável por impedir reutilização do Trial.
+    const durationDays = identity.source === "firebase" ? 7 : 3;
 
     const upstream = await fetch(historyOddLicenseUrl, {
       method: "POST",

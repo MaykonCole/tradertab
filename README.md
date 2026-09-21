@@ -89,12 +89,6 @@ Após publicar, valide no navegador:
 - `/ads.txt` responde com `google.com, pub-2309431199669812, DIRECT, f08c47fec0942fa0`.
 
 
-## Vídeo HistoryOdd sem Fast Origin Transfer
+## Vídeo HistoryOdd e tráfego Vercel
 
-O vídeo da landing page é carregado **diretamente pelo navegador** a partir de `VITE_HISTORYODD_VIDEO_URL`.
-Ele não deve ser proxyado por uma Vercel Function, pois cada byte do MP4 passando pelo Compute gera Fast Origin Transfer.
-
-- Recomendado em produção: hospedar o MP4 em Cloudflare R2, Bunny, S3/CloudFront ou outra CDN de objetos e configurar `VITE_HISTORYODD_VIDEO_URL`.
-- Enquanto essa variável estiver vazia, o frontend usa diretamente o arquivo atual do Google Drive, sem passar pela Vercel.
-- A API `/api/historyodd-video-progress` continua ativa apenas para validar o progresso/Trial; ela trafega somente pequenos JSONs.
-- O checkpoint do progresso agora é adaptativo (~10 segundos de vídeo por validação: 10s em 1x, 8s em 1.25x, ~6,7s em 1.5x e 5s em 2x), reduzindo Function Invocations sem enfraquecer a validação anti-skip.
+A landing page usa o vídeo do YouTube diretamente em um `iframe`. O vídeo não passa pela Vercel. O Trial de 7 dias para usuários autenticados e o Trial de 3 dias para visitantes são ativados diretamente, sem rastreamento de progresso.
