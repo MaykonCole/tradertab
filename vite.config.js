@@ -1,6 +1,5 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
-import { streamHistoryOddVideo } from "./api/_historyOddVideoStream.js";
 import historyOddVideoProgress from "./api/historyodd-video-progress.js";
 import generateHistoryOddTrial from "./api/generate-historyodd-trial.js";
 import sendVerificationCode from "./api/send-verification-code.js";
@@ -47,10 +46,6 @@ const localApiPlugin = () => ({
     server.middlewares.use(async (req, res, next) => {
       const pathname = String(req.url || "").split("?")[0];
 
-      if (pathname === "/api/historyodd-video-stream") {
-        await streamHistoryOddVideo(req, res);
-        return;
-      }
 
       const handler =
         pathname === "/api/historyodd-video-progress"
