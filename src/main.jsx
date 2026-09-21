@@ -23,6 +23,7 @@ import {
   Sun,
   TrendingUp,
   Trophy,
+  Trash2,
   UserRound,
   X,
 } from "lucide-react";
@@ -65,6 +66,9 @@ const languageOptions = [
   { key: "en", label: "English", short: "EN", flag: "🇺🇸" },
   { key: "es", label: "Español", short: "ES", flag: "🇪🇸" },
 ];
+
+const HIDE_GAME_USER_DISPLAY_NAME = "Maykon Emanuel Cardoso Rocha";
+const HIDDEN_GAMES_STORAGE_KEY = "tradertab-hidden-games-v1";
 
 const translations = {
   pt: {
@@ -178,6 +182,7 @@ const translations = {
     addFavoriteGame: "Adicionar aos Meus Jogos",
     removeFavoriteGame: "Remover dos Meus Jogos",
     favoriteSaveError: "Não foi possível atualizar o jogo favorito.",
+    hideGame: "Ocultar jogo desta listagem",
     logout: "Sair",
     memberAccess: "Recursos para membros",
     lockedTitle: "Entre para liberar as ferramentas de análise",
@@ -299,6 +304,7 @@ const translations = {
     addFavoriteGame: "Add to My Matches",
     removeFavoriteGame: "Remove from My Matches",
     favoriteSaveError: "Unable to update the favorite match.",
+    hideGame: "Hide match from this list",
     logout: "Sign out",
     memberAccess: "Member features",
     lockedTitle: "Sign in to unlock analysis tools",
@@ -421,6 +427,7 @@ const translations = {
     addFavoriteGame: "Agregar a Mis Partidos",
     removeFavoriteGame: "Eliminar de Mis Partidos",
     favoriteSaveError: "No fue posible actualizar el partido favorito.",
+    hideGame: "Ocultar partido de esta lista",
     logout: "Salir",
     memberAccess: "Funciones para miembros",
     lockedTitle: "Entra para desbloquear las herramientas de análisis",
@@ -451,6 +458,7 @@ translations["pt-PT"] = {
   myGames: "Os meus jogos",
   addFavoriteGame: "Adicionar aos meus jogos",
   removeFavoriteGame: "Remover dos meus jogos",
+  hideGame: "Ocultar jogo desta lista",
   completeProfile: "Completar registo",
   profileRequiredTitle: "Complete o seu registo para desbloquear as funcionalidades",
   profileRequiredText: "A data de nascimento e o país são obrigatórios. O clube favorito é opcional.",
@@ -1122,6 +1130,8 @@ function MatchTable({
   favoriteBusyIds,
   onToggleFavorite,
   canViewOdds,
+  canHideGames,
+  onHideGame,
 }) {
   const [columnOrder, setColumnOrder] = useState(() =>
     getSavedColumnOrder(userId),
@@ -1281,7 +1291,10 @@ function MatchTable({
         <thead>
           <tr>
             {userId && (
-              <th className="column-favorite" aria-label={t.myGames}>
+              <th
+                className={`column-favorite ${canHideGames ? "column-favorite-admin" : ""}`}
+                aria-label={t.myGames}
+              >
                 <Star size={15} />
               </th>
             )}
@@ -1317,34 +1330,47 @@ function MatchTable({
           {games.map((game) => (
             <tr key={game.id}>
               {userId && (
-                <td className="column-favorite">
-                  <button
-                    type="button"
-                    className={`game-favorite-button ${
-                      favoriteIds.has(String(game.id)) ? "active" : ""
-                    }`}
-                    onClick={() => onToggleFavorite(game)}
-                    disabled={favoriteBusyIds.has(String(game.id))}
-                    title={
-                      favoriteIds.has(String(game.id))
-                        ? t.removeFavoriteGame
-                        : t.addFavoriteGame
-                    }
-                    aria-label={
-                      favoriteIds.has(String(game.id))
-                        ? t.removeFavoriteGame
-                        : t.addFavoriteGame
-                    }
-                  >
-                    <Star
-                      size={18}
-                      fill={
+                <td className={`column-favorite ${canHideGames ? "column-favorite-admin" : ""}`}>
+                  <div className="game-row-actions">
+                    <button
+                      type="button"
+                      className={`game-favorite-button ${
+                        favoriteIds.has(String(game.id)) ? "active" : ""
+                      }`}
+                      onClick={() => onToggleFavorite(game)}
+                      disabled={favoriteBusyIds.has(String(game.id))}
+                      title={
                         favoriteIds.has(String(game.id))
-                          ? "currentColor"
-                          : "none"
+                          ? t.removeFavoriteGame
+                          : t.addFavoriteGame
                       }
-                    />
-                  </button>
+                      aria-label={
+                        favoriteIds.has(String(game.id))
+                          ? t.removeFavoriteGame
+                          : t.addFavoriteGame
+                      }
+                    >
+                      <Star
+                        size={18}
+                        fill={
+                          favoriteIds.has(String(game.id))
+                            ? "currentColor"
+                            : "none"
+                        }
+                      />
+                    </button>
+                    {canHideGames && (
+                      <button
+                        type="button"
+                        className="game-hide-button"
+                        onClick={() => onHideGame(game)}
+                        title={t.hideGame}
+                        aria-label={t.hideGame}
+                      >
+                        <Trash2 size={17} />
+                      </button>
+                    )}
+                  </div>
                 </td>
               )}
               {columnOrder.map((columnKey) => (
@@ -1370,6 +1396,8 @@ function MobileList({
   favoriteBusyIds,
   onToggleFavorite,
   canViewOdds,
+  canHideGames,
+  onHideGame,
 }) {
   return (
     <div className="mobile-cards">
@@ -1408,6 +1436,17 @@ function MobileList({
                         : "none"
                     }
                   />
+                </button>
+              )}
+              {canHideGames && (
+                <button
+                  type="button"
+                  className="game-hide-button"
+                  onClick={() => onHideGame(game)}
+                  title={t.hideGame}
+                  aria-label={t.hideGame}
+                >
+                  <Trash2 size={18} />
                 </button>
               )}
             </div>
@@ -1562,6 +1601,7 @@ function App() {
   });
   const [favoriteGames, setFavoriteGames] = useState([]);
   const [favoriteBusyIds, setFavoriteBusyIds] = useState(() => new Set());
+  const [hiddenGameIds, setHiddenGameIds] = useState(() => new Set());
   const [favoriteMessage, setFavoriteMessage] = useState("");
   const [cookieSettingsOpen, setCookieSettingsOpen] = useState(false);
   const [currentHash, setCurrentHash] = useState(
@@ -1576,6 +1616,10 @@ function App() {
       userProfile?.birthDate &&
       userProfile?.countryCode &&
       Number(userProfile?.age) >= 18,
+  );
+  const canHideGames = Boolean(
+    hasMemberAccess &&
+      authUser?.displayName?.trim() === HIDE_GAME_USER_DISPLAY_NAME,
   );
 
   const loadGames = async ({ force = false, background = false } = {}) => {
@@ -1716,6 +1760,35 @@ function App() {
       }),
     [],
   );
+
+  useEffect(() => {
+    if (!canHideGames || !authUser?.uid) {
+      setHiddenGameIds(new Set());
+      return;
+    }
+
+    try {
+      const raw = localStorage.getItem(`${HIDDEN_GAMES_STORAGE_KEY}-${authUser.uid}`);
+      const savedIds = raw ? JSON.parse(raw) : [];
+      setHiddenGameIds(new Set(Array.isArray(savedIds) ? savedIds.map(String) : []));
+    } catch {
+      setHiddenGameIds(new Set());
+    }
+  }, [canHideGames, authUser?.uid]);
+
+  const hideGame = (game) => {
+    if (!canHideGames || !authUser?.uid) return;
+    const gameId = String(game.id);
+    setHiddenGameIds((current) => {
+      const next = new Set(current);
+      next.add(gameId);
+      localStorage.setItem(
+        `${HIDDEN_GAMES_STORAGE_KEY}-${authUser.uid}`,
+        JSON.stringify([...next]),
+      );
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (!hasMemberAccess || !authUser?.uid) {
@@ -1864,6 +1937,7 @@ function App() {
     const awayPositionLimit = parsePositiveNumber(maxAwayPosition);
     const normalized = query.trim().toLowerCase();
     const result = games.filter((game) => {
+      if (canHideGames && hiddenGameIds.has(String(game.id))) return false;
       const searchable =
         `${game.home} ${game.away} ${game.competition} ${game.country}`.toLowerCase();
       return (
@@ -2037,6 +2111,8 @@ function App() {
     sortConfig,
     lang,
     t,
+    canHideGames,
+    hiddenGameIds,
   ]);
 
   const avgFavorite = filteredGames.length
@@ -2740,6 +2816,8 @@ function App() {
                   favoriteBusyIds={favoriteBusyIds}
                   onToggleFavorite={toggleFavoriteGame}
                   canViewOdds={Boolean(authUser)}
+                  canHideGames={canHideGames}
+                  onHideGame={hideGame}
                 />
               </div>
               <div className="mobile-table">
@@ -2753,6 +2831,8 @@ function App() {
                   favoriteBusyIds={favoriteBusyIds}
                   onToggleFavorite={toggleFavoriteGame}
                   canViewOdds={Boolean(authUser)}
+                  canHideGames={canHideGames}
+                  onHideGame={hideGame}
                 />
               </div>
             </>

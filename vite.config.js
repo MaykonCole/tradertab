@@ -1,6 +1,5 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
-import historyOddVideoProgress from "./api/historyodd-video-progress.js";
 import generateHistoryOddTrial from "./api/generate-historyodd-trial.js";
 import sendVerificationCode from "./api/send-verification-code.js";
 import verifyEmailCode from "./api/verify-email-code.js";
@@ -48,15 +47,13 @@ const localApiPlugin = () => ({
 
 
       const handler =
-        pathname === "/api/historyodd-video-progress"
-          ? historyOddVideoProgress
-          : pathname === "/api/generate-historyodd-trial"
-            ? generateHistoryOddTrial
-            : pathname === "/api/send-verification-code"
-              ? sendVerificationCode
-              : pathname === "/api/verify-email-code"
-                ? verifyEmailCode
-                : null;
+        pathname === "/api/generate-historyodd-trial"
+          ? generateHistoryOddTrial
+          : pathname === "/api/send-verification-code"
+            ? sendVerificationCode
+            : pathname === "/api/verify-email-code"
+              ? verifyEmailCode
+              : null;
 
       if (!handler) return next();
 
