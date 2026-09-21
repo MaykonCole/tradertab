@@ -30,7 +30,17 @@ const HISTORY_ODD_DOWNLOAD_URL =
 const HISTORY_ODD_PURCHASE_URL =
   "https://pay.kirvano.com/8a79d04a-5602-43c6-83b7-bf9a2f1127c2";
 const HISTORY_ODD_INSTAGRAM_URL = "https://www.instagram.com/history_odd/";
-const HISTORY_ODD_VIDEO_URL = "/api/historyodd-video-stream";
+const HISTORY_ODD_VIDEO_FILE_ID = "1UNRWlQ-uTyyPMGbFFBBYvSpzx249pt-C";
+const HISTORY_ODD_VIDEO_DIRECT_URL =
+  `https://drive.usercontent.google.com/download?id=${HISTORY_ODD_VIDEO_FILE_ID}&export=download&authuser=0&confirm=t`;
+
+// IMPORTANTE: o vídeo é carregado diretamente da origem/CDN configurada no navegador.
+// Ele NÃO passa por uma Vercel Function, evitando Fast Origin Transfer de arquivos grandes.
+// Em produção, prefira configurar VITE_HISTORYODD_VIDEO_URL com uma URL pública de CDN
+// (Cloudflare R2, Bunny, S3/CloudFront etc.). O Google Drive fica como fallback direto.
+const HISTORY_ODD_VIDEO_URL =
+  String(import.meta.env.VITE_HISTORYODD_VIDEO_URL || "").trim() ||
+  HISTORY_ODD_VIDEO_DIRECT_URL;
 const HISTORY_ODD_PROGRESS_STORAGE = "historyodd-video-progress-v1";
 const HISTORY_ODD_COMPLETION_STORAGE = "historyodd-video-completion-v1";
 
@@ -860,7 +870,11 @@ export default function OddsHistoryPage({ language = "pt", authUser = null, onRe
     }
 
     const now = Date.now();
-    if (!force && !ended && now - lastCheckpointRef.current < 3500) return;
+    // Reduz invocações da Function sem enfraquecer a validação anti-skip.
+    // O intervalo é adaptativo: ~10s de vídeo por checkpoint em qualquer velocidade.
+    // 1x=10s, 1.25x=8s, 1.5x≈6.7s e 2x=5s.
+    const checkpointIntervalMs = Math.max(4500, Math.floor(10000 / videoPlaybackRate));
+    if (!force && !ended && now - lastCheckpointRef.current < checkpointIntervalMs) return;
 
     checkpointInFlightRef.current = true;
     setVideoValidationBusy(true);
