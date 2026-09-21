@@ -470,9 +470,9 @@ translations["pt-PT"] = {
 const GOOGLE_SHEETS_URL =
   "https://script.google.com/macros/s/AKfycbxuSAtXNbMuc_4t5Xas4d7ONzywWT5PUx1x1TNuu0WWXyGLci_aExuG__xAK1CDiwEE/exec";
 
-// Cache local da listagem para que navegar/recarregar rotas como /lay, /back,
-// /balanced não volte ao servidor a cada acesso. O cache é considerado
-// atual durante a mesma hora; na virada da hora fazemos uma nova sincronização.
+// Cache local usado somente para exibir rapidamente a última listagem enquanto
+// uma nova consulta à planilha é feita. Ao carregar/recarregar o site, sempre
+// sincronizamos com o Google Sheets para refletir imediatamente novos jogos.
 const GAMES_CACHE_STORAGE_KEY = "tradertab-games-cache-v1";
 
 const readGamesCache = () => {
@@ -1711,7 +1711,9 @@ function App() {
       }, delay);
     };
 
-    loadGames();
+    // Sempre consulta a planilha ao carregar/recarregar o site. Se existir cache,
+    // ele aparece imediatamente na tela, mas nunca impede esta sincronização.
+    loadGames({ force: true });
     scheduleNextFullHour();
 
     return () => {
