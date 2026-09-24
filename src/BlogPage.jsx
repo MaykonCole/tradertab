@@ -42,6 +42,49 @@ const copy = {
 };
 
 const articles = {
+  "traders-calma-mp-bets": {
+    icon: Scale,
+    pt: {
+      title: "Traders, calma.",
+      excerpt: "Entenda os prazos de uma possível medida provisória sobre apostas online e o que ainda falta definir.",
+      sections: [
+        ["O que sabemos agora", "Uma medida provisória (MP) pode mudar as regras das apostas online, mas nenhuma MP sobre essa possível proibição foi publicada até 24 de setembro de 2026. Ainda não há como saber quais mercados seriam afetados, quando as mudanças começariam ou se as plataformas teriam um período de adaptação."],
+        ["Os prazos da MP", "Se for publicada, a MP poderá produzir efeitos imediatos, de acordo com as regras escritas nela. Em seguida, precisará passar pela Câmara dos Deputados e pelo Senado. O prazo inicial de vigência é de 60 dias, prorrogado automaticamente uma vez por mais 60 dias se a votação não terminar. Se a análise não ocorrer nos primeiros 45 dias, a tramitação entra em regime de urgência."],
+        ["O papel do Congresso", "Nesse processo, o Congresso pode aprovar, alterar ou rejeitar a MP. Se o prazo terminar sem aprovação, ela perde a eficácia. Portanto, os 120 dias não significam que tudo continuará igual até lá: o que vale desde a publicação depende do conteúdo da própria medida."],
+        ["O que acompanhar", "O possível ressarcimento de pessoas endividadas com apostas também não tem regras definidas e pode ser tratado separadamente. Por enquanto, vale acompanhar a publicação oficial e evitar decisões baseadas em suposições. Com as regras em mãos, será possível entender o que realmente muda para cada trader."],
+      ],
+    },
+    "pt-PT": {
+      title: "Traders, calma.",
+      excerpt: "O que se sabe sobre a possível medida provisória para restringir apostas online no Brasil.",
+      sections: [
+        ["O que está em discussão", "O governo brasileiro estuda uma medida provisória (MP) para proibir apostas online. Até 24 de setembro de 2026, a MP ainda não tinha sido publicada, pelo que esta proposta não criou uma nova regra em vigor."],
+        ["O que falta definir", "Ainda não se conhecem o texto final, o alcance de uma eventual proibição, as regras para operadores autorizados nem possíveis períodos de transição. Por isso, não é possível afirmar como cada mercado ou plataforma seria afetado."],
+        ["Possível ressarcimento", "Também se avalia recorrer à Justiça para pedir que plataformas ressarçam pessoas endividadas com apostas. Esta hipótese pode avançar separadamente da MP; os critérios e os valores ainda não foram definidos."],
+        ["O próximo passo", "Traders, calma: uma intenção em estudo não é a regra final. Acompanhe a publicação oficial e as orientações das plataformas antes de tomar decisões. Um texto publicado permitirá perceber os efeitos concretos."],
+      ],
+    },
+    en: {
+      title: "Traders, stay calm.",
+      excerpt: "What is known about Brazil's possible provisional measure on online betting.",
+      sections: [
+        ["What is being discussed", "Brazil's government is considering a provisional measure to ban online betting. As of September 24, 2026, the measure had not been published, so this proposal has not introduced a new rule."],
+        ["What remains unclear", "The final wording, the scope of a possible ban, rules for licensed operators and any transition period have yet to be defined. It is too early to say how individual markets or platforms would be affected."],
+        ["Possible compensation", "The government is also considering legal action to seek compensation from betting companies for people who fell into debt through gambling. This could proceed separately from the measure; eligibility and amounts have not been set."],
+        ["What to watch", "Traders, stay calm: a proposal under discussion is not a final rule. Follow official publications and your platforms' guidance before making decisions. Once the text is available, its practical effects can be assessed."],
+      ],
+    },
+    es: {
+      title: "Traders, calma.",
+      excerpt: "Qué se sabe sobre la posible medida provisional para restringir las apuestas online en Brasil.",
+      sections: [
+        ["Qué se está estudiando", "El Gobierno brasileño estudia una medida provisional para prohibir las apuestas online. Hasta el 24 de septiembre de 2026, la medida aún no se había publicado, por lo que esta propuesta no ha creado una nueva norma vigente."],
+        ["Qué falta definir", "Todavía no se conocen el texto final, el alcance de una posible prohibición, las reglas para operadores autorizados ni los eventuales plazos de transición. Es pronto para afirmar cómo se vería afectado cada mercado o plataforma."],
+        ["Posible compensación", "El Gobierno también estudia acudir a la Justicia para reclamar a las plataformas una compensación para personas endeudadas por las apuestas. Esta posibilidad podría avanzar por separado; aún no hay criterios ni importes definidos."],
+        ["Qué hacer ahora", "Traders, calma: una propuesta en estudio no es la norma final. Sigue las publicaciones oficiales y las indicaciones de las plataformas antes de tomar decisiones. El texto publicado permitirá valorar sus efectos reales."],
+      ],
+    },
+  },
   "classificacao-lay": {
     icon: TrendingDown,
     pt: {
